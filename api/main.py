@@ -37,9 +37,9 @@ def get_spreadsheet():
         "https://www.googleapis.com/auth/drive"
     ]
     # Mengambil JSON credential dari Environment Variable Vercel
-    creds_json = os.environ.get("GOOGLE_CREDENTIALS_JSON")
+    creds_json = os.environ.get("GOOGLE_CREDENTIALS")
     if not creds_json:
-        raise ValueError("Environment variable GOOGLE_CREDENTIALS_JSON belum diatur di Vercel!")
+        raise ValueError("Environment variable GOOGLE_CREDENTIALS belum diatur di Vercel!")
     
     creds_dict = json.loads(creds_json)
     creds = Credentials.from_service_account_info(creds_dict, scopes=scopes)
