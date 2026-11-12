@@ -167,7 +167,7 @@ async def serve_dashboard():
     return FileResponse(str(BASE_DIR / "templates" / "index.html"))
 
 @app.get("/api/dashboard")
-async def get_all_dashboard_data(bulan: int, tahun: int):
+async def get_dashboard(bulan: int, tahun: int):
     ss = get_spreadsheet()
     sync_admin_bank(ss)
 

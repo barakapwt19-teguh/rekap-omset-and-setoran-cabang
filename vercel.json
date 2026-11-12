@@ -1,8 +1,17 @@
 {
+  "functions": {
+    "api/main.py": {
+      "includeFiles": "templates/**"
+    }
+  },
   "rewrites": [
     {
+      "source": "/api/(.*)",
+      "destination": "/api/main.py"
+    },
+    {
       "source": "/(.*)",
-      "destination": "/api/main"
+      "destination": "/api/main.py"
     }
   ]
 }
