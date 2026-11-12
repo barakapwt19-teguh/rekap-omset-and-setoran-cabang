@@ -162,6 +162,7 @@ class PengeluaranInput(BaseModel):
 
 # --- ROUTES ---
 @app.get("/", response_class=HTMLResponse)
+@app.get("/api/main", response_class=HTMLResponse)
 async def serve_dashboard(request: Request):
     return templates.TemplateResponse("index.html", {"request": request})
 
