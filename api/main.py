@@ -8,9 +8,11 @@ from fastapi import FastAPI, Request
 from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
+from pathlib import Path
 
+BASE_DIR = Path(__file__).resolve().parent.parent
 app = FastAPI(title="Baraka Express Executive Controller")
-templates = Jinja2Templates(directory="templates")
+templates = Jinja2Templates(directory=str(BASE_DIR / "templates"))
 
 SPREADSHEET_ID = "1RopoqGAtSgZl5UGURcBZyhorEfV1ZzhoZ2SGc6-2Sqo"
 
