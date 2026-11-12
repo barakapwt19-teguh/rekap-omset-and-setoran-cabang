@@ -5,10 +5,10 @@ from typing import Optional
 import gspread
 from google.oauth2.service_account import Credentials
 from fastapi import FastAPI, Request
-from fastapi.responses import HTMLResponse, JSONResponse
 from fastapi.templating import Jinja2Templates
 from pydantic import BaseModel
 from pathlib import Path
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 app = FastAPI(title="Baraka Express Executive Controller")
@@ -163,8 +163,8 @@ class PengeluaranInput(BaseModel):
 # --- ROUTES ---
 @app.get("/", response_class=HTMLResponse)
 @app.get("/api/main", response_class=HTMLResponse)
-async def serve_dashboard(request: Request):
-    return templates.TemplateResponse("index.html", {"request": request})
+async def serve_dashboard():
+    return FileResponse(str(BASE_DIR / "templates" / "index.html"))
 
 @app.get("/api/dashboard")
 async def get_all_dashboard_data(bulan: int, tahun: int):
