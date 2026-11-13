@@ -398,3 +398,53 @@ thead .sticky-col {
   .filter-glass { width: 100%; }
   .filter-glass select { flex: 1; }
 }
+
+/* --- FILTER CABANG PILLS (BERWARNA SESUAI CABANG) --- */
+.branch-filter-bar {
+  background: #ffffff;
+  border: 1px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 0.55rem 0.75rem;
+  box-shadow: var(--shadow-soft);
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+  overflow-x: auto;
+  white-space: nowrap;
+}
+
+.btn-cab-filter {
+  border-radius: 10px;
+  font-size: 0.78rem;
+  font-weight: 700;
+  padding: 0.42rem 0.85rem;
+  border: 1px solid transparent;
+  transition: all 0.18s ease;
+  cursor: pointer;
+}
+
+.btn-cab-filter:hover {
+  transform: translateY(-1px);
+  filter: brightness(0.96);
+}
+
+.btn-cab-all { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
+.btn-cab-all.active { background: var(--blue-navy); color: #ffffff; border-color: var(--blue-navy); box-shadow: 0 4px 10px rgba(11, 25, 44, 0.25); }
+
+.btn-cab-purwokerto { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
+.btn-cab-purwokerto.active { background: #2563eb; color: #ffffff; border-color: #2563eb; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
+
+.btn-cab-kebumen { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
+.btn-cab-kebumen.active { background: #ea580c; color: #ffffff; border-color: #ea580c; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3); }
+
+.btn-cab-cilacap { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
+.btn-cab-cilacap.active { background: #16a34a; color: #ffffff; border-color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3); }
+
+.btn-cab-purbalingga { background: #fefce8; color: #854d0e; border-color: #fef08a; }
+.btn-cab-purbalingga.active { background: #ca8a04; color: #ffffff; border-color: #ca8a04; box-shadow: 0 4px 10px rgba(202, 138, 4, 0.3); }
+
+.btn-cab-banjarnegara { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
+.btn-cab-banjarnegara.active { background: #7e22ce; color: #ffffff; border-color: #7e22ce; box-shadow: 0 4px 10px rgba(126, 34, 206, 0.3); }
+
+.btn-cab-banyumas-selatan { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
+.btn-cab-banyumas-selatan.active { background: #e11d48; color: #ffffff; border-color: #e11d48; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3); }
