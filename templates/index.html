@@ -91,7 +91,7 @@
       <!-- ========================================================= -->
       <div class="tab-pane fade show active" id="modul-kas" role="tabpanel">
 
-        <!-- 3 KARTU SALDO UTAMA (KAS PENAMPUNG GLOBAL) -->
+        <!-- 3 KARTU SALDO UTAMA -->
         <div class="row g-3 mb-4">
           <div class="col-12 col-md-4">
             <div class="kpi-card-primary p-4 h-100">
@@ -136,21 +136,12 @@
           </div>
         </div>
 
-        <!-- RINGKASAN MUTASI BULAN INI -->
-        <div class="modern-card p-4 mb-4">
-          <div class="fw-bold text-dark small mb-3" id="titleMutasiBulan">
-            <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>RINGKASAN MUTASI BULAN INI (SEMUA CABANG)
-          </div>
-          <div class="row g-3 text-center">
-            <div class="col-12 col-md-4"><div class="branch-card"><small class="text-muted d-block fw-semibold mb-1" id="lblSetoranCabang">TOTAL SETORAN CABANG</small><span class="fw-bold text-primary fs-5 tabular-nums" id="rTotalSetoranCabang">Rp 0</span></div></div>
-            <div class="col-12 col-md-4"><div class="branch-card"><small class="text-muted d-block fw-semibold mb-1" id="lblSetoranPusat">TOTAL SETORAN PUSAT</small><span class="fw-bold text-dark fs-5 tabular-nums" id="rTotalSetoranPusat">Rp 0</span></div></div>
-            <div class="col-12 col-md-4"><div class="branch-card"><small class="text-muted d-block fw-semibold mb-1">TOTAL PENGELUARAN (GLOBAL)</small><span class="fw-bold text-danger fs-5 tabular-nums" id="rTotalPengeluaran">Rp 0</span></div></div>
-          </div>
-        </div>
-
         <!-- ESTIMASI KEWAJIBAN PUSAT -->
         <div class="modern-card p-4 mb-4">
-          <h6 class="fw-bold text-dark mb-3" id="titleEstimasi"><i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Total Kewajiban Setoran Pusat Per Cabang</h6>
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-dark mb-0" id="titleEstimasi"><i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Total Kewajiban Setoran Pusat Per Cabang</h6>
+            <span class="badge-total-tabel bg-warning-subtle text-warning-emphasis" id="rTotalEstimasi">Total: Rp 0</span>
+          </div>
           <div class="table-modern-wrapper">
             <table class="table table-modern align-middle">
               <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban Setoran</th><th class="text-center">Status</th></tr></thead>
@@ -163,7 +154,10 @@
         <div class="row g-4 mb-4">
           <div class="col-12 col-lg-6">
             <div class="modern-card p-4 h-100">
-              <h6 class="fw-bold text-dark mb-3" id="titleRekapSetoran"><i class="bi bi-arrow-down-left-circle-fill text-primary me-2"></i>Rekap Setoran Cabang</h6>
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+                <h6 class="fw-bold text-dark mb-0" id="titleRekapSetoran"><i class="bi bi-arrow-down-left-circle-fill text-primary me-2"></i>Rekap Setoran Cabang</h6>
+                <span class="badge-total-tabel bg-success-subtle text-success" id="rTotalSetoranCabang">Total: Rp 0</span>
+              </div>
               <div class="table-modern-wrapper" style="max-height: 360px;">
                 <table class="table table-modern align-middle">
                   <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Nominal</th><th class="text-center">Jenis</th></tr></thead>
@@ -176,7 +170,10 @@
           <div class="col-12 col-lg-6">
             <div class="modern-card p-4 h-100">
               <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bank2 text-primary me-2"></i>Rekap Setor Tunai ke Bank</h6>
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                  <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bank2 text-primary me-2"></i>Rekap Setor Tunai ke Bank</h6>
+                  <span class="badge-total-tabel badge-soft-blue" id="rTotalSetorBank">Total: Rp 0</span>
+                </div>
                 <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorBank">+ Setor Tunai</button>
               </div>
               <div class="table-modern-wrapper" style="max-height: 360px;">
@@ -194,7 +191,10 @@
           <div class="col-12 col-lg-6">
             <div class="modern-card p-4 h-100">
               <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0" id="titleRekapPusat"><i class="bi bi-send-check-fill text-primary me-2"></i>Rekap Setoran Pusat (Realisasi)</h6>
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                  <h6 class="fw-bold text-dark mb-0" id="titleRekapPusat"><i class="bi bi-send-check-fill text-primary me-2"></i>Rekap Setoran Pusat</h6>
+                  <span class="badge-total-tabel badge-soft-blue" id="rTotalSetoranPusat">Total: Rp 0</span>
+                </div>
                 <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorPusat">+ Setor Pusat</button>
               </div>
               <div class="table-modern-wrapper" style="max-height: 360px;">
@@ -209,7 +209,10 @@
           <div class="col-12 col-lg-6">
             <div class="modern-card p-4 h-100">
               <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-up-right-circle-fill text-danger me-2"></i>Rekap Pengeluaran Operasional</h6>
+                <div class="d-flex align-items-center flex-wrap gap-2">
+                  <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-up-right-circle-fill text-danger me-2"></i>Rekap Pengeluaran</h6>
+                  <span class="badge-total-tabel bg-danger-subtle text-danger" id="rTotalPengeluaran">Total: Rp 0</span>
+                </div>
                 <button class="btn btn-sm btn-soft-blue text-danger border-danger-subtle" data-bs-toggle="modal" data-bs-target="#modalPengeluaran">+ Pengeluaran</button>
               </div>
               <div class="table-modern-wrapper" style="max-height: 360px;">
@@ -224,7 +227,7 @@
       </div>
 
       <!-- ========================================================= -->
-      <!-- MODUL 2: MONITORING OMSET BARANG (DINAMIS PER CABANG)     -->
+      <!-- MODUL 2: MONITORING OMSET BARANG (HEADER STICKY TOP)      -->
       <!-- ========================================================= -->
       <div class="tab-pane fade" id="modul-omset" role="tabpanel">
 
@@ -269,8 +272,8 @@
           <div class="tab-pane fade show active" id="sub-terima" role="tabpanel">
             <div class="modern-card p-4 mb-4">
               <h6 class="fw-bold text-dark mb-3" id="titleMatriksTerima"><i class="bi bi-table text-primary me-2"></i>Tabel Rekapitulasi Harian Barang Terima (6 Cabang)</h6>
-              <div class="table-modern-wrapper" style="max-height: 520px;">
-                <table class="table table-modern align-middle">
+              <div class="table-modern-wrapper" style="max-height: 540px;">
+                <table class="table table-modern table-matrix-sticky align-middle">
                   <thead id="tblMatriksTerimaHead"></thead>
                   <tbody id="tblMatriksTerimaBody" class="tabular-nums"></tbody>
                   <tfoot class="fw-bold" id="tblMatriksTerimaFoot"></tfoot>
@@ -283,8 +286,8 @@
           <div class="tab-pane fade" id="sub-kirim" role="tabpanel">
             <div class="modern-card p-4 mb-4">
               <h6 class="fw-bold text-dark mb-3" id="titleMatriksKirim"><i class="bi bi-table text-primary me-2"></i>Tabel Rekapitulasi Harian Barang Kirim (6 Cabang)</h6>
-              <div class="table-modern-wrapper" style="max-height: 520px;">
-                <table class="table table-modern align-middle">
+              <div class="table-modern-wrapper" style="max-height: 540px;">
+                <table class="table table-modern table-matrix-sticky align-middle">
                   <thead id="tblMatriksKirimHead"></thead>
                   <tbody id="tblMatriksKirimBody" class="tabular-nums"></tbody>
                   <tfoot class="fw-bold" id="tblMatriksKirimFoot"></tfoot>
@@ -347,7 +350,6 @@
       document.querySelectorAll('.btn-cab-filter').forEach(btn => btn.classList.remove('active'));
       if (btnEl) btnEl.classList.add('active');
 
-      // Otomatis arahkan dropdown cabang pada form Setor Pusat jika memilih cabang spesifik
       if (cabang !== 'ALL') {
         const selectModalPusat = document.getElementById('cabangPusat');
         if (selectModalPusat) selectModalPusat.value = cabang;
@@ -401,7 +403,7 @@
       const labelFilter = selectedCabang === 'ALL' ? 'SEMUA CABANG' : selectedCabang;
       document.getElementById('badgePeriodeAktif').innerText = `${namaBulan[Number(bulan) - 1]} ${tahun} • ${labelFilter}`;
 
-      // 1. RENDER DATA KAS (TERFILTER PER CABANG JIKA DIPILIH)
+      // 1. RENDER DATA KAS & BADGE TOTAL DI SEBELAH JUDUL TABEL
       const kas = data.kas;
       document.getElementById('mSaldoCash').innerText = formatRupiah(kas.saldoAkhir.cashGudang);
       document.getElementById('mSaldoRekening').innerText = formatRupiah(kas.saldoAkhir.rekeningBank);
@@ -421,20 +423,21 @@
 
       const totalSetoranCab = filteredSetoran.reduce((acc, cur) => acc + (Number(cur.nominal) || 0), 0);
       const totalSetoranPst = filteredPusat.reduce((acc, cur) => acc + (Number(cur.setoran) || 0), 0);
-
-      document.getElementById('titleMutasiBulan').innerHTML = `<i class="bi bi-bar-chart-line-fill text-primary me-2"></i>RINGKASAN MUTASI BULAN INI (${labelFilter})`;
-      document.getElementById('lblSetoranCabang').innerText = selectedCabang === 'ALL' ? 'TOTAL SETORAN CABANG' : `SETORAN MASUK (${selectedCabang})`;
-      document.getElementById('lblSetoranPusat').innerText = selectedCabang === 'ALL' ? 'TOTAL SETORAN PUSAT' : `SETORAN PUSAT (${selectedCabang})`;
-
-      document.getElementById('rTotalSetoranCabang').innerText = formatRupiah(totalSetoranCab);
-      document.getElementById('rTotalSetoranPusat').innerText = formatRupiah(totalSetoranPst);
-      document.getElementById('rTotalPengeluaran').innerText = formatRupiah(kas.rekapMutasi.totalPengeluaran);
-
-      const subTitleEst = kas.tanggalEstimasiTerakhir ? ` (Sampai Tanggal ${kas.tanggalEstimasiTerakhir})` : '';
-      document.getElementById('titleEstimasi').innerHTML = `<i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Total Kewajiban Setoran Pusat Per Cabang${subTitleEst}`;
+      const totalSetorBnk = kas.riwayatSetorBank.reduce((acc, cur) => acc + (Number(cur.nominal) || 0), 0);
 
       const allCabKas = ['PURWOKERTO', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'KEBUMEN', 'BANYUMAS SELATAN'];
       const listCabKas = selectedCabang === 'ALL' ? allCabKas : [selectedCabang];
+      const totalEstKewajiban = listCabKas.reduce((acc, cab) => acc + (Number(kas.estimasiKewajiban[cab]) || 0), 0);
+
+      // Update badge total di sebelah judul masing-masing tabel
+      document.getElementById('rTotalEstimasi').innerText = `Total: ${formatRupiah(totalEstKewajiban)}`;
+      document.getElementById('rTotalSetoranCabang').innerText = `Total: ${formatRupiah(totalSetoranCab)}`;
+      document.getElementById('rTotalSetorBank').innerText = `Total: ${formatRupiah(totalSetorBnk)}`;
+      document.getElementById('rTotalSetoranPusat').innerText = `Total: ${formatRupiah(totalSetoranPst)}`;
+      document.getElementById('rTotalPengeluaran').innerText = `Total: ${formatRupiah(kas.rekapMutasi.totalPengeluaran)}`;
+
+      const subTitleEst = kas.tanggalEstimasiTerakhir ? ` (Sampai Tanggal ${kas.tanggalEstimasiTerakhir})` : '';
+      document.getElementById('titleEstimasi').innerHTML = `<i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Kewajiban Setoran Pusat${subTitleEst}`;
 
       document.getElementById('tblEstimasiBody').innerHTML = listCabKas.map(cab => {
         const nom = kas.estimasiKewajiban[cab] || 0;
@@ -462,7 +465,7 @@
         ? '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada pengeluaran</td></tr>'
         : kas.riwayatPengeluaran.map(i => `<tr><td class="small text-muted">${i.tanggal}</td><td><span class="badge-soft-blue">${i.sumber}</span></td><td class="text-end fw-bold text-danger">${formatRupiah(i.nominal)}</td><td class="small text-muted">${i.keterangan}</td></tr>`).join('');
 
-      // 2. RENDER DATA OMSET MATRIKS (TERFILTER PER CABANG JIKA DIPILIH)
+      // 2. RENDER DATA OMSET MATRIKS
       const omset = data.omset;
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
@@ -491,7 +494,6 @@
     }
 
     function renderMatriksTable(headId, bodyId, footId, listRiwayat, rekapCabang, listCab) {
-      // Bangun header dinamis sesuai cabang aktif
       const branchHeaders = listCab.map(cab => `<th colspan="4" class="${BRANCH_HEADER_CLASS[cab] || ''}">${cab}</th>`).join('');
       const subHeaders = listCab.map(() => `<th>TUNAI</th><th>TUJUAN</th><th>VA</th><th class="col-total-cabang">TOTAL</th>`).join('');
 
@@ -500,7 +502,7 @@
           <th rowspan="2" class="sticky-col text-center">TANGGAL</th>
           ${branchHeaders}
         </tr>
-        <tr>${subHeaders}</tr>
+        <tr class="sub-header">${subHeaders}</tr>
       `;
 
       const dataPerTanggal = {};
