@@ -1,21 +1,23 @@
 /* =========================================================
-   BARAKA EXPRESS — EXECUTIVE BLUE THEME (static/style.css)
+   BARAKA EXPRESS — FULL BLUE EXECUTIVE THEME (static/style.css)
    ========================================================= */
 
 :root {
-  --bg-page: #f0f4f8;
-  --bg-card: #ffffff;
-  --blue-navy: #0b192c;
-  --blue-royal: #1e3a8a;
+  --bg-page-top: #cfe2ff;
+  --bg-page-bottom: #e2eeff;
+  --bg-card: #f4f8ff;
+  --bg-card-inner: #ffffff;
+  --blue-navy: #0a192f;
+  --blue-royal: #1d4ed8;
   --blue-primary: #2563eb;
   --blue-sky: #3b82f6;
-  --blue-soft: #eff6ff;
-  --blue-tint: #dbeafe;
-  --border-subtle: #e2e8f0;
+  --blue-soft: #dbeafe;
+  --blue-tint: #bfdbfe;
+  --border-subtle: #bfdbfe;
   --text-dark: #0f172a;
-  --text-muted: #64748b;
-  --shadow-soft: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 4px 10px -6px rgba(37, 99, 235, 0.06);
-  --shadow-blue: 0 14px 28px -8px rgba(37, 99, 235, 0.35);
+  --text-muted: #475569;
+  --shadow-soft: 0 10px 25px -5px rgba(29, 78, 216, 0.12), 0 4px 10px -6px rgba(15, 23, 42, 0.08);
+  --shadow-blue: 0 14px 30px -8px rgba(30, 58, 138, 0.45);
   --radius-card: 20px;
 }
 
@@ -25,7 +27,8 @@
 
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
-  background-color: var(--bg-page);
+  background: linear-gradient(180deg, var(--bg-page-top) 0%, var(--bg-page-bottom) 100%);
+  min-height: 100vh;
   color: var(--text-dark);
   padding-bottom: 4.5rem;
   -webkit-font-smoothing: antialiased;
@@ -38,12 +41,12 @@ body {
 
 /* --- HERO HEADER --- */
 .hero-header {
-  background: linear-gradient(135deg, var(--blue-navy) 0%, var(--blue-royal) 55%, var(--blue-primary) 100%);
+  background: linear-gradient(135deg, var(--blue-navy) 0%, #1e3a8a 55%, var(--blue-primary) 100%);
   color: #ffffff;
-  padding: 1.75rem 0 4.75rem 0;
-  border-bottom-left-radius: 30px;
-  border-bottom-right-radius: 30px;
-  box-shadow: 0 12px 32px -10px rgba(30, 58, 138, 0.4);
+  padding: 1.5rem 0 4.5rem 0;
+  border-bottom-left-radius: 28px;
+  border-bottom-right-radius: 28px;
+  box-shadow: 0 12px 32px -10px rgba(15, 23, 42, 0.45);
   position: relative;
   overflow: hidden;
 }
@@ -55,30 +58,31 @@ body {
   right: -60px;
   width: 260px;
   height: 260px;
-  background: radial-gradient(circle, rgba(96, 165, 250, 0.25) 0%, transparent 70%);
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.28) 0%, transparent 70%);
   pointer-events: none;
 }
 
 .brand-badge {
-  background: rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.16);
   backdrop-filter: blur(10px);
-  border: 1px solid rgba(255, 255, 255, 0.25);
-  border-radius: 16px;
-  width: 50px;
-  height: 50px;
+  border: 1px solid rgba(255, 255, 255, 0.28);
+  border-radius: 15px;
+  width: 48px;
+  height: 48px;
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.45rem;
+  font-size: 1.4rem;
+  flex-shrink: 0;
 }
 
 /* --- FILTER BAR GLASSMORPHISM --- */
 .filter-glass {
-  background: rgba(255, 255, 255, 0.12);
+  background: rgba(255, 255, 255, 0.14);
   backdrop-filter: blur(12px);
-  border: 1px solid rgba(255, 255, 255, 0.22);
+  border: 1px solid rgba(255, 255, 255, 0.26);
   border-radius: 16px;
-  padding: 0.5rem 0.75rem;
+  padding: 0.45rem 0.65rem;
 }
 
 .filter-glass select {
@@ -87,128 +91,192 @@ body {
   border-radius: 10px;
   font-weight: 700;
   color: var(--blue-navy);
-  font-size: 0.85rem;
+  font-size: 0.82rem;
   cursor: pointer;
+}
+
+/* Efek Tekan & Putar Tombol Refresh */
+.btn-refresh-modern {
+  background: #ffffff;
+  color: var(--blue-royal);
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  font-size: 0.82rem;
+  padding: 0.42rem 0.85rem;
+  transition: transform 0.12s ease, background-color 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 3px 8px rgba(15, 23, 42, 0.15);
+}
+
+.btn-refresh-modern:hover {
+  background: #eff6ff;
+  color: var(--blue-primary);
+}
+
+.btn-refresh-modern:active,
+.btn-refresh-modern.is-pressed {
+  transform: scale(0.93);
+  background: #dbeafe;
+}
+
+.btn-refresh-modern i {
+  display: inline-block;
+  transition: transform 0.3s ease;
+}
+
+.spin {
+  animation: spin 0.75s linear infinite;
+}
+
+@keyframes spin {
+  100% { transform: rotate(360deg); }
 }
 
 /* --- LAYOUT OVERLAP --- */
 .main-container {
-  margin-top: -3.3rem;
+  margin-top: -3.2rem;
   position: relative;
   z-index: 5;
 }
 
-/* --- MODERN CARDS --- */
+/* --- MODERN BLUE-TINTED CARDS --- */
 .modern-card {
   background: var(--bg-card);
-  border: 1px solid rgba(226, 232, 240, 0.95);
+  border: 1px solid var(--border-subtle);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
   transition: box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 .modern-card:hover {
-  box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.1);
-  border-color: var(--blue-tint);
+  box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.18);
+  border-color: #93c5fd;
 }
 
 /* --- BADGE 1: KARTU SALDO TERPADU --- */
 .saldo-unified-card {
-  background: linear-gradient(135deg, var(--blue-navy) 0%, var(--blue-royal) 60%, var(--blue-primary) 100%);
+  background: linear-gradient(135deg, var(--blue-navy) 0%, #1e3a8a 60%, var(--blue-primary) 100%);
   color: #ffffff;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-blue);
-  border: none;
+  border: 1px solid rgba(147, 197, 253, 0.25);
 }
 
 .saldo-sub-box {
-  background: rgba(255, 255, 255, 0.1);
+  background: rgba(255, 255, 255, 0.11);
   backdrop-filter: blur(8px);
-  border: 1px solid rgba(255, 255, 255, 0.18);
+  border: 1px solid rgba(255, 255, 255, 0.2);
   border-radius: 16px;
-  padding: 1rem 1.2rem;
+  padding: 0.95rem 1.15rem;
   height: 100%;
 }
 
 .saldo-sub-box-highlight {
-  background: rgba(255, 255, 255, 0.19);
-  border: 1px solid rgba(255, 255, 255, 0.38);
+  background: rgba(255, 255, 255, 0.2);
+  border: 1px solid rgba(255, 255, 255, 0.42);
 }
 
-/* --- BADGE 2 & 3: KOTAK METRIK KLIKABLE (PEMICU TABEL) --- */
+/* --- KOTAK METRIK KLIKABLE (PEMICU TABEL) --- */
 .metric-click-box {
-  background: #f8fafc;
+  background: var(--bg-card-inner);
   border: 1.5px solid var(--border-subtle);
   border-radius: 16px;
-  padding: 1rem 1.15rem;
+  padding: 0.95rem 1.1rem;
   height: 100%;
   cursor: pointer;
   user-select: none;
-  transition: all 0.2s ease;
+  transition: transform 0.16s ease, box-shadow 0.2s ease, border-color 0.2s ease, background-color 0.2s ease;
   position: relative;
 }
 
 .metric-click-box:hover {
-  background: var(--blue-soft);
-  border-color: #93c5fd;
+  background: #eff6ff;
+  border-color: var(--blue-sky);
   transform: translateY(-2px);
-  box-shadow: 0 8px 18px -6px rgba(37, 99, 235, 0.15);
+  box-shadow: 0 8px 18px -6px rgba(37, 99, 235, 0.2);
+}
+
+.metric-click-box:active {
+  transform: scale(0.98);
 }
 
 .metric-click-box.active-drawer {
-  background: var(--blue-soft);
+  background: #dbeafe;
   border-color: var(--blue-primary);
-  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.2);
 }
 
-.metric-click-box .tap-hint {
+/* Variasi Kartu Klikable Biru Utama (Untuk Omset Terima) */
+.metric-click-primary {
+  background: linear-gradient(135deg, var(--blue-royal) 0%, var(--blue-primary) 100%);
+  color: #ffffff;
+  border: 1.5px solid rgba(255, 255, 255, 0.25);
+  border-radius: 18px;
+  padding: 1.15rem 1.25rem;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+  transition: transform 0.16s ease, box-shadow 0.2s ease;
+  box-shadow: 0 10px 22px -6px rgba(37, 99, 235, 0.35);
+}
+
+.metric-click-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 14px 26px -6px rgba(37, 99, 235, 0.45);
+}
+
+.metric-click-primary:active {
+  transform: scale(0.98);
+}
+
+.metric-click-primary.active-drawer {
+  box-shadow: 0 0 0 4px rgba(37, 99, 235, 0.35);
+  border-color: #ffffff;
+}
+
+.tap-hint {
   font-size: 0.72rem;
-  font-weight: 600;
+  font-weight: 700;
   color: var(--blue-primary);
   display: inline-flex;
   align-items: center;
   gap: 0.25rem;
 }
 
+.tap-hint-light {
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: #dbeafe;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
+}
+
 .metric-value {
-  font-size: 1.55rem;
+  font-size: 1.5rem;
   font-weight: 800;
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
 }
 
-/* --- ICON BOXES --- */
-.icon-box {
-  width: 38px;
-  height: 38px;
-  border-radius: 11px;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  font-size: 1.1rem;
-}
-
-.icon-blue { background: var(--blue-soft); color: var(--blue-primary); }
-.icon-sky { background: #e0f2fe; color: #0284c7; }
-.icon-white { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
-
 /* --- NAVIGATION PILLS --- */
 .nav-pills-modern {
-  background: #ffffff;
-  padding: 0.45rem;
+  background: rgba(255, 255, 255, 0.85);
+  backdrop-filter: blur(8px);
+  border: 1px solid var(--border-subtle);
+  padding: 0.4rem;
   border-radius: 16px;
   box-shadow: var(--shadow-soft);
   display: inline-flex;
   gap: 0.35rem;
-  flex-wrap: wrap;
 }
 
 .nav-pills-modern .nav-link {
   color: var(--text-muted);
   font-weight: 700;
-  font-size: 0.88rem;
+  font-size: 0.86rem;
   border-radius: 12px;
-  padding: 0.65rem 1.25rem;
+  padding: 0.6rem 1.15rem;
   transition: all 0.2s ease;
 }
 
@@ -220,7 +288,7 @@ body {
 .nav-pills-modern .nav-link.active {
   background: linear-gradient(135deg, var(--blue-sky) 0%, var(--blue-primary) 100%);
   color: #ffffff;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.32);
 }
 
 /* --- MODERN DATA TABLE & STICKY HEADER --- */
@@ -234,15 +302,15 @@ body {
 
 .table-modern {
   margin-bottom: 0;
-  font-size: 0.84rem;
+  font-size: 0.83rem;
   white-space: nowrap;
   border-collapse: separate;
   border-spacing: 0;
 }
 
 .table-modern thead th {
-  background-color: #f8fafc;
-  color: #334155;
+  background-color: #eff6ff;
+  color: #1e3a8a;
   font-weight: 700;
   text-transform: uppercase;
   font-size: 0.71rem;
@@ -268,14 +336,14 @@ body {
   position: sticky;
   top: 36px;
   z-index: 5;
-  background-color: #f8fafc;
+  background-color: #eff6ff;
   border-bottom: 2px solid var(--border-subtle);
 }
 
 .table-matrix-sticky thead th.sticky-col {
   left: 0;
   z-index: 8 !important;
-  background-color: #f1f5f9 !important;
+  background-color: #dbeafe !important;
   box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.12);
 }
 
@@ -302,9 +370,9 @@ tfoot .sticky-col {
 /* --- WARNA BADGE PER CABANG --- */
 .badge-cabang {
   font-weight: 700;
-  padding: 0.38em 0.8em;
+  padding: 0.36em 0.78em;
   border-radius: 8px;
-  font-size: 0.74rem;
+  font-size: 0.73rem;
   display: inline-block;
   letter-spacing: 0.02em;
 }
@@ -317,8 +385,8 @@ tfoot .sticky-col {
 .badge-default { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
 
 .table-modern tbody td {
-  padding: 0.78rem 0.9rem;
-  border-bottom: 1px solid #f1f5f9;
+  padding: 0.75rem 0.85rem;
+  border-bottom: 1px solid #eff6ff;
   vertical-align: middle;
 }
 
@@ -327,13 +395,13 @@ tfoot .sticky-col {
 }
 
 .table-modern tbody tr:hover td {
-  background-color: #f4f8ff;
+  background-color: #eff6ff;
 }
 
 .col-total-cabang {
-  background-color: rgba(239, 246, 255, 0.65);
+  background-color: rgba(219, 234, 254, 0.55);
   font-weight: 700;
-  color: var(--blue-royal);
+  color: #1e3a8a;
 }
 
 /* --- BUTTONS & BADGES --- */
@@ -343,39 +411,49 @@ tfoot .sticky-col {
   border: none;
   border-radius: 10px;
   font-weight: 600;
-  padding: 0.42rem 0.95rem;
-  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.22);
-  transition: all 0.2s ease;
+  padding: 0.42rem 0.9rem;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.24);
+  transition: all 0.18s ease;
 }
 
 .btn-blue-modern:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.32);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.34);
   color: #ffffff;
 }
 
+.btn-blue-modern:active {
+  transform: scale(0.96);
+}
+
 .btn-soft-blue {
-  background: var(--blue-soft);
+  background: #eff6ff;
   color: var(--blue-primary);
   border: 1px solid var(--blue-tint);
   border-radius: 10px;
   font-weight: 600;
-  padding: 0.42rem 0.95rem;
-  transition: all 0.2s ease;
+  padding: 0.42rem 0.9rem;
+  transition: all 0.18s ease;
 }
 
 .btn-soft-blue:hover {
   background: var(--blue-tint);
-  color: var(--blue-royal);
+  color: #1e3a8a;
+}
+
+.btn-soft-blue:active {
+  transform: scale(0.96);
 }
 
 .badge-soft-blue {
-  background: var(--blue-tint);
-  color: var(--blue-royal);
+  background: #ffffff;
+  color: #1e3a8a;
+  border: 1px solid var(--border-subtle);
   font-weight: 700;
-  padding: 0.4em 0.8em;
-  border-radius: 8px;
+  padding: 0.42em 0.85em;
+  border-radius: 10px;
   font-size: 0.78rem;
+  box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
 }
 
 .badge-soft-sky {
@@ -395,61 +473,43 @@ tfoot .sticky-col {
   font-variant-numeric: tabular-nums;
 }
 
-/* --- FILTER CABANG PILLS --- */
-.branch-filter-bar {
-  background: #ffffff;
-  border: 1px solid var(--border-subtle);
-  border-radius: 16px;
-  padding: 0.55rem 0.75rem;
-  box-shadow: var(--shadow-soft);
-  display: flex;
-  align-items: center;
-  gap: 0.45rem;
-  overflow-x: auto;
-  white-space: nowrap;
-}
-
-.btn-cab-filter {
-  border-radius: 10px;
-  font-size: 0.78rem;
-  font-weight: 700;
-  padding: 0.42rem 0.85rem;
-  border: 1px solid transparent;
-  transition: all 0.18s ease;
-  cursor: pointer;
-}
-
-.btn-cab-filter:hover {
-  transform: translateY(-1px);
-  filter: brightness(0.96);
-}
-
-.btn-cab-all { background: #f1f5f9; color: #334155; border-color: #cbd5e1; }
-.btn-cab-all.active { background: var(--blue-navy); color: #ffffff; border-color: var(--blue-navy); box-shadow: 0 4px 10px rgba(11, 25, 44, 0.25); }
-
-.btn-cab-purwokerto { background: #eff6ff; color: #1e40af; border-color: #bfdbfe; }
-.btn-cab-purwokerto.active { background: #2563eb; color: #ffffff; border-color: #2563eb; box-shadow: 0 4px 10px rgba(37, 99, 235, 0.3); }
-
-.btn-cab-kebumen { background: #fff7ed; color: #9a3412; border-color: #fed7aa; }
-.btn-cab-kebumen.active { background: #ea580c; color: #ffffff; border-color: #ea580c; box-shadow: 0 4px 10px rgba(234, 88, 12, 0.3); }
-
-.btn-cab-cilacap { background: #f0fdf4; color: #166534; border-color: #bbf7d0; }
-.btn-cab-cilacap.active { background: #16a34a; color: #ffffff; border-color: #16a34a; box-shadow: 0 4px 10px rgba(22, 163, 74, 0.3); }
-
-.btn-cab-purbalingga { background: #fefce8; color: #854d0e; border-color: #fef08a; }
-.btn-cab-purbalingga.active { background: #ca8a04; color: #ffffff; border-color: #ca8a04; box-shadow: 0 4px 10px rgba(202, 138, 4, 0.3); }
-
-.btn-cab-banjarnegara { background: #faf5ff; color: #6b21a8; border-color: #e9d5ff; }
-.btn-cab-banjarnegara.active { background: #7e22ce; color: #ffffff; border-color: #7e22ce; box-shadow: 0 4px 10px rgba(126, 34, 206, 0.3); }
-
-.btn-cab-banyumas-selatan { background: #fff1f2; color: #9f1239; border-color: #fecdd3; }
-.btn-cab-banyumas-selatan.active { background: #e11d48; color: #ffffff; border-color: #e11d48; box-shadow: 0 4px 10px rgba(225, 29, 72, 0.3); }
-
-.spin { animation: spin 0.8s linear infinite; }
-@keyframes spin { 100% { transform: rotate(360deg); } }
-
-@media (max-width: 576px) {
-  .metric-value { font-size: 1.3rem; }
-  .filter-glass { width: 100%; }
-  .filter-glass select { flex: 1; }
+/* --- RESPONSIVE HP --- */
+@media (max-width: 767.98px) {
+  .hero-header {
+    padding: 1.25rem 0 4.2rem 0;
+    border-bottom-left-radius: 22px;
+    border-bottom-right-radius: 22px;
+  }
+  .filter-glass {
+    width: 100%;
+    display: grid !important;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.45rem !important;
+  }
+  .filter-glass #selectCabang {
+    grid-column: span 2;
+    width: 100% !important;
+  }
+  .filter-glass #selectBulan,
+  .filter-glass #selectTahun {
+    width: 100% !important;
+  }
+  .filter-glass .btn-refresh-modern {
+    grid-column: span 2;
+    width: 100%;
+    padding: 0.5rem;
+  }
+  .nav-pills-modern {
+    width: 100%;
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+  }
+  .nav-pills-modern .nav-link {
+    text-align: center;
+    padding: 0.55rem 0.5rem;
+    font-size: 0.8rem;
+  }
+  .metric-value {
+    font-size: 1.32rem;
+  }
 }
