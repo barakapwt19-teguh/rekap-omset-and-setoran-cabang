@@ -210,7 +210,7 @@
       </div>
 
       <!-- ========================================================= -->
-      <!-- MODUL 2: MONITORING OMSET BARANG (TERIMA DI KIRI)         -->
+      <!-- MODUL 2: MONITORING OMSET BARANG (WARNA PER CABANG)       -->
       <!-- ========================================================= -->
       <div class="tab-pane fade" id="modul-omset" role="tabpanel">
 
@@ -260,12 +260,12 @@
                   <thead>
                     <tr class="branch-header">
                       <th rowspan="2" class="sticky-col text-center">TANGGAL</th>
-                      <th colspan="4">PURWOKERTO</th>
-                      <th colspan="4">KEBUMEN</th>
-                      <th colspan="4">CILACAP</th>
-                      <th colspan="4">PURBALINGGA</th>
-                      <th colspan="4">BANJARNEGARA</th>
-                      <th colspan="4">BANYUMAS SELATAN</th>
+                      <th colspan="4" class="th-purwokerto">PURWOKERTO</th>
+                      <th colspan="4" class="th-kebumen">KEBUMEN</th>
+                      <th colspan="4" class="th-cilacap">CILACAP</th>
+                      <th colspan="4" class="th-purbalingga">PURBALINGGA</th>
+                      <th colspan="4" class="th-banjarnegara">BANJARNEGARA</th>
+                      <th colspan="4" class="th-banyumas-selatan">BANYUMAS SELATAN</th>
                     </tr>
                     <tr>
                       <th>TUNAI</th><th>TUJUAN</th><th>VA</th><th class="col-total-cabang">TOTAL</th>
@@ -292,12 +292,12 @@
                   <thead>
                     <tr class="branch-header">
                       <th rowspan="2" class="sticky-col text-center">TANGGAL</th>
-                      <th colspan="4">PURWOKERTO</th>
-                      <th colspan="4">KEBUMEN</th>
-                      <th colspan="4">CILACAP</th>
-                      <th colspan="4">PURBALINGGA</th>
-                      <th colspan="4">BANJARNEGARA</th>
-                      <th colspan="4">BANYUMAS SELATAN</th>
+                      <th colspan="4" class="th-purwokerto">PURWOKERTO</th>
+                      <th colspan="4" class="th-kebumen">KEBUMEN</th>
+                      <th colspan="4" class="th-cilacap">CILACAP</th>
+                      <th colspan="4" class="th-purbalingga">PURBALINGGA</th>
+                      <th colspan="4" class="th-banjarnegara">BANJARNEGARA</th>
+                      <th colspan="4" class="th-banyumas-selatan">BANYUMAS SELATAN</th>
                     </tr>
                     <tr>
                       <th>TUNAI</th><th>TUJUAN</th><th>VA</th><th class="col-total-cabang">TOTAL</th>
@@ -342,7 +342,14 @@
 
     function getBranchBadgeHtml(namaCabang) {
       const cab = String(namaCabang || '').toUpperCase();
-      return `<span class="badge-soft-blue">${cab}</span>`;
+      let badgeClass = 'badge-default';
+      if (cab.includes('PURWOKERTO')) badgeClass = 'badge-purwokerto';
+      else if (cab.includes('KEBUMEN')) badgeClass = 'badge-kebumen';
+      else if (cab.includes('CILACAP')) badgeClass = 'badge-cilacap';
+      else if (cab.includes('PURBALINGGA')) badgeClass = 'badge-purbalingga';
+      else if (cab.includes('BANJARNEGARA')) badgeClass = 'badge-banjarnegara';
+      else if (cab.includes('BANYUMAS SELATAN')) badgeClass = 'badge-banyumas-selatan';
+      return `<span class="badge-cabang ${badgeClass}">${cab}</span>`;
     }
 
     function initFilterOptions() {

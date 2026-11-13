@@ -223,11 +223,86 @@ body {
 }
 
 .table-modern thead tr.branch-header th {
-  background: var(--blue-soft);
-  color: var(--blue-royal);
-  border-bottom: 1px solid #bfdbfe;
+  border-bottom: 1px solid #cbd5e1;
   text-align: center;
   font-size: 0.76rem;
+}
+
+/* --- WARNA HEADER MATRIKS PER CABANG --- */
+.th-purwokerto {
+  background-color: #dbeafe !important; /* Biru muda */
+  color: #1e40af !important;
+  border-left: 1px solid #bfdbfe;
+}
+.th-kebumen {
+  background-color: #ffedd5 !important; /* Oren muda */
+  color: #9a3412 !important;
+  border-left: 1px solid #fed7aa;
+}
+.th-cilacap {
+  background-color: #dcfce7 !important; /* Hijau muda */
+  color: #166534 !important;
+  border-left: 1px solid #bbf7d0;
+}
+.th-purbalingga {
+  background-color: #fef9c3 !important; /* Kuning muda */
+  color: #854d0e !important;
+  border-left: 1px solid #fef08a;
+}
+.th-banjarnegara {
+  background-color: #f3e8ff !important; /* Ungu muda */
+  color: #6b21a8 !important;
+  border-left: 1px solid #e9d5ff;
+}
+.th-banyumas-selatan {
+  background-color: #ffe4e6 !important; /* Merah muda */
+  color: #9f1239 !important;
+  border-left: 1px solid #fecdd3;
+}
+
+/* --- WARNA BADGE PER CABANG --- */
+.badge-cabang {
+  font-weight: 700;
+  padding: 0.38em 0.8em;
+  border-radius: 8px;
+  font-size: 0.74rem;
+  display: inline-block;
+  letter-spacing: 0.02em;
+}
+.badge-purwokerto {
+  background-color: #dbeafe; /* Biru muda */
+  color: #1e40af;
+  border: 1px solid #bfdbfe;
+}
+.badge-kebumen {
+  background-color: #ffedd5; /* Oren muda */
+  color: #9a3412;
+  border: 1px solid #fed7aa;
+}
+.badge-cilacap {
+  background-color: #dcfce7; /* Hijau muda */
+  color: #166534;
+  border: 1px solid #bbf7d0;
+}
+.badge-purbalingga {
+  background-color: #fef9c3; /* Kuning muda */
+  color: #854d0e;
+  border: 1px solid #fef08a;
+}
+.badge-banjarnegara {
+  background-color: #f3e8ff; /* Ungu muda */
+  color: #6b21a8;
+  border: 1px solid #e9d5ff;
+}
+.badge-banyumas-selatan {
+  background-color: #ffe4e6; /* Merah muda */
+  color: #9f1239;
+  border: 1px solid #fecdd3;
+}
+.badge-default {
+  background-color: #f1f5f9;
+  color: #334155;
+  border: 1px solid #cbd5e1;
 }
 
 .table-modern tbody td {
@@ -255,7 +330,7 @@ body {
 
 thead .sticky-col {
   z-index: 3;
-  background-color: var(--blue-soft) !important;
+  background-color: #f8fafc !important;
 }
 
 .col-total-cabang {
