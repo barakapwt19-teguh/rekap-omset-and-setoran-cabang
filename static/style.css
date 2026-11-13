@@ -1,0 +1,310 @@
+/* =========================================================
+   BARAKA EXPRESS — EXECUTIVE BLUE THEME (style.css)
+   ========================================================= */
+
+:root {
+  /* Palet Warna Utama (Ubah di sini untuk ganti nuansa) */
+  --bg-page: #f0f4f8;
+  --bg-card: #ffffff;
+  --blue-navy: #0b192c;
+  --blue-royal: #1e3a8a;
+  --blue-primary: #2563eb;
+  --blue-sky: #3b82f6;
+  --blue-soft: #eff6ff;
+  --blue-tint: #dbeafe;
+  --border-subtle: #e2e8f0;
+  --text-dark: #0f172a;
+  --text-muted: #64748b;
+  --shadow-soft: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 4px 10px -6px rgba(37, 99, 235, 0.06);
+  --shadow-blue: 0 14px 28px -8px rgba(37, 99, 235, 0.38);
+  --radius-card: 20px;
+}
+
+* {
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
+  background-color: var(--bg-page);
+  color: var(--text-dark);
+  padding-bottom: 4.5rem;
+  -webkit-font-smoothing: antialiased;
+}
+
+.tabular-nums {
+  font-variant-numeric: tabular-nums;
+  letter-spacing: -0.02em;
+}
+
+/* --- HERO HEADER --- */
+.hero-header {
+  background: linear-gradient(135deg, var(--blue-navy) 0%, var(--blue-royal) 55%, var(--blue-primary) 100%);
+  color: #ffffff;
+  padding: 1.75rem 0 4.75rem 0;
+  border-bottom-left-radius: 30px;
+  border-bottom-right-radius: 30px;
+  box-shadow: 0 12px 32px -10px rgba(30, 58, 138, 0.4);
+  position: relative;
+  overflow: hidden;
+}
+
+/* Efek cahaya halus di sudut header */
+.hero-header::after {
+  content: "";
+  position: absolute;
+  top: -60px;
+  right: -60px;
+  width: 260px;
+  height: 260px;
+  background: radial-gradient(circle, rgba(96, 165, 250, 0.25) 0%, transparent 70%);
+  pointer-events: none;
+}
+
+.brand-badge {
+  background: rgba(255, 255, 255, 0.14);
+  backdrop-filter: blur(10px);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 16px;
+  width: 50px;
+  height: 50px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.45rem;
+}
+
+/* --- FILTER BAR GLASSMORPHISM --- */
+.filter-glass {
+  background: rgba(255, 255, 255, 0.12);
+  backdrop-filter: blur(12px);
+  border: 1px solid rgba(255, 255, 255, 0.22);
+  border-radius: 16px;
+  padding: 0.5rem 0.75rem;
+}
+
+.filter-glass select {
+  background-color: #ffffff;
+  border: none;
+  border-radius: 10px;
+  font-weight: 700;
+  color: var(--blue-navy);
+  font-size: 0.85rem;
+  cursor: pointer;
+}
+
+/* --- LAYOUT OVERLAP --- */
+.main-container {
+  margin-top: -3.3rem;
+  position: relative;
+  z-index: 5;
+}
+
+/* --- MODERN CARDS --- */
+.modern-card {
+  background: var(--bg-card);
+  border: 1px solid rgba(226, 232, 240, 0.9);
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-soft);
+  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+}
+
+.modern-card:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 16px 32px -6px rgba(37, 99, 235, 0.12);
+  border-color: var(--blue-tint);
+}
+
+.kpi-card-primary {
+  background: linear-gradient(145deg, var(--blue-primary) 0%, var(--blue-royal) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--radius-card);
+  box-shadow: var(--shadow-blue);
+  transition: transform 0.22s ease;
+}
+
+.kpi-card-primary:hover {
+  transform: translateY(-2px);
+}
+
+/* --- ICON BOXES --- */
+.icon-box {
+  width: 44px;
+  height: 44px;
+  border-radius: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 1.25rem;
+}
+
+.icon-blue { background: var(--blue-soft); color: var(--blue-primary); }
+.icon-indigo { background: #eef2ff; color: #4338ca; }
+.icon-white { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
+
+/* --- BRANCH MINI CARDS --- */
+.branch-card {
+  background: linear-gradient(180deg, #ffffff 0%, #f8fafc 100%);
+  border: 1px solid var(--border-subtle);
+  border-left: 4px solid var(--blue-primary);
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  transition: all 0.2s ease;
+}
+
+.branch-card:hover {
+  background: var(--blue-soft);
+  border-color: #93c5fd;
+}
+
+/* --- NAVIGATION PILLS --- */
+.nav-pills-modern {
+  background: #ffffff;
+  padding: 0.45rem;
+  border-radius: 16px;
+  box-shadow: var(--shadow-soft);
+  display: inline-flex;
+  gap: 0.35rem;
+  flex-wrap: wrap;
+}
+
+.nav-pills-modern .nav-link {
+  color: var(--text-muted);
+  font-weight: 600;
+  font-size: 0.88rem;
+  border-radius: 12px;
+  padding: 0.6rem 1.2rem;
+  transition: all 0.2s ease;
+}
+
+.nav-pills-modern .nav-link:hover {
+  color: var(--blue-primary);
+  background: var(--blue-soft);
+}
+
+.nav-pills-modern .nav-link.active {
+  background: var(--blue-primary);
+  color: #ffffff;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
+}
+
+/* --- MODERN DATA TABLE (NON-RIGID) --- */
+.table-modern-wrapper {
+  border-radius: 16px;
+  overflow-x: auto;
+  border: 1px solid var(--border-subtle);
+  background: #ffffff;
+}
+
+.table-modern {
+  margin-bottom: 0;
+  font-size: 0.84rem;
+  white-space: nowrap;
+  border-collapse: separate;
+  border-spacing: 0;
+}
+
+.table-modern thead th {
+  background-color: #f8fafc;
+  color: #334155;
+  font-weight: 700;
+  text-transform: uppercase;
+  font-size: 0.71rem;
+  letter-spacing: 0.04em;
+  padding: 0.85rem 0.9rem;
+  border-bottom: 2px solid var(--border-subtle);
+}
+
+.table-modern thead tr.branch-header th {
+  background: var(--blue-soft);
+  color: var(--blue-royal);
+  border-bottom: 1px solid #bfdbfe;
+  text-align: center;
+  font-size: 0.76rem;
+}
+
+.table-modern tbody td {
+  padding: 0.8rem 0.9rem;
+  border-bottom: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-modern tbody tr:hover td {
+  background-color: #f4f8ff;
+}
+
+/* Sticky Tanggal saat scroll horizontal di HP */
+.sticky-col {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background-color: #ffffff;
+  box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.08);
+}
+
+thead .sticky-col {
+  z-index: 3;
+  background-color: var(--blue-soft) !important;
+}
+
+.col-total-cabang {
+  background-color: rgba(239, 246, 255, 0.65);
+  font-weight: 700;
+  color: var(--blue-royal);
+}
+
+/* --- BUTTONS & BADGES --- */
+.btn-blue-modern {
+  background: linear-gradient(135deg, var(--blue-sky) 0%, var(--blue-primary) 100%);
+  color: #ffffff;
+  border: none;
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 0.6rem 1.2rem;
+  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  transition: all 0.2s ease;
+}
+
+.btn-blue-modern:hover {
+  transform: translateY(-1px);
+  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  color: #ffffff;
+}
+
+.btn-soft-blue {
+  background: var(--blue-soft);
+  color: var(--blue-primary);
+  border: 1px solid var(--blue-tint);
+  border-radius: 12px;
+  font-weight: 600;
+  padding: 0.6rem 1.1rem;
+  transition: all 0.2s ease;
+}
+
+.btn-soft-blue:hover {
+  background: var(--blue-tint);
+  color: var(--blue-royal);
+}
+
+.badge-soft-blue {
+  background: var(--blue-tint);
+  color: var(--blue-royal);
+  font-weight: 700;
+  padding: 0.35em 0.75em;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
+
+.badge-soft-sky {
+  background: #e0f2fe;
+  color: #0369a1;
+  font-weight: 600;
+  padding: 0.35em 0.75em;
+  border-radius: 8px;
+  font-size: 0.75rem;
+}
