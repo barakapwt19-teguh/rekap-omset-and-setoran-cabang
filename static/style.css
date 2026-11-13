@@ -15,7 +15,7 @@
   --text-dark: #0f172a;
   --text-muted: #64748b;
   --shadow-soft: 0 10px 25px -5px rgba(15, 23, 42, 0.05), 0 4px 10px -6px rgba(37, 99, 235, 0.06);
-  --shadow-blue: 0 14px 28px -8px rgba(37, 99, 235, 0.38);
+  --shadow-blue: 0 14px 28px -8px rgba(37, 99, 235, 0.35);
   --radius-card: 20px;
 }
 
@@ -101,33 +101,77 @@ body {
 /* --- MODERN CARDS --- */
 .modern-card {
   background: var(--bg-card);
-  border: 1px solid rgba(226, 232, 240, 0.9);
+  border: 1px solid rgba(226, 232, 240, 0.95);
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-soft);
-  transition: transform 0.22s ease, box-shadow 0.22s ease, border-color 0.22s ease;
+  transition: box-shadow 0.22s ease, border-color 0.22s ease;
 }
 
 .modern-card:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 16px 32px -6px rgba(37, 99, 235, 0.12);
+  box-shadow: 0 14px 28px -6px rgba(37, 99, 235, 0.1);
   border-color: var(--blue-tint);
 }
 
-.kpi-card-primary {
-  background: linear-gradient(145deg, var(--blue-primary) 0%, var(--blue-royal) 100%);
+/* --- BADGE 1: KARTU SALDO TERPADU --- */
+.saldo-unified-card {
+  background: linear-gradient(135deg, var(--blue-navy) 0%, var(--blue-royal) 60%, var(--blue-primary) 100%);
   color: #ffffff;
-  border: none;
   border-radius: var(--radius-card);
   box-shadow: var(--shadow-blue);
-  transition: transform 0.22s ease;
+  border: none;
 }
 
-.kpi-card-primary:hover {
+.saldo-sub-box {
+  background: rgba(255, 255, 255, 0.1);
+  backdrop-filter: blur(8px);
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  border-radius: 16px;
+  padding: 1rem 1.2rem;
+  height: 100%;
+}
+
+.saldo-sub-box-highlight {
+  background: rgba(255, 255, 255, 0.19);
+  border: 1px solid rgba(255, 255, 255, 0.38);
+}
+
+/* --- BADGE 2 & 3: KOTAK METRIK KLIKABLE (PEMICU TABEL) --- */
+.metric-click-box {
+  background: #f8fafc;
+  border: 1.5px solid var(--border-subtle);
+  border-radius: 16px;
+  padding: 1rem 1.15rem;
+  height: 100%;
+  cursor: pointer;
+  user-select: none;
+  transition: all 0.2s ease;
+  position: relative;
+}
+
+.metric-click-box:hover {
+  background: var(--blue-soft);
+  border-color: #93c5fd;
   transform: translateY(-2px);
+  box-shadow: 0 8px 18px -6px rgba(37, 99, 235, 0.15);
+}
+
+.metric-click-box.active-drawer {
+  background: var(--blue-soft);
+  border-color: var(--blue-primary);
+  box-shadow: 0 0 0 3px rgba(37, 99, 235, 0.14);
+}
+
+.metric-click-box .tap-hint {
+  font-size: 0.72rem;
+  font-weight: 600;
+  color: var(--blue-primary);
+  display: inline-flex;
+  align-items: center;
+  gap: 0.25rem;
 }
 
 .metric-value {
-  font-size: 1.6rem;
+  font-size: 1.55rem;
   font-weight: 800;
   letter-spacing: -0.5px;
   font-variant-numeric: tabular-nums;
@@ -135,17 +179,16 @@ body {
 
 /* --- ICON BOXES --- */
 .icon-box {
-  width: 44px;
-  height: 44px;
-  border-radius: 14px;
+  width: 38px;
+  height: 38px;
+  border-radius: 11px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  font-size: 1.25rem;
+  font-size: 1.1rem;
 }
 
 .icon-blue { background: var(--blue-soft); color: var(--blue-primary); }
-.icon-indigo { background: #eef2ff; color: #4338ca; }
 .icon-sky { background: #e0f2fe; color: #0284c7; }
 .icon-white { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
 
@@ -211,7 +254,6 @@ body {
   z-index: 4;
 }
 
-/* Sticky khusus tabel matriks 2 baris header */
 .table-matrix-sticky thead tr.branch-header th {
   position: sticky;
   top: 0;
@@ -230,7 +272,6 @@ body {
   border-bottom: 2px solid var(--border-subtle);
 }
 
-/* Pojok kiri atas TANGGAL (terkunci vertikal & horizontal) */
 .table-matrix-sticky thead th.sticky-col {
   left: 0;
   z-index: 8 !important;
@@ -238,7 +279,6 @@ body {
   box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.12);
 }
 
-/* Kolom kiri TANGGAL pada isi & footer tabel */
 .sticky-col {
   position: sticky;
   left: 0;
@@ -252,36 +292,12 @@ tfoot .sticky-col {
 }
 
 /* --- WARNA HEADER MATRIKS PER CABANG --- */
-.th-purwokerto {
-  background-color: #dbeafe !important; /* Biru muda */
-  color: #1e40af !important;
-  border-left: 1px solid #bfdbfe;
-}
-.th-kebumen {
-  background-color: #ffedd5 !important; /* Oren muda */
-  color: #9a3412 !important;
-  border-left: 1px solid #fed7aa;
-}
-.th-cilacap {
-  background-color: #dcfce7 !important; /* Hijau muda */
-  color: #166534 !important;
-  border-left: 1px solid #bbf7d0;
-}
-.th-purbalingga {
-  background-color: #fef9c3 !important; /* Kuning muda */
-  color: #854d0e !important;
-  border-left: 1px solid #fef08a;
-}
-.th-banjarnegara {
-  background-color: #f3e8ff !important; /* Ungu muda */
-  color: #6b21a8 !important;
-  border-left: 1px solid #e9d5ff;
-}
-.th-banyumas-selatan {
-  background-color: #ffe4e6 !important; /* Merah muda */
-  color: #9f1239 !important;
-  border-left: 1px solid #fecdd3;
-}
+.th-purwokerto { background-color: #dbeafe !important; color: #1e40af !important; border-left: 1px solid #bfdbfe; }
+.th-kebumen { background-color: #ffedd5 !important; color: #9a3412 !important; border-left: 1px solid #fed7aa; }
+.th-cilacap { background-color: #dcfce7 !important; color: #166534 !important; border-left: 1px solid #bbf7d0; }
+.th-purbalingga { background-color: #fef9c3 !important; color: #854d0e !important; border-left: 1px solid #fef08a; }
+.th-banjarnegara { background-color: #f3e8ff !important; color: #6b21a8 !important; border-left: 1px solid #e9d5ff; }
+.th-banyumas-selatan { background-color: #ffe4e6 !important; color: #9f1239 !important; border-left: 1px solid #fecdd3; }
 
 /* --- WARNA BADGE PER CABANG --- */
 .badge-cabang {
@@ -325,16 +341,16 @@ tfoot .sticky-col {
   background: linear-gradient(135deg, var(--blue-sky) 0%, var(--blue-primary) 100%);
   color: #ffffff;
   border: none;
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
-  padding: 0.5rem 1.05rem;
-  box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
+  padding: 0.42rem 0.95rem;
+  box-shadow: 0 4px 10px rgba(37, 99, 235, 0.22);
   transition: all 0.2s ease;
 }
 
 .btn-blue-modern:hover {
   transform: translateY(-1px);
-  box-shadow: 0 6px 16px rgba(37, 99, 235, 0.35);
+  box-shadow: 0 6px 14px rgba(37, 99, 235, 0.32);
   color: #ffffff;
 }
 
@@ -342,9 +358,9 @@ tfoot .sticky-col {
   background: var(--blue-soft);
   color: var(--blue-primary);
   border: 1px solid var(--blue-tint);
-  border-radius: 12px;
+  border-radius: 10px;
   font-weight: 600;
-  padding: 0.5rem 1rem;
+  padding: 0.42rem 0.95rem;
   transition: all 0.2s ease;
 }
 
@@ -373,9 +389,9 @@ tfoot .sticky-col {
 
 .badge-total-tabel {
   font-weight: 800;
-  padding: 0.42em 0.85em;
-  border-radius: 10px;
-  font-size: 0.82rem;
+  padding: 0.38em 0.8em;
+  border-radius: 9px;
+  font-size: 0.8rem;
   font-variant-numeric: tabular-nums;
 }
 
@@ -433,7 +449,7 @@ tfoot .sticky-col {
 @keyframes spin { 100% { transform: rotate(360deg); } }
 
 @media (max-width: 576px) {
-  .metric-value { font-size: 1.35rem; }
+  .metric-value { font-size: 1.3rem; }
   .filter-glass { width: 100%; }
   .filter-glass select { flex: 1; }
 }

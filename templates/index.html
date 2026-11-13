@@ -91,139 +91,245 @@
       <!-- ========================================================= -->
       <div class="tab-pane fade show active" id="modul-kas" role="tabpanel">
 
-        <!-- 3 KARTU SALDO UTAMA -->
-        <div class="row g-3 mb-4">
-          <div class="col-12 col-md-4">
-            <div class="kpi-card-primary p-4 h-100">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-white-50 fw-bold small">AKUMULASI SALDO AKHIR</span>
-                <div class="icon-box icon-white"><i class="bi bi-shield-check"></i></div>
-              </div>
-              <div class="metric-value text-white" id="mTotalSaldo">Rp 0</div>
-              <div class="mt-3 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small">
-                <span class="text-white-50">Saldo Awal Total:</span>
-                <span class="fw-bold tabular-nums" id="valSaldoAwalTotal">Rp 0</span>
+        <!-- BADGE 1: SATU KARTU TERPADU SALDO AKHIR, SALDO CASH & SALDO REKENING -->
+        <div class="saldo-unified-card p-3 p-md-4 mb-3">
+          <div class="d-flex justify-content-between align-items-center mb-3">
+            <span class="text-white-50 fw-bold small"><i class="bi bi-safe2-fill me-2"></i>POSISI SALDO KAS PENAMPUNG</span>
+            <span class="badge bg-white bg-opacity-10 text-white fw-semibold px-2 py-1" style="font-size: 0.72rem;">Cash + Rekening</span>
+          </div>
+          <div class="row g-3">
+            <!-- Akumulasi Saldo Akhir -->
+            <div class="col-12 col-md-4">
+              <div class="saldo-sub-box saldo-sub-box-highlight">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="text-white-50 fw-bold small">SALDO AKHIR (CASH + REKENING)</span>
+                  <i class="bi bi-shield-check text-white"></i>
+                </div>
+                <div class="metric-value text-white" id="mTotalSaldo">Rp 0</div>
+                <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small">
+                  <span class="text-white-50">Saldo Awal Total:</span>
+                  <span class="fw-bold tabular-nums" id="valSaldoAwalTotal">Rp 0</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-12 col-md-4">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-muted fw-bold small">SALDO CASH (GUDANG)</span>
-                <div class="icon-box icon-sky"><i class="bi bi-cash-stack"></i></div>
-              </div>
-              <div class="metric-value text-dark" id="mSaldoCash">Rp 0</div>
-              <div class="mt-3 pt-2 border-top d-flex justify-content-between small">
-                <span class="text-muted">Saldo Awal:</span>
-                <span class="fw-bold text-dark tabular-nums" id="valSaldoAwalCash">Rp 0</span>
+            <!-- Saldo Cash -->
+            <div class="col-12 col-md-4">
+              <div class="saldo-sub-box">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="text-white-50 fw-bold small">SALDO CASH</span>
+                  <i class="bi bi-cash-stack text-white"></i>
+                </div>
+                <div class="metric-value text-white" id="mSaldoCash">Rp 0</div>
+                <div class="mt-2 pt-2 border-top border-white border-opacity-20 d-flex justify-content-between small">
+                  <span class="text-white-50">Saldo Awal Cash:</span>
+                  <span class="fw-bold tabular-nums" id="valSaldoAwalCash">Rp 0</span>
+                </div>
               </div>
             </div>
-          </div>
 
-          <div class="col-12 col-md-4">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex align-items-center justify-content-between mb-2">
-                <span class="text-muted fw-bold small">SALDO REKENING (BANK)</span>
-                <div class="icon-box icon-blue"><i class="bi bi-bank"></i></div>
-              </div>
-              <div class="metric-value text-primary" id="mSaldoRekening">Rp 0</div>
-              <div class="mt-3 pt-2 border-top d-flex justify-content-between small">
-                <span class="text-muted">Saldo Awal:</span>
-                <span class="fw-bold text-dark tabular-nums" id="valSaldoAwalRekening">Rp 0</span>
+            <!-- Saldo Rekening -->
+            <div class="col-12 col-md-4">
+              <div class="saldo-sub-box">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <span class="text-white-50 fw-bold small">SALDO REKENING</span>
+                  <i class="bi bi-bank text-white"></i>
+                </div>
+                <div class="metric-value text-white" id="mSaldoRekening">Rp 0</div>
+                <div class="mt-2 pt-2 border-top border-white border-opacity-20 d-flex justify-content-between small">
+                  <span class="text-white-50">Saldo Awal Rekening:</span>
+                  <span class="fw-bold tabular-nums" id="valSaldoAwalRekening">Rp 0</span>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- ESTIMASI KEWAJIBAN PUSAT -->
-        <div class="modern-card p-4 mb-4">
+        <!-- BADGE 2: RINGKASAN BULAN INI (SETORAN CABANG, SETORAN PUSAT, ESTIMASI KEWAJIBAN PUSAT) -->
+        <div class="modern-card p-3 p-md-4 mb-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h6 class="fw-bold text-dark mb-0" id="titleEstimasi"><i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Total Kewajiban Setoran Pusat Per Cabang</h6>
-            <span class="badge-total-tabel bg-warning-subtle text-warning-emphasis" id="rTotalEstimasi">Total: Rp 0</span>
+            <span class="fw-bold text-dark small" id="titleMutasiBulan">
+              <i class="bi bi-bar-chart-line-fill text-primary me-2"></i>RINGKASAN MUTASI BULAN INI (SEMUA CABANG)
+            </span>
+            <span class="text-muted small"><i class="bi bi-hand-index-thumb me-1"></i>Klik nominal untuk buka/tutup rincian tabel</span>
           </div>
-          <div class="table-modern-wrapper">
-            <table class="table table-modern align-middle">
-              <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban Setoran</th><th class="text-center">Status</th></tr></thead>
-              <tbody id="tblEstimasiBody" class="tabular-nums"></tbody>
-            </table>
+          <div class="row g-3">
+            <!-- Setoran Cabang -->
+            <div class="col-12 col-md-4">
+              <div class="metric-click-box" id="box-drawerSetoranCabang" onclick="toggleTableDrawer('drawerSetoranCabang', this)">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted fw-bold" id="lblSetoranCabang">SETORAN CABANG</small>
+                  <span class="tap-hint"><i class="bi bi-table"></i> Rincian</span>
+                </div>
+                <div class="fs-4 fw-extrabold text-success tabular-nums" id="cardSetoranCabang">Rp 0</div>
+              </div>
+            </div>
+
+            <!-- Setoran Pusat -->
+            <div class="col-12 col-md-4">
+              <div class="metric-click-box" id="box-drawerSetoranPusat" onclick="toggleTableDrawer('drawerSetoranPusat', this)">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted fw-bold" id="lblSetoranPusat">SETORAN PUSAT</small>
+                  <span class="tap-hint"><i class="bi bi-table"></i> Rincian</span>
+                </div>
+                <div class="fs-4 fw-extrabold text-primary tabular-nums" id="cardSetoranPusat">Rp 0</div>
+              </div>
+            </div>
+
+            <!-- Estimasi Kewajiban Setoran Pusat -->
+            <div class="col-12 col-md-4">
+              <div class="metric-click-box" id="box-drawerEstimasiPusat" onclick="toggleTableDrawer('drawerEstimasiPusat', this)">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted fw-bold" id="lblEstimasiPusat">ESTIMASI KEWAJIBAN PUSAT</small>
+                  <span class="tap-hint"><i class="bi bi-table"></i> Rincian</span>
+                </div>
+                <div class="fs-4 fw-extrabold text-warning-emphasis tabular-nums" id="cardEstimasiPusat">Rp 0</div>
+              </div>
+            </div>
           </div>
         </div>
 
-        <!-- TABEL SETORAN CABANG & SETOR BANK -->
-        <div class="row g-4 mb-4">
-          <div class="col-12 col-lg-6">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-                <h6 class="fw-bold text-dark mb-0" id="titleRekapSetoran"><i class="bi bi-arrow-down-left-circle-fill text-primary me-2"></i>Rekap Setoran Cabang</h6>
+        <!-- BADGE 3: PENGELUARAN & SETOR TUNAI BANK -->
+        <div class="modern-card p-3 p-md-4 mb-4">
+          <div class="row g-3">
+            <!-- Pengeluaran -->
+            <div class="col-12 col-md-6">
+              <div class="metric-click-box" id="box-drawerPengeluaran" onclick="toggleTableDrawer('drawerPengeluaran', this)">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted fw-bold">PENGELUARAN OPERASIONAL</small>
+                  <span class="tap-hint"><i class="bi bi-table"></i> Rincian</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div class="fs-4 fw-extrabold text-danger tabular-nums" id="cardPengeluaran">Rp 0</div>
+                  <button type="button" class="btn btn-sm btn-soft-blue text-danger border-danger-subtle" onclick="event.stopPropagation()" data-bs-toggle="modal" data-bs-target="#modalPengeluaran">+ Pengeluaran</button>
+                </div>
+              </div>
+            </div>
+
+            <!-- Setor Tunai Bank -->
+            <div class="col-12 col-md-6">
+              <div class="metric-click-box" id="box-drawerSetorBank" onclick="toggleTableDrawer('drawerSetorBank', this)">
+                <div class="d-flex justify-content-between align-items-center mb-1">
+                  <small class="text-muted fw-bold">SETOR TUNAI BANK</small>
+                  <span class="tap-hint"><i class="bi bi-table"></i> Rincian</span>
+                </div>
+                <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
+                  <div class="fs-4 fw-extrabold text-dark tabular-nums" id="cardSetorBank">Rp 0</div>
+                  <button type="button" class="btn btn-sm btn-blue-modern" onclick="event.stopPropagation()" data-bs-toggle="modal" data-bs-target="#modalSetorBank">+ Setor Tunai</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- ========================================================= -->
+        <!-- AREA TABEL TERSEMBUNYI (TERBUKA SAAT NOMINAL DIKLIK)       -->
+        <!-- ========================================================= -->
+
+        <!-- 1. DRAWER TABEL ESTIMASI KEWAJIBAN PUSAT -->
+        <div class="collapse mb-3" id="drawerEstimasiPusat">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0" id="titleEstimasi"><i class="bi bi-exclamation-circle-fill text-primary me-2"></i>Estimasi Kewajiban Setoran Pusat</h6>
+                <span class="badge-total-tabel bg-warning-subtle text-warning-emphasis" id="rTotalEstimasi">Total: Rp 0</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-light rounded-3" onclick="toggleTableDrawer('drawerEstimasiPusat')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban Setoran</th><th class="text-center">Status</th></tr></thead>
+                <tbody id="tblEstimasiBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 2. DRAWER TABEL SETORAN CABANG -->
+        <div class="collapse mb-3" id="drawerSetoranCabang">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0" id="titleRekapSetoran"><i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i>Rekap Setoran Cabang</h6>
                 <span class="badge-total-tabel bg-success-subtle text-success" id="rTotalSetoranCabang">Total: Rp 0</span>
               </div>
-              <div class="table-modern-wrapper" style="max-height: 360px;">
-                <table class="table table-modern align-middle">
-                  <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Nominal</th><th class="text-center">Jenis</th></tr></thead>
-                  <tbody id="tblRiwayatSetoranBody" class="tabular-nums"></tbody>
-                </table>
-              </div>
+              <button type="button" class="btn btn-sm btn-light rounded-3" onclick="toggleTableDrawer('drawerSetoranCabang')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="d-flex align-items-center flex-wrap gap-2">
-                  <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bank2 text-primary me-2"></i>Rekap Setor Tunai ke Bank</h6>
-                  <span class="badge-total-tabel badge-soft-blue" id="rTotalSetorBank">Total: Rp 0</span>
-                </div>
-                <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorBank">+ Setor Tunai</button>
-              </div>
-              <div class="table-modern-wrapper" style="max-height: 360px;">
-                <table class="table table-modern align-middle">
-                  <thead><tr><th>Tanggal</th><th class="text-end">Nominal</th><th>Bank</th><th>Keterangan</th></tr></thead>
-                  <tbody id="tblRiwayatSetorBankBody" class="tabular-nums"></tbody>
-                </table>
-              </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Nominal</th><th class="text-center">Jenis</th></tr></thead>
+                <tbody id="tblRiwayatSetoranBody" class="tabular-nums"></tbody>
+              </table>
             </div>
           </div>
         </div>
 
-        <!-- TABEL SETORAN PUSAT & PENGELUARAN -->
-        <div class="row g-4 mb-4">
-          <div class="col-12 col-lg-6">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="d-flex align-items-center flex-wrap gap-2">
-                  <h6 class="fw-bold text-dark mb-0" id="titleRekapPusat"><i class="bi bi-send-check-fill text-primary me-2"></i>Rekap Setoran Pusat</h6>
-                  <span class="badge-total-tabel badge-soft-blue" id="rTotalSetoranPusat">Total: Rp 0</span>
-                </div>
+        <!-- 3. DRAWER TABEL SETORAN PUSAT -->
+        <div class="collapse mb-3" id="drawerSetoranPusat">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0" id="titleRekapPusat"><i class="bi bi-send-check-fill text-primary me-2"></i>Rekap Setoran Pusat (Realisasi)</h6>
+                <span class="badge-total-tabel badge-soft-blue" id="rTotalSetoranPusat">Total: Rp 0</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
                 <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorPusat">+ Setor Pusat</button>
-              </div>
-              <div class="table-modern-wrapper" style="max-height: 360px;">
-                <table class="table table-modern align-middle">
-                  <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Estimasi</th><th class="text-end">Real Transfer</th></tr></thead>
-                  <tbody id="tblRiwayatPusatBody" class="tabular-nums"></tbody>
-                </table>
+                <button type="button" class="btn btn-sm btn-light rounded-3" onclick="toggleTableDrawer('drawerSetoranPusat')"><i class="bi bi-x-lg"></i></button>
               </div>
             </div>
-          </div>
-
-          <div class="col-12 col-lg-6">
-            <div class="modern-card p-4 h-100">
-              <div class="d-flex justify-content-between align-items-center mb-3 flex-wrap gap-2">
-                <div class="d-flex align-items-center flex-wrap gap-2">
-                  <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-up-right-circle-fill text-danger me-2"></i>Rekap Pengeluaran</h6>
-                  <span class="badge-total-tabel bg-danger-subtle text-danger" id="rTotalPengeluaran">Total: Rp 0</span>
-                </div>
-                <button class="btn btn-sm btn-soft-blue text-danger border-danger-subtle" data-bs-toggle="modal" data-bs-target="#modalPengeluaran">+ Pengeluaran</button>
-              </div>
-              <div class="table-modern-wrapper" style="max-height: 360px;">
-                <table class="table table-modern align-middle">
-                  <thead><tr><th>Tanggal</th><th>Sumber</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
-                  <tbody id="tblRiwayatPengeluaranBody" class="tabular-nums"></tbody>
-                </table>
-              </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Estimasi</th><th class="text-end">Real Transfer</th></tr></thead>
+                <tbody id="tblRiwayatPusatBody" class="tabular-nums"></tbody>
+              </table>
             </div>
           </div>
         </div>
+
+        <!-- 4. DRAWER TABEL PENGELUARAN -->
+        <div class="collapse mb-3" id="drawerPengeluaran">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-arrow-up-right-circle-fill text-danger me-2"></i>Rekap Pengeluaran Operasional</h6>
+                <span class="badge-total-tabel bg-danger-subtle text-danger" id="rTotalPengeluaran">Total: Rp 0</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-soft-blue text-danger border-danger-subtle" data-bs-toggle="modal" data-bs-target="#modalPengeluaran">+ Pengeluaran</button>
+                <button type="button" class="btn btn-sm btn-light rounded-3" onclick="toggleTableDrawer('drawerPengeluaran')"><i class="bi bi-x-lg"></i></button>
+              </div>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Tanggal</th><th>Sumber</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
+                <tbody id="tblRiwayatPengeluaranBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- 5. DRAWER TABEL SETOR TUNAI KE BANK -->
+        <div class="collapse mb-3" id="drawerSetorBank">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-bank2 text-primary me-2"></i>Rekap Setor Tunai ke Bank</h6>
+                <span class="badge-total-tabel badge-soft-blue" id="rTotalSetorBank">Total: Rp 0</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorBank">+ Setor Tunai</button>
+                <button type="button" class="btn btn-sm btn-light rounded-3" onclick="toggleTableDrawer('drawerSetorBank')"><i class="bi bi-x-lg"></i></button>
+              </div>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Tanggal</th><th class="text-end">Nominal</th><th>Bank</th><th>Keterangan</th></tr></thead>
+                <tbody id="tblRiwayatSetorBankBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
       </div>
 
       <!-- ========================================================= -->
@@ -234,7 +340,7 @@
         <!-- 3 KARTU SUMMARY OMSET -->
         <div class="row g-3 mb-4">
           <div class="col-12 col-md-4">
-            <div class="kpi-card-primary p-4">
+            <div class="saldo-unified-card p-4">
               <small class="text-white-50 fw-bold" id="lblOmsetTerima">TOTAL OMSET BARANG TERIMA</small>
               <div class="metric-value text-white mt-1" id="mTotalOmsetTerima">Rp 0</div>
             </div>
@@ -308,7 +414,7 @@
   <div class="modal fade" id="modalSetorPusat" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Setoran Kewajiban ke Pusat</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/setor-pusat', 'modalSetorPusat', () => ({ tanggal: document.getElementById('tglPusat').value, cabang: document.getElementById('cabangPusat').value, estimasi: Number(document.getElementById('estPusat').value), setoran: Number(document.getElementById('nomPusat').value), keterangan: document.getElementById('ketPusat').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal Transfer</label><input type="date" id="tglPusat" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Nama Cabang</label><select id="cabangPusat" class="form-select rounded-3" required><option value="PURWOKERTO">PURWOKERTO</option><option value="CILACAP">CILACAP</option><option value="PURBALINGGA">PURBALINGGA</option><option value="BANJARNEGARA">BANJARNEGARA</option><option value="KEBUMEN">KEBUMEN</option><option value="BANYUMAS SELATAN">BANYUMAS SELATAN</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Estimasi (Rp)</label><input type="number" id="estPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Realisasi Setoran (Rp)</label><input type="number" id="nomPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketPusat" class="form-control rounded-3"></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
 
   <!-- MODAL 3: PENGELUARAN -->
-  <div class="modal fade" id="modalPengeluaran" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Tambah Pengeluaran</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/pengeluaran', 'modalPengeluaran', () => ({ tanggal: document.getElementById('tglKeluar').value, sumberDana: document.getElementById('sumberDana').value, nominal: Number(document.getElementById('nomKeluar').value), kategori: document.getElementById('katKeluar').value, keterangan: document.getElementById('ketKeluar').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal</label><input type="date" id="tglKeluar" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Sumber Dana</label><select id="sumberDana" class="form-select rounded-3" required><option value="KAS CASH">KAS CASH (GUDANG)</option><option value="REKENING BANK">REKENING BANK</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Nominal (Rp)</label><input type="number" id="nomKeluar" class="form-control rounded-3" min="1" required></div><div class="mb-3"><label class="form-label small fw-semibold">Kategori</label><select id="katKeluar" class="form-select rounded-3" required><option value="Operasional Gudang">Operasional Gudang</option><option value="BBM / Transport">BBM / Transport</option><option value="ATK & Perlengkapan">ATK &amp; Perlengkapan</option><option value="Biaya Admin Bank">Biaya Admin Bank</option><option value="Lain-Lain">Lain-Lain</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketKeluar" class="form-control rounded-3" required></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
+  <div class="modal fade" id="modalPengeluaran" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Tambah Pengeluaran</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/pengeluaran', 'modalPengeluaran', () => ({ tanggal: document.getElementById('tglKeluar').value, sumberDana: document.getElementById('sumberDana').value, nominal: Number(document.getElementById('nomKeluar').value), kategori: document.getElementById('katKeluar').value, keterangan: document.getElementById('ketKeluar').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal</label><input type="date" id="tglKeluar" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Sumber Dana</label><select id="sumberDana" class="form-select rounded-3" required><option value="KAS CASH">KAS CASH</option><option value="REKENING BANK">REKENING BANK</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Nominal (Rp)</label><input type="number" id="nomKeluar" class="form-control rounded-3" min="1" required></div><div class="mb-3"><label class="form-label small fw-semibold">Kategori</label><select id="katKeluar" class="form-select rounded-3" required><option value="Operasional Gudang">Operasional Gudang</option><option value="BBM / Transport">BBM / Transport</option><option value="ATK & Perlengkapan">ATK &amp; Perlengkapan</option><option value="Biaya Admin Bank">Biaya Admin Bank</option><option value="Lain-Lain">Lain-Lain</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketKeluar" class="form-control rounded-3" required></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
 
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
@@ -343,6 +449,37 @@
       else if (cab.includes('BANJARNEGARA')) badgeClass = 'badge-banjarnegara';
       else if (cab.includes('BANYUMAS SELATAN')) badgeClass = 'badge-banyumas-selatan';
       return `<span class="badge-cabang ${badgeClass}">${cab}</span>`;
+    }
+
+    // Fungsi buka/tutup tabel di balik masing-masing kotak nominal
+    function toggleTableDrawer(drawerId) {
+      const targetEl = document.getElementById(drawerId);
+      if (!targetEl) return;
+
+      const isCurrentlyShown = targetEl.classList.contains('show');
+
+      // Tutup semua drawer lain terlebih dahulu agar layar selalu ringkas
+      document.querySelectorAll('#modul-kas .collapse.show').forEach(el => {
+        if (el.id !== drawerId) {
+          bootstrap.Collapse.getOrCreateInstance(el).hide();
+        }
+      });
+
+      document.querySelectorAll('.metric-click-box').forEach(box => {
+        box.classList.remove('active-drawer');
+      });
+
+      const bsCollapse = bootstrap.Collapse.getOrCreateInstance(targetEl);
+      if (isCurrentlyShown) {
+        bsCollapse.hide();
+      } else {
+        bsCollapse.show();
+        const activeBox = document.getElementById('box-' + drawerId);
+        if (activeBox) activeBox.classList.add('active-drawer');
+        setTimeout(() => {
+          targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+        }, 180);
+      }
     }
 
     function setFilterCabang(cabang, btnEl) {
@@ -403,16 +540,17 @@
       const labelFilter = selectedCabang === 'ALL' ? 'SEMUA CABANG' : selectedCabang;
       document.getElementById('badgePeriodeAktif').innerText = `${namaBulan[Number(bulan) - 1]} ${tahun} • ${labelFilter}`;
 
-      // 1. RENDER DATA KAS & BADGE TOTAL DI SEBELAH JUDUL TABEL
+      // 1. RENDER BADGE 1: POSISI SALDO TERPADU
       const kas = data.kas;
+      document.getElementById('mTotalSaldo').innerText = formatRupiah(kas.saldoAkhir.totalSaldo);
       document.getElementById('mSaldoCash').innerText = formatRupiah(kas.saldoAkhir.cashGudang);
       document.getElementById('mSaldoRekening').innerText = formatRupiah(kas.saldoAkhir.rekeningBank);
-      document.getElementById('mTotalSaldo').innerText = formatRupiah(kas.saldoAkhir.totalSaldo);
 
+      document.getElementById('valSaldoAwalTotal').innerText = formatRupiah(kas.saldoAwal.total);
       document.getElementById('valSaldoAwalCash').innerText = formatRupiah(kas.saldoAwal.cash);
       document.getElementById('valSaldoAwalRekening').innerText = formatRupiah(kas.saldoAwal.rekening);
-      document.getElementById('valSaldoAwalTotal').innerText = formatRupiah(kas.saldoAwal.total);
 
+      // Hitung nominal sesuai filter cabang
       const filteredSetoran = selectedCabang === 'ALL'
         ? kas.riwayatSetoran
         : kas.riwayatSetoran.filter(i => String(i.cabang).toUpperCase().includes(selectedCabang));
@@ -429,7 +567,21 @@
       const listCabKas = selectedCabang === 'ALL' ? allCabKas : [selectedCabang];
       const totalEstKewajiban = listCabKas.reduce((acc, cab) => acc + (Number(kas.estimasiKewajiban[cab]) || 0), 0);
 
-      // Update badge total di sebelah judul masing-masing tabel
+      // 2. RENDER BADGE 2: RINGKASAN BULAN INI
+      document.getElementById('titleMutasiBulan').innerHTML = `<i class="bi bi-bar-chart-line-fill text-primary me-2"></i>RINGKASAN MUTASI BULAN INI (${labelFilter})`;
+      document.getElementById('lblSetoranCabang').innerText = selectedCabang === 'ALL' ? 'SETORAN CABANG' : `SETORAN (${selectedCabang})`;
+      document.getElementById('lblSetoranPusat').innerText = selectedCabang === 'ALL' ? 'SETORAN PUSAT' : `SETORAN PUSAT (${selectedCabang})`;
+      document.getElementById('lblEstimasiPusat').innerText = selectedCabang === 'ALL' ? 'ESTIMASI KEWAJIBAN PUSAT' : `ESTIMASI KEWAJIBAN (${selectedCabang})`;
+
+      document.getElementById('cardSetoranCabang').innerText = formatRupiah(totalSetoranCab);
+      document.getElementById('cardSetoranPusat').innerText = formatRupiah(totalSetoranPst);
+      document.getElementById('cardEstimasiPusat').innerText = formatRupiah(totalEstKewajiban);
+
+      // 3. RENDER BADGE 3: PENGELUARAN & SETOR TUNAI BANK
+      document.getElementById('cardPengeluaran').innerText = formatRupiah(kas.rekapMutasi.totalPengeluaran);
+      document.getElementById('cardSetorBank').innerText = formatRupiah(totalSetorBnk);
+
+      // 4. UPDATE BADGE TOTAL DI SEBELAH JUDUL MASING-MASING TABEL
       document.getElementById('rTotalEstimasi').innerText = `Total: ${formatRupiah(totalEstKewajiban)}`;
       document.getElementById('rTotalSetoranCabang').innerText = `Total: ${formatRupiah(totalSetoranCab)}`;
       document.getElementById('rTotalSetorBank').innerText = `Total: ${formatRupiah(totalSetorBnk)}`;
@@ -447,7 +599,7 @@
         return `<tr><td>${getBranchBadgeHtml(cab)}</td><td class="text-end fw-bold text-primary">${formatRupiah(nom)}</td><td class="text-center">${status}</td></tr>`;
       }).join('');
 
-      document.getElementById('titleRekapSetoran').innerHTML = `<i class="bi bi-arrow-down-left-circle-fill text-primary me-2"></i>Rekap Setoran Cabang (${labelFilter})`;
+      document.getElementById('titleRekapSetoran').innerHTML = `<i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i>Rekap Setoran Cabang (${labelFilter})`;
       document.getElementById('tblRiwayatSetoranBody').innerHTML = filteredSetoran.length === 0
         ? '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada data setoran periode ini</td></tr>'
         : filteredSetoran.map(i => `<tr><td class="small text-muted">${i.tanggal}</td><td>${getBranchBadgeHtml(i.cabang)}</td><td class="text-end fw-bold">${formatRupiah(i.nominal)}</td><td class="text-center"><span class="badge-soft-sky">${i.jenis}</span></td></tr>`).join('');
@@ -465,7 +617,7 @@
         ? '<tr><td colspan="4" class="text-center py-4 text-muted">Belum ada pengeluaran</td></tr>'
         : kas.riwayatPengeluaran.map(i => `<tr><td class="small text-muted">${i.tanggal}</td><td><span class="badge-soft-blue">${i.sumber}</span></td><td class="text-end fw-bold text-danger">${formatRupiah(i.nominal)}</td><td class="small text-muted">${i.keterangan}</td></tr>`).join('');
 
-      // 2. RENDER DATA OMSET MATRIKS
+      // 5. RENDER DATA OMSET MATRIKS
       const omset = data.omset;
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
