@@ -1,9 +1,8 @@
 /* =========================================================
-   BARAKA EXPRESS — EXECUTIVE BLUE THEME (style.css)
+   BARAKA EXPRESS — EXECUTIVE BLUE THEME (static/style.css)
    ========================================================= */
 
 :root {
-  /* Palet Warna Utama (Ubah di sini untuk ganti nuansa) */
   --bg-page: #f0f4f8;
   --bg-card: #ffffff;
   --blue-navy: #0b192c;
@@ -49,7 +48,6 @@ body {
   overflow: hidden;
 }
 
-/* Efek cahaya halus di sudut header */
 .hero-header::after {
   content: "";
   position: absolute;
@@ -128,6 +126,13 @@ body {
   transform: translateY(-2px);
 }
 
+.metric-value {
+  font-size: 1.6rem;
+  font-weight: 800;
+  letter-spacing: -0.5px;
+  font-variant-numeric: tabular-nums;
+}
+
 /* --- ICON BOXES --- */
 .icon-box {
   width: 44px;
@@ -141,6 +146,7 @@ body {
 
 .icon-blue { background: var(--blue-soft); color: var(--blue-primary); }
 .icon-indigo { background: #eef2ff; color: #4338ca; }
+.icon-sky { background: #e0f2fe; color: #0284c7; }
 .icon-white { background: rgba(255, 255, 255, 0.18); color: #ffffff; }
 
 /* --- BRANCH MINI CARDS --- */
@@ -171,10 +177,10 @@ body {
 
 .nav-pills-modern .nav-link {
   color: var(--text-muted);
-  font-weight: 600;
+  font-weight: 700;
   font-size: 0.88rem;
   border-radius: 12px;
-  padding: 0.6rem 1.2rem;
+  padding: 0.65rem 1.25rem;
   transition: all 0.2s ease;
 }
 
@@ -184,7 +190,7 @@ body {
 }
 
 .nav-pills-modern .nav-link.active {
-  background: var(--blue-primary);
+  background: linear-gradient(135deg, var(--blue-sky) 0%, var(--blue-primary) 100%);
   color: #ffffff;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.3);
 }
@@ -265,7 +271,7 @@ thead .sticky-col {
   border: none;
   border-radius: 12px;
   font-weight: 600;
-  padding: 0.6rem 1.2rem;
+  padding: 0.55rem 1.15rem;
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.25);
   transition: all 0.2s ease;
 }
@@ -282,7 +288,7 @@ thead .sticky-col {
   border: 1px solid var(--blue-tint);
   border-radius: 12px;
   font-weight: 600;
-  padding: 0.6rem 1.1rem;
+  padding: 0.55rem 1.1rem;
   transition: all 0.2s ease;
 }
 
@@ -307,4 +313,13 @@ thead .sticky-col {
   padding: 0.35em 0.75em;
   border-radius: 8px;
   font-size: 0.75rem;
+}
+
+.spin { animation: spin 0.8s linear infinite; }
+@keyframes spin { 100% { transform: rotate(360deg); } }
+
+@media (max-width: 576px) {
+  .metric-value { font-size: 1.35rem; }
+  .filter-glass { width: 100%; }
+  .filter-glass select { flex: 1; }
 }
