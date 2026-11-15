@@ -32,6 +32,24 @@ BRANCH_MAP = {
     "BANYUMAS SELATAN": {"tunai": 21, "tujuan": 22, "va": 23, "total": 24},
 }
 
+GUDANG_BRANCH_MAP = {
+    "PURWOKERTO":       {"msk": 1,  "bbm": 2,  "lb": 3,  "tot_setor": 4,  "lokalan": 6,  "tag_msk": 7,  "tag_dist": 8,  "s_cash": 9,  "s_tf": 10},
+    "KEBUMEN":          {"msk": 11, "bbm": 12, "lb": 13, "tot_setor": 14, "lokalan": 16, "tag_msk": 17, "tag_dist": 18, "s_cash": 19, "s_tf": 20},
+    "CILACAP":          {"msk": 21, "bbm": 22, "lb": 23, "tot_setor": 24, "lokalan": 26, "tag_msk": 27, "tag_dist": 28, "s_cash": 29, "s_tf": 30},
+    "PURBALINGGA":      {"msk": 31, "bbm": 32, "lb": 33, "tot_setor": 34, "lokalan": 36, "tag_msk": 37, "tag_dist": 38, "s_cash": 39, "s_tf": 40},
+    "BANJARNEGARA":     {"msk": 41, "bbm": 42, "lb": 43, "tot_setor": 44, "lokalan": 46, "tag_msk": 47, "tag_dist": 48, "s_cash": 49, "s_tf": 50},
+    "BANYUMAS SELATAN": {"msk": 51, "bbm": 52, "lb": 53, "tot_setor": 54, "lokalan": 56, "tag_msk": 57, "tag_dist": 58, "s_cash": 59, "s_tf": 60},
+}
+
+PENGELUARAN_GUDANG_MAP = {
+    "PURWOKERTO":       {"tgl": 0,  "rincian": 1,  "nom": 2,  "ket": 3},
+    "KEBUMEN":          {"tgl": 5,  "rincian": 6,  "nom": 7,  "ket": 8},
+    "CILACAP":          {"tgl": 10, "rincian": 11, "nom": 12, "ket": 13},
+    "PURBALINGGA":      {"tgl": 15, "rincian": 16, "nom": 17, "ket": 18},
+    "BANJARNEGARA":     {"tgl": 20, "rincian": 21, "nom": 22, "ket": 23},
+    "BANYUMAS SELATAN": {"tgl": 25, "rincian": 26, "nom": 27, "ket": 28},
+}
+
 # --- KONEKSI GOOGLE SHEETS ---
 def get_spreadsheet():
     scopes = [
@@ -347,6 +365,101 @@ async def get_dashboard(bulan: int, tahun: int):
     tot_terima, rekap_terima, riw_terima = baca_matriks_omset("OMSET_TERIMA")
     tot_kirim, rekap_kirim, riw_kirim = baca_matriks_omset("OMSET_KIRIM")
 
+    # --- MODUL KAS GUDANG ---
+    rekap_gudang_cab = {
+        cab: {
+            "msk": 0.0, "bbm": 0.0, "lb": 0.0, "tot_setor": 0.0,
+            "lokalan": 0.0, "tag_msk": 0.0, "tag_dist": 0.0,
+            "s_cash": 0.0, "s_tf": 0.0, "keluar_lain": 0.0,
+            "sisa_kas": 0.0, "selisih_tagihan": 0.0
+        } for cab in DAFTAR_CABANG
+    }
+    riwayat_gudang_harian = []
+    riwayat_keluar_gudang = []
+
+    # Baca PENGELUARAN_GUDANG (6 Cabang berjajar ke samping)
+    try:
+        rows_kg = ss.worksheet("PENGELUARAN_GUDANG").get_all_values()
+        if len(rows_kg) >= 3:
+            for r in rows_kg[2:]:
+                for cab, m in PENGELUARAN_GUDANG_MAP.items():
+                    if len(r) > m["nom"]:
+                        d = parse_date_matrix(r[m["tgl"]])
+                        nom = parse_num(r[m["nom"]])
+                        if d and d.month == bulan and d.year == tahun and nom > 0:
+                            rekap_gudang_cab[cab]["keluar_lain"] += nom
+                            riwayat_keluar_gudang.insert(0, {
+                                "tanggal": d.strftime("%d/%m/%Y"),
+                                "cabang": cab,
+                                "nominal": nom,
+                                "kategori": r[m["rincian"]] if len(r) > m["rincian"] and r[m["rincian"]] else "Operasional",
+                                "keterangan": r[m["ket"]] if len(r) > m["ket"] and r[m["ket"]] else "-"
+                            })
+    except Exception:
+        pass
+
+    # Baca KAS_Gudang
+    try:
+        ws_gdg = ss.worksheet("KAS_Gudang")
+        rows_gdg = ws_gdg.get_all_values()
+        if len(rows_gdg) >= 3:
+            for r in rows_gdg[2:]:
+                if not r or not r[0]: continue
+                # Lewati baris TOTAL jika ada
+                if "TOTAL" in str(r[0]).upper() or "TAGIHAN" in str(r[0]).upper():
+                    continue
+                d = parse_date_matrix(r[0])
+                if d and d.month == bulan and d.year == tahun:
+                    tgl_fmt = d.strftime("%d/%m/%Y")
+                    for cab, m in GUDANG_BRANCH_MAP.items():
+                        if len(r) > m["s_tf"]:
+                            v_msk = parse_num(r[m["msk"]])
+                            v_bbm = parse_num(r[m["bbm"]])
+                            v_lb  = parse_num(r[m["lb"]])
+                            v_tot = parse_num(r[m["tot_setor"]])
+                            if v_tot == 0 and (v_msk > 0 or v_bbm > 0 or v_lb > 0):
+                                v_tot = v_msk - v_bbm + v_lb
+                            v_lok = parse_num(r[m["lokalan"]])
+                            v_tmsk = parse_num(r[m["tag_msk"]])
+                            v_tdst = parse_num(r[m["tag_dist"]])
+                            v_cash = parse_num(r[m["s_cash"]])
+                            v_tf   = parse_num(r[m["s_tf"]])
+
+                            if any([v_msk, v_bbm, v_lb, v_tot, v_lok, v_tmsk, v_tdst, v_cash, v_tf]):
+                                rec = rekap_gudang_cab[cab]
+                                rec["msk"] += v_msk
+                                rec["bbm"] += v_bbm
+                                rec["lb"] += v_lb
+                                rec["tot_setor"] += v_tot
+                                rec["lokalan"] += v_lok
+                                rec["tag_msk"] += v_tmsk
+                                rec["tag_dist"] += v_tdst
+                                rec["s_cash"] += v_cash
+                                rec["s_tf"] += v_tf
+
+                                riwayat_gudang_harian.append({
+                                    "tanggal": tgl_fmt,
+                                    "cabang": cab,
+                                    "msk": v_msk,
+                                    "bbm": v_bbm,
+                                    "lb": v_lb,
+                                    "tot_setor": v_tot,
+                                    "lokalan": v_lok,
+                                    "tag_msk": v_tmsk,
+                                    "tag_dist": v_tdst,
+                                    "s_cash": v_cash,
+                                    "s_tf": v_tf
+                                })
+    except Exception:
+        pass
+
+    # Hitung Perkiraan Uang Masih di Cabang & Selisih Tagihan per Cabang
+    for cab, rec in rekap_gudang_cab.items():
+        uang_masuk = rec["tot_setor"] + rec["lokalan"] + rec["tag_msk"]
+        sudah_disetor = rec["s_cash"] + rec["s_tf"]
+        rec["sisa_kas"] = uang_masuk - sudah_disetor - rec["keluar_lain"]
+        rec["selisih_tagihan"] = rec["tag_dist"] - rec["tag_msk"]
+
     return JSONResponse({
         "kas": {
             "saldoAwal": {
@@ -380,7 +493,12 @@ async def get_dashboard(bulan: int, tahun: int):
             "kirimPerCabang": rekap_kirim,
             "riwayatTerima": riw_terima,
             "riwayatKirim": riw_kirim
-        }
+        },
+        "gudang": {
+            "rekapPerCabang": rekap_gudang_cab,
+            "riwayatHarian": riwayat_gudang_harian,
+            "riwayatPengeluaran": riwayat_keluar_gudang
+        },
     })
 
 @app.post("/api/setor-bank")
@@ -418,3 +536,30 @@ async def post_pengeluaran(data: PengeluaranInput):
         return {"success": True, "message": "Pengeluaran berhasil dicatat!"}
     except Exception as e:
         return {"success": False, "message": str(e)}
+
+@app.post("/api/pengeluaran-gudang")
+async def tambah_pengeluaran_gudang(request: Request):
+    try:
+        body = await request.json()
+        ss = get_spreadsheet()
+        ws = ss.worksheet("PENGELUARAN_GUDANG")
+        cabang = str(body.get("cabang", "")).upper()
+        if cabang not in PENGELUARAN_GUDANG_MAP:
+            return JSONResponse({"success": False, "message": "Cabang tidak valid"}, status_code=400)
+
+        col_idx = PENGELUARAN_GUDANG_MAP[cabang]["tgl"] + 1  # 1-based column index
+        col_values = ws.col_values(col_idx)
+        next_row = max(3, len(col_values) + 1)
+
+        tgl_str = format_date_indo(body.get("tanggal"))
+        rincian = str(body.get("kategori", "Operasional Gudang"))
+        nominal = float(body.get("nominal", 0))
+        ket = str(body.get("keterangan", ""))
+
+        start_col_letter = gspread.utils.rowcol_to_a1(next_row, col_idx)
+        end_col_letter = gspread.utils.rowcol_to_a1(next_row, col_idx + 3)
+        ws.update(f"{start_col_letter}:{end_col_letter}", [[tgl_str, rincian, nominal, ket]], value_input_option="USER_ENTERED")
+
+        return JSONResponse({"success": True, "message": f"Pengeluaran gudang {cabang} berhasil dicatat!"})
+    except Exception as e:
+        return JSONResponse({"success": False, "message": f"Gagal menyimpan: {str(e)}"}, status_code=500)        
