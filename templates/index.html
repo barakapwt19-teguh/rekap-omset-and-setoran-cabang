@@ -22,7 +22,7 @@
             <i class="bi bi-truck"></i>
           </div>
           <div>
-            <span class="badge bg-white bg-opacity-15 text-white fw-semibold mb-1 px-2 py-1" style="font-size: 0.68rem; letter-spacing: 0.05em;">
+            <span class="badge fw-bold mb-1 px-2 py-1" style="background-color: #fde047; color: #0a192f; font-size: 0.68rem; letter-spacing: 0.05em;">
               EXECUTIVE CONTROLLER • 6 CABANG
             </span>
             <h1 class="h4 fw-bold mb-0">Baraka Express</h1>
@@ -95,7 +95,7 @@
         <div class="saldo-unified-card p-3 p-md-4 mb-3">
           <div class="d-flex justify-content-between align-items-center mb-3">
             <span class="text-white-50 fw-bold small"><i class="bi bi-safe2-fill me-2"></i>POSISI SALDO KAS PENAMPUNG</span>
-            <span class="badge bg-white bg-opacity-15 text-white fw-semibold px-2 py-1" style="font-size: 0.72rem;">Cash + Rekening</span>
+            <span class="badge fw-bold px-2 py-1" style="background-color: #dbeafe; color: #0a192f; font-size: 0.72rem;">Cash + Rekening</span>
           </div>
           <div class="row g-2 g-md-3">
             <!-- Saldo Akhir -->
@@ -152,30 +152,54 @@
               <span class="fw-bold text-primary small" id="lblEstimasiPusat">
                 <i class="bi bi-exclamation-circle-fill me-1"></i>ESTIMASI KEWAJIBAN SETORAN PUSAT
               </span>
-              <span class="tap-hint"><i class="bi bi-table"></i> Klik untuk rincian per cabang</span>
+              <span class="tap-hint"><i class="bi bi-table"></i> Klik untuk rincian cabang &amp; tanggal</span>
             </div>
             <div class="d-flex justify-content-between align-items-baseline flex-wrap gap-2">
               <div class="fs-3 fw-extrabold text-dark tabular-nums" id="cardEstimasiPusat">Rp 0</div>
               <small class="text-muted fw-semibold" id="subTanggalEstimasi">Belum tersetor ke pusat</small>
             </div>
+            <!-- Keterangan Perhitungan Selisih Saldo Akhir - Kewajiban Setoran Pusat -->
+            <div class="mt-2 pt-2 border-top border-primary-subtle d-flex justify-content-between align-items-center flex-wrap gap-1 small">
+              <span class="text-muted fw-semibold">Saldo Akhir - Kewajiban Setoran Pusat =</span>
+              <span class="fw-extrabold tabular-nums text-primary" id="valSisaSaldoSetelahKewajiban">Rp 0</span>
+            </div>
           </div>
 
-          <!-- DRAWER TABEL ESTIMASI KEWAJIBAN PUSAT -->
+          <!-- DRAWER TABEL ESTIMASI KEWAJIBAN PUSAT (PER CABANG & PER TANGGAL) -->
           <div class="collapse mt-3" id="drawerEstimasiPusat">
             <div class="pt-3 border-top border-primary-subtle">
-              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
+              <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
                 <div class="d-flex align-items-center flex-wrap gap-2">
                   <h6 class="fw-bold text-dark mb-0" id="titleEstimasi">Estimasi Kewajiban Setoran Pusat</h6>
                   <span class="badge-total-tabel bg-warning-subtle text-warning-emphasis" id="rTotalEstimasi">Total: Rp 0</span>
                 </div>
                 <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-kas', 'drawerEstimasiPusat')"><i class="bi bi-x-lg"></i> Tutup</button>
               </div>
-              <div class="table-modern-wrapper">
-                <table class="table table-modern align-middle">
-                  <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban Setoran</th><th class="text-center">Status</th></tr></thead>
-                  <tbody id="tblEstimasiBody" class="tabular-nums"></tbody>
-                </table>
+
+              <div class="row g-3">
+                <!-- Tabel 1: Kewajiban Per Cabang -->
+                <div class="col-12 col-lg-6">
+                  <div class="small fw-bold text-primary mb-2"><i class="bi bi-building me-1"></i>Rekap Per Cabang</div>
+                  <div class="table-modern-wrapper">
+                    <table class="table table-modern align-middle">
+                      <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban</th><th class="text-center">Status</th></tr></thead>
+                      <tbody id="tblEstimasiBody" class="tabular-nums"></tbody>
+                    </table>
+                  </div>
+                </div>
+
+                <!-- Tabel 2: Rincian Nominal Kewajiban Per Tanggal -->
+                <div class="col-12 col-lg-6">
+                  <div class="small fw-bold text-primary mb-2"><i class="bi bi-calendar-event me-1"></i>Rincian Nominal Per Tanggal</div>
+                  <div class="table-modern-wrapper" style="max-height: 320px;">
+                    <table class="table table-modern align-middle">
+                      <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Nominal Kewajiban</th></tr></thead>
+                      <tbody id="tblEstimasiTanggalBody" class="tabular-nums"></tbody>
+                    </table>
+                  </div>
+                </div>
               </div>
+
             </div>
           </div>
         </div>
@@ -454,7 +478,6 @@
       return `<span class="badge-cabang ${badgeClass}">${cab}</span>`;
     }
 
-    // Buka/tutup tabel di balik nominal (independen per modul tab)
     function toggleTableDrawer(modulId, drawerId) {
       const targetEl = document.getElementById(drawerId);
       const modulContainer = document.getElementById(modulId);
@@ -552,7 +575,8 @@
 
       // 1. RENDER BADGE 1: POSISI SALDO TERPADU
       const kas = data.kas;
-      document.getElementById('mTotalSaldo').innerText = formatRupiah(kas.saldoAkhir.totalSaldo);
+      const saldoAkhirTotal = Number(kas.saldoAkhir.totalSaldo) || 0;
+      document.getElementById('mTotalSaldo').innerText = formatRupiah(saldoAkhirTotal);
       document.getElementById('mSaldoCash').innerText = formatRupiah(kas.saldoAkhir.cashGudang);
       document.getElementById('mSaldoRekening').innerText = formatRupiah(kas.saldoAkhir.rekeningBank);
 
@@ -577,13 +601,21 @@
       const listCabKas = selectedCabang === 'ALL' ? allCabKas : [selectedCabang];
       const totalEstKewajiban = listCabKas.reduce((acc, cab) => acc + (Number(kas.estimasiKewajiban[cab]) || 0), 0);
 
-      // 2. RENDER BADGE KHUSUS: ESTIMASI KEWAJIBAN SETORAN PUSAT (DI LUAR RINGKASAN BULAN INI)
+      // 2. RENDER BADGE KHUSUS: ESTIMASI KEWAJIBAN SETORAN PUSAT + SELISIH SALDO AKHIR
       const infoTglEst = kas.tanggalEstimasiTerakhir
         ? `Sampai Tanggal ${kas.tanggalEstimasiTerakhir} (Belum Tersetor)`
         : 'Estimasi belum tersetor ke pusat';
       document.getElementById('lblEstimasiPusat').innerHTML = `<i class="bi bi-exclamation-circle-fill me-1"></i>ESTIMASI KEWAJIBAN SETORAN PUSAT (${labelFilter})`;
       document.getElementById('cardEstimasiPusat').innerText = formatRupiah(totalEstKewajiban);
       document.getElementById('subTanggalEstimasi').innerText = infoTglEst;
+
+      // Hitung & tampilkan: Saldo Akhir - Kewajiban Setoran Pusat = (Hasilnya)
+      const sisaSetelahKewajiban = saldoAkhirTotal - totalEstKewajiban;
+      const elSisaSaldo = document.getElementById('valSisaSaldoSetelahKewajiban');
+      elSisaSaldo.innerText = formatRupiah(sisaSetelahKewajiban);
+      elSisaSaldo.className = sisaSetelahKewajiban >= 0
+        ? 'fw-extrabold tabular-nums text-success'
+        : 'fw-extrabold tabular-nums text-danger';
 
       // 3. RENDER BADGE 2: RINGKASAN SETORAN BULAN INI
       document.getElementById('titleMutasiBulan').innerHTML = `<i class="bi bi-bar-chart-line-fill text-primary me-2"></i>RINGKASAN SETORAN BULAN INI (${labelFilter})`;
@@ -614,6 +646,33 @@
           : '<span class="badge-soft-sky">Lunas / Nihil</span>';
         return `<tr><td>${getBranchBadgeHtml(cab)}</td><td class="text-end fw-bold text-primary">${formatRupiah(nom)}</td><td class="text-center">${status}</td></tr>`;
       }).join('');
+
+      // Rincian Nominal Kewajiban Per Tanggal
+      const listRincianTgl = Array.isArray(kas.rincianEstimasiTanggal) ? kas.rincianEstimasiTanggal : [];
+      const filteredRincianTgl = selectedCabang === 'ALL'
+        ? listRincianTgl
+        : listRincianTgl.filter(r => String(r.cabang || '').toUpperCase().includes(selectedCabang));
+
+      if (filteredRincianTgl.length > 0) {
+        document.getElementById('tblEstimasiTanggalBody').innerHTML = filteredRincianTgl.map(r => `
+          <tr>
+            <td class="small text-muted">${r.tanggal}</td>
+            <td>${getBranchBadgeHtml(r.cabang)}</td>
+            <td class="text-end fw-bold text-primary">${formatRupiah(r.nominal)}</td>
+          </tr>
+        `).join('');
+      } else {
+        const tglLabel = kas.tanggalEstimasiTerakhir || 'Periode Berjalan';
+        document.getElementById('tblEstimasiTanggalBody').innerHTML = listCabKas
+          .filter(cab => (kas.estimasiKewajiban[cab] || 0) > 0)
+          .map(cab => `
+            <tr>
+              <td class="small text-muted">s/d ${tglLabel}</td>
+              <td>${getBranchBadgeHtml(cab)}</td>
+              <td class="text-end fw-bold text-primary">${formatRupiah(kas.estimasiKewajiban[cab])}</td>
+            </tr>
+          `).join('') || '<tr><td colspan="3" class="text-center py-4 text-muted">Tidak ada tunggakan estimasi kewajiban</td></tr>';
+      }
 
       document.getElementById('titleRekapSetoran').innerHTML = `<i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i>Rekap Setoran Cabang (${labelFilter})`;
       document.getElementById('tblRiwayatSetoranBody').innerHTML = filteredSetoran.length === 0
