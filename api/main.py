@@ -187,6 +187,7 @@ async def get_dashboard(bulan: int, tahun: int):
     total_setoran_cabang = 0.0
 
     estimasi_kewajiban = {cab: 0.0 for cab in DAFTAR_CABANG}
+    rincian_estimasi_tanggal = []
     riwayat_setoran = []
     riwayat_bank = []
     riwayat_keluar = []
@@ -292,6 +293,11 @@ async def get_dashboard(bulan: int, tahun: int):
                         })
                     elif est > 0 and cb in estimasi_kewajiban:
                         estimasi_kewajiban[cb] += est
+                        rincian_estimasi_tanggal.append({
+                            "tanggal": tgl_fmt,
+                            "cabang": cb,
+                            "nominal": est
+                        })
     except Exception:
         pass
 
@@ -360,6 +366,7 @@ async def get_dashboard(bulan: int, tahun: int):
             },
             "estimasiKewajiban": estimasi_kewajiban,
             "tanggalEstimasiTerakhir": tgl_estimasi_terakhir,
+            "rincianEstimasiTanggal": rincian_estimasi_tanggal,
             "riwayatSetoran": riwayat_setoran,
             "riwayatSetorBank": riwayat_bank,
             "riwayatPusat": riwayat_pusat,
