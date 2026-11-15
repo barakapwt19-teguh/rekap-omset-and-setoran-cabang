@@ -19,7 +19,7 @@ app.mount("/static", StaticFiles(directory=str(BASE_DIR / "static")), name="stat
 SPREADSHEET_ID = "1RopoqGAtSgZl5UGURcBZyhorEfV1ZzhoZ2SGc6-2Sqo"
 
 DAFTAR_CABANG = [
-    "PURWOKERTO", "CILACAP", "PURBALINGGA", 
+    "PURWOKERTO", "CILACAP", "PURBALINGGA",
     "BANJARNEGARA", "KEBUMEN", "BANYUMAS SELATAN"
 ]
 
@@ -56,7 +56,6 @@ def get_spreadsheet():
         "https://www.googleapis.com/auth/spreadsheets",
         "https://www.googleapis.com/auth/drive"
     ]
-    # Mengambil JSON credential dari Environment Variable Vercel
     creds_json = os.environ.get("GOOGLE_CREDENTIALS")
     if not creds_json:
         raise ValueError("Environment variable GOOGLE_CREDENTIALS belum diatur di Vercel!")
@@ -93,11 +92,9 @@ def parse_date_matrix(raw_tgl) -> Optional[datetime]:
     if not raw_tgl:
         return None
     s = str(raw_tgl).strip()
-    # Format dd/mm/yyyy
     dt = parse_date_slash(s)
     if dt:
         return dt
-    # Format 1-Okt-26
     parts = s.split("-")
     if len(parts) == 3:
         months = {
@@ -188,357 +185,372 @@ async def serve_dashboard():
 
 @app.get("/api/dashboard")
 async def get_dashboard(bulan: int, tahun: int):
-    ss = get_spreadsheet()
-    sync_admin_bank(ss)
-
-    start_date = datetime(tahun, bulan, 1)
-    
-    # Variabel Kas Penampung
-    saldo_awal_cash = 0.0
-    saldo_awal_bank = 0.0
-    cash_masuk = 0.0
-    tf_masuk = 0.0
-    setor_bank = 0.0
-    keluar_cash = 0.0
-    keluar_bank = 0.0
-    setor_pusat_tf = 0.0
-    total_setoran_cabang = 0.0
-
-    estimasi_kewajiban = {cab: 0.0 for cab in DAFTAR_CABANG}
-    rincian_estimasi_tanggal = []
-    riwayat_setoran = []
-    riwayat_bank = []
-    riwayat_keluar = []
-    riwayat_pusat = []
-    tgl_estimasi_terakhir = ""
-
-    # 1. SETORAN CABANG
     try:
-        rows_setoran = ss.worksheet("SETORAN CABANG").get_all_values()[1:]
-        for r in rows_setoran:
-            if len(r) < 4: continue
-            d = parse_date_slash(r[1])
-            nom = parse_num(r[3])
-            ket = str(r[4]).upper() if len(r) > 4 else ""
-            is_tf = "TRANSFER" in ket
-            if d and nom > 0:
-                if d < start_date:
-                    if is_tf: saldo_awal_bank += nom
-                    else: saldo_awal_cash += nom
-                elif d.month == bulan and d.year == tahun:
-                    if is_tf: tf_masuk += nom
-                    else: cash_masuk += nom
-                    total_setoran_cabang += nom
-                    cb = str(r[2]).replace(" .", "").strip().upper()
-                    riwayat_setoran.insert(0, {
-                        "tanggal": d.strftime("%d/%m/%Y"),
-                        "cabang": cb or "TANPA CABANG",
-                        "nominal": nom,
-                        "jenis": "TRANSFER" if is_tf else "CASH"
-                    })
-    except Exception:
-        pass
+        ss = get_spreadsheet()
+        sync_admin_bank(ss)
 
-    # 2. SETOR_TUNAI_BANK
-    try:
-        rows_bank = ss.worksheet("SETOR_TUNAI_BANK").get_all_values()[1:]
-        for r in rows_bank:
-            if len(r) < 3: continue
-            d = parse_date_slash(r[1])
-            nom = parse_num(r[2])
-            if d and nom > 0:
-                if d < start_date:
-                    saldo_awal_cash -= nom
-                    saldo_awal_bank += nom
-                elif d.month == bulan and d.year == tahun:
-                    setor_bank += nom
-                    riwayat_bank.insert(0, {
-                        "tanggal": d.strftime("%d/%m/%Y"),
-                        "nominal": nom,
-                        "bank": r[3] if len(r) > 3 else "MANDIRI",
-                        "keterangan": r[4] if len(r) > 4 else "-"
-                    })
-    except Exception:
-        pass
+        start_date = datetime(tahun, bulan, 1)
+        
+        # Variabel Kas Penampung
+        saldo_awal_cash = 0.0
+        saldo_awal_bank = 0.0
+        cash_masuk = 0.0
+        tf_masuk = 0.0
+        setor_bank = 0.0
+        keluar_cash = 0.0
+        keluar_bank = 0.0
+        setor_pusat_tf = 0.0
+        total_setoran_cabang = 0.0
 
-    # 3. PENGELUARAN
-    try:
-        rows_keluar = ss.worksheet("PENGELUARAN").get_all_values()[1:]
-        for r in rows_keluar:
-            if len(r) < 4: continue
-            d = parse_date_slash(r[1])
-            sumber = str(r[2]).upper()
-            nom = parse_num(r[3])
-            if d and nom > 0:
-                is_cash = "CASH" in sumber
-                if d < start_date:
-                    if is_cash: saldo_awal_cash -= nom
-                    else: saldo_awal_bank -= nom
-                elif d.month == bulan and d.year == tahun:
-                    if is_cash: keluar_cash += nom
-                    else: keluar_bank += nom
-                    riwayat_keluar.insert(0, {
-                        "tanggal": d.strftime("%d/%m/%Y"),
-                        "sumber": sumber,
-                        "nominal": nom,
-                        "keterangan": r[5] if len(r) > 5 else "-"
-                    })
-    except Exception:
-        pass
+        estimasi_kewajiban = {cab: 0.0 for cab in DAFTAR_CABANG}
+        rincian_estimasi_tanggal = []
+        riwayat_setoran = []
+        riwayat_bank = []
+        riwayat_keluar = []
+        riwayat_pusat = []
+        tgl_estimasi_terakhir = ""
 
-    # 4. SETORAN_PUSAT
-    try:
-        rows_pusat = ss.worksheet("SETORAN_PUSAT").get_all_values()[1:]
-        for r in rows_pusat:
-            if len(r) < 5: continue
-            d = parse_date_slash(r[1])
-            cb = str(r[2]).replace(" .", "").strip().upper()
-            est = parse_num(r[3])
-            real = parse_num(r[4])
-            if d:
-                if d < start_date:
-                    if real > 0: saldo_awal_bank -= real
-                elif d.month == bulan and d.year == tahun:
-                    tgl_fmt = d.strftime("%d/%m/%Y")
-                    if est > 0: tgl_estimasi_terakhir = tgl_fmt
-                    if real > 0:
-                        setor_pusat_tf += real
-                        riwayat_pusat.insert(0, {
-                            "tanggal": tgl_fmt,
-                            "cabang": cb,
-                            "estimasi": est,
-                            "setoran": real
-                        })
-                    elif est > 0 and cb in estimasi_kewajiban:
-                        estimasi_kewajiban[cb] += est
-                        rincian_estimasi_tanggal.append({
-                            "tanggal": tgl_fmt,
-                            "cabang": cb,
-                            "nominal": est
-                        })
-    except Exception:
-        pass
-
-    saldo_cash_akhir = saldo_awal_cash + cash_masuk - setor_bank - keluar_cash
-    saldo_bank_akhir = saldo_awal_bank + tf_masuk + setor_bank - keluar_bank - setor_pusat_tf
-
-    # --- MODUL OMSET MATRIKS (4 SUB-KOLOM) ---
-    def baca_matriks_omset(nama_sheet):
-        rekap_cb = {cab: {"tunai": 0.0, "tujuan": 0.0, "va": 0.0, "total": 0.0} for cab in DAFTAR_CABANG}
-        total_all = 0.0
-        riwayat = []
+        # 1. SETORAN CABANG
         try:
-            ws = ss.worksheet(nama_sheet)
-            rows = ws.get_all_values()
-            if len(rows) >= 4:
-                for r in rows[3:]:
-                    if not r: continue
+            rows_setoran = ss.worksheet("SETORAN CABANG").get_all_values()[1:]
+            for r in rows_setoran:
+                if len(r) < 4:
+                    continue
+                d = parse_date_slash(r[1])
+                nom = parse_num(r[3])
+                ket = str(r[4]).upper() if len(r) > 4 else ""
+                is_tf = "TRANSFER" in ket
+                if d and nom > 0:
+                    if d < start_date:
+                        if is_tf:
+                            saldo_awal_bank += nom
+                        else:
+                            saldo_awal_cash += nom
+                    elif d.month == bulan and d.year == tahun:
+                        if is_tf:
+                            tf_masuk += nom
+                        else:
+                            cash_masuk += nom
+                        total_setoran_cabang += nom
+                        cb = str(r[2]).replace(" .", "").strip().upper()
+                        riwayat_setoran.insert(0, {
+                            "tanggal": d.strftime("%d/%m/%Y"),
+                            "cabang": cb or "TANPA CABANG",
+                            "nominal": nom,
+                            "jenis": "TRANSFER" if is_tf else "CASH"
+                        })
+        except Exception:
+            pass
+
+        # 2. SETOR_TUNAI_BANK
+        try:
+            rows_bank = ss.worksheet("SETOR_TUNAI_BANK").get_all_values()[1:]
+            for r in rows_bank:
+                if len(r) < 3:
+                    continue
+                d = parse_date_slash(r[1])
+                nom = parse_num(r[2])
+                if d and nom > 0:
+                    if d < start_date:
+                        saldo_awal_cash -= nom
+                        saldo_awal_bank += nom
+                    elif d.month == bulan and d.year == tahun:
+                        setor_bank += nom
+                        riwayat_bank.insert(0, {
+                            "tanggal": d.strftime("%d/%m/%Y"),
+                            "nominal": nom,
+                            "bank": r[3] if len(r) > 3 else "MANDIRI",
+                            "keterangan": r[4] if len(r) > 4 else "-"
+                        })
+        except Exception:
+            pass
+
+        # 3. PENGELUARAN
+        try:
+            rows_keluar = ss.worksheet("PENGELUARAN").get_all_values()[1:]
+            for r in rows_keluar:
+                if len(r) < 4:
+                    continue
+                d = parse_date_slash(r[1])
+                sumber = str(r[2]).upper()
+                nom = parse_num(r[3])
+                if d and nom > 0:
+                    is_cash = "CASH" in sumber
+                    if d < start_date:
+                        if is_cash:
+                            saldo_awal_cash -= nom
+                        else:
+                            saldo_awal_bank -= nom
+                    elif d.month == bulan and d.year == tahun:
+                        if is_cash:
+                            keluar_cash += nom
+                        else:
+                            keluar_bank += nom
+                        riwayat_keluar.insert(0, {
+                            "tanggal": d.strftime("%d/%m/%Y"),
+                            "sumber": sumber,
+                            "nominal": nom,
+                            "keterangan": r[5] if len(r) > 5 else "-"
+                        })
+        except Exception:
+            pass
+
+        # 4. SETORAN_PUSAT
+        try:
+            rows_pusat = ss.worksheet("SETORAN_PUSAT").get_all_values()[1:]
+            for r in rows_pusat:
+                if len(r) < 5:
+                    continue
+                d = parse_date_slash(r[1])
+                cb = str(r[2]).replace(" .", "").strip().upper()
+                est = parse_num(r[3])
+                real = parse_num(r[4])
+                if d:
+                    if d < start_date:
+                        if real > 0:
+                            saldo_awal_bank -= real
+                    elif d.month == bulan and d.year == tahun:
+                        tgl_fmt = d.strftime("%d/%m/%Y")
+                        if est > 0:
+                            tgl_estimasi_terakhir = tgl_fmt
+                        if real > 0:
+                            setor_pusat_tf += real
+                            riwayat_pusat.insert(0, {
+                                "tanggal": tgl_fmt,
+                                "cabang": cb,
+                                "estimasi": est,
+                                "setoran": real
+                            })
+                        elif est > 0 and cb in estimasi_kewajiban:
+                            estimasi_kewajiban[cb] += est
+                            rincian_estimasi_tanggal.append({
+                                "tanggal": tgl_fmt,
+                                "cabang": cb,
+                                "nominal": est
+                            })
+        except Exception:
+            pass
+
+        saldo_cash_akhir = saldo_awal_cash + cash_masuk - setor_bank - keluar_cash
+        saldo_bank_akhir = saldo_awal_bank + tf_masuk + setor_bank - keluar_bank - setor_pusat_tf
+
+        # --- MODUL OMSET MATRIKS (4 SUB-KOLOM) ---
+        def baca_matriks_omset(nama_sheet):
+            rekap_cb = {cab: {"tunai": 0.0, "tujuan": 0.0, "va": 0.0, "total": 0.0} for cab in DAFTAR_CABANG}
+            total_all = 0.0
+            riwayat = []
+            try:
+                ws = ss.worksheet(nama_sheet)
+                rows = ws.get_all_values()
+                if len(rows) >= 4:
+                    for r in rows[3:]:
+                        if not r:
+                            continue
+                        d = parse_date_matrix(r[0])
+                        if d and d.month == bulan and d.year == tahun:
+                            tgl_fmt = d.strftime("%d/%m/%Y")
+                            for cab, m in BRANCH_MAP.items():
+                                if len(r) > m["total"]:
+                                    t_val = parse_num(r[m["tunai"]])
+                                    tuj_val = parse_num(r[m["tujuan"]])
+                                    va_val = parse_num(r[m["va"]])
+                                    tot_val = parse_num(r[m["total"]])
+                                    if tot_val == 0:
+                                        tot_val = t_val + tuj_val + va_val
+                                    if tot_val > 0:
+                                        rekap_cb[cab]["tunai"] += t_val
+                                        rekap_cb[cab]["tujuan"] += tuj_val
+                                        rekap_cb[cab]["va"] += va_val
+                                        rekap_cb[cab]["total"] += tot_val
+                                        total_all += tot_val
+                                        riwayat.append({
+                                            "tanggal": tgl_fmt,
+                                            "cabang": cab,
+                                            "tunai": t_val,
+                                            "tujuan": tuj_val,
+                                            "va": va_val,
+                                            "jumlah": tot_val
+                                        })
+            except Exception:
+                pass
+            return total_all, rekap_cb, riwayat
+
+        tot_terima, rekap_terima, riw_terima = baca_matriks_omset("OMSET_TERIMA")
+        tot_kirim, rekap_kirim, riw_kirim = baca_matriks_omset("OMSET_KIRIM")
+
+        # --- MODUL KAS GUDANG ---
+        rekap_gudang_cab = {
+            cab: {
+                "msk": 0.0, "bbm": 0.0, "lb": 0.0, "tot_setor": 0.0,
+                "lokalan": 0.0, "tag_msk": 0.0, "tag_dist": 0.0,
+                "s_cash": 0.0, "s_tf": 0.0, "keluar_lain": 0.0,
+                "sisa_kas": 0.0, "selisih_tagihan": 0.0
+            } for cab in DAFTAR_CABANG
+        }
+        riwayat_gudang_harian = []
+        riwayat_keluar_gudang = []
+
+        # Baca PENGELUARAN_GUDANG (6 Cabang berjajar ke samping)
+        try:
+            rows_kg = ss.worksheet("PENGELUARAN_GUDANG").get_all_values()
+            if len(rows_kg) >= 3:
+                for r in rows_kg[2:]:
+                    for cab, m in PENGELUARAN_GUDANG_MAP.items():
+                        if len(r) > m["nom"]:
+                            d = parse_date_matrix(r[m["tgl"]])
+                            nom = parse_num(r[m["nom"]])
+                            if d and d.month == bulan and d.year == tahun and nom > 0:
+                                rekap_gudang_cab[cab]["keluar_lain"] += nom
+                                riwayat_keluar_gudang.insert(0, {
+                                    "tanggal": d.strftime("%d/%m/%Y"),
+                                    "cabang": cab,
+                                    "nominal": nom,
+                                    "kategori": r[m["rincian"]] if len(r) > m["rincian"] and r[m["rincian"]] else "Operasional",
+                                    "keterangan": r[m["ket"]] if len(r) > m["ket"] and r[m["ket"]] else "-"
+                                })
+        except Exception:
+            pass
+
+        # Baca KAS_Gudang
+        try:
+            ws_gdg = ss.worksheet("KAS_Gudang")
+            rows_gdg = ws_gdg.get_all_values()
+            if len(rows_gdg) >= 3:
+                for r in rows_gdg[2:]:
+                    if not r or not r[0]:
+                        continue
+                    if "TOTAL" in str(r[0]).upper() or "TAGIHAN" in str(r[0]).upper():
+                        continue
                     d = parse_date_matrix(r[0])
                     if d and d.month == bulan and d.year == tahun:
                         tgl_fmt = d.strftime("%d/%m/%Y")
-                        for cab, m in BRANCH_MAP.items():
-                            if len(r) > m["total"]:
-                                t_val = parse_num(r[m["tunai"]])
-                                tuj_val = parse_num(r[m["tujuan"]])
-                                va_val = parse_num(r[m["va"]])
-                                tot_val = parse_num(r[m["total"]])
-                                if tot_val == 0:
-                                    tot_val = t_val + tuj_val + va_val
-                                if tot_val > 0:
-                                    rekap_cb[cab]["tunai"] += t_val
-                                    rekap_cb[cab]["tujuan"] += tuj_val
-                                    rekap_cb[cab]["va"] += va_val
-                                    rekap_cb[cab]["total"] += tot_val
-                                    total_all += tot_val
-                                    riwayat.append({
+                        for cab, m in GUDANG_BRANCH_MAP.items():
+                            if len(r) > m["s_tf"]:
+                                v_msk = parse_num(r[m["msk"]])
+                                v_bbm = parse_num(r[m["bbm"]])
+                                v_lb  = parse_num(r[m["lb"]])
+                                v_tot = parse_num(r[m["tot_setor"]])
+                                if v_tot == 0 and (v_msk > 0 or v_bbm > 0 or v_lb > 0):
+                                    v_tot = v_msk - v_bbm + v_lb
+                                v_lok = parse_num(r[m["lokalan"]])
+                                v_tmsk = parse_num(r[m["tag_msk"]])
+                                v_tdst = parse_num(r[m["tag_dist"]])
+                                v_cash = parse_num(r[m["s_cash"]])
+                                v_tf   = parse_num(r[m["s_tf"]])
+
+                                if any([v_msk, v_bbm, v_lb, v_tot, v_lok, v_tmsk, v_tdst, v_cash, v_tf]):
+                                    rec = rekap_gudang_cab[cab]
+                                    rec["msk"] += v_msk
+                                    rec["bbm"] += v_bbm
+                                    rec["lb"] += v_lb
+                                    rec["tot_setor"] += v_tot
+                                    rec["lokalan"] += v_lok
+                                    rec["tag_msk"] += v_tmsk
+                                    rec["tag_dist"] += v_tdst
+                                    rec["s_cash"] += v_cash
+                                    rec["s_tf"] += v_tf
+
+                                    riwayat_gudang_harian.append({
                                         "tanggal": tgl_fmt,
                                         "cabang": cab,
-                                        "tunai": t_val,
-                                        "tujuan": tuj_val,
-                                        "va": va_val,
-                                        "jumlah": tot_val
+                                        "msk": v_msk,
+                                        "bbm": v_bbm,
+                                        "lb": v_lb,
+                                        "tot_setor": v_tot,
+                                        "lokalan": v_lok,
+                                        "tag_msk": v_tmsk,
+                                        "tag_dist": v_tdst,
+                                        "s_cash": v_cash,
+                                        "s_tf": v_tf
                                     })
         except Exception:
             pass
-        return total_all, rekap_cb, riwayat
 
-    tot_terima, rekap_terima, riw_terima = baca_matriks_omset("OMSET_TERIMA")
-    tot_kirim, rekap_kirim, riw_kirim = baca_matriks_omset("OMSET_KIRIM")
-
-    # --- MODUL KAS GUDANG ---
-    rekap_gudang_cab = {
-        cab: {
-            "msk": 0.0, "bbm": 0.0, "lb": 0.0, "tot_setor": 0.0,
-            "lokalan": 0.0, "tag_msk": 0.0, "tag_dist": 0.0,
-            "s_cash": 0.0, "s_tf": 0.0, "keluar_lain": 0.0,
-            "sisa_kas": 0.0, "selisih_tagihan": 0.0
-        } for cab in DAFTAR_CABANG
-    }
-    riwayat_gudang_harian = []
-    riwayat_keluar_gudang = []
-
-    # Baca PENGELUARAN_GUDANG (6 Cabang berjajar ke samping)
-    try:
-        rows_kg = ss.worksheet("PENGELUARAN_GUDANG").get_all_values()
-        if len(rows_kg) >= 3:
-            for r in rows_kg[2:]:
-                for cab, m in PENGELUARAN_GUDANG_MAP.items():
-                    if len(r) > m["nom"]:
-                        d = parse_date_matrix(r[m["tgl"]])
-                        nom = parse_num(r[m["nom"]])
-                        if d and d.month == bulan and d.year == tahun and nom > 0:
-                            rekap_gudang_cab[cab]["keluar_lain"] += nom
-                            riwayat_keluar_gudang.insert(0, {
-                                "tanggal": d.strftime("%d/%m/%Y"),
-                                "cabang": cab,
-                                "nominal": nom,
-                                "kategori": r[m["rincian"]] if len(r) > m["rincian"] and r[m["rincian"]] else "Operasional",
-                                "keterangan": r[m["ket"]] if len(r) > m["ket"] and r[m["ket"]] else "-"
-                            })
-    except Exception:
-        pass
-
-    # Baca KAS_Gudang
-    try:
-        ws_gdg = ss.worksheet("KAS_Gudang")
-        rows_gdg = ws_gdg.get_all_values()
-        if len(rows_gdg) >= 3:
-            for r in rows_gdg[2:]:
-                if not r or not r[0]: continue
-                # Lewati baris TOTAL jika ada
-                if "TOTAL" in str(r[0]).upper() or "TAGIHAN" in str(r[0]).upper():
+        # Baca CONTROL_GUDANG (Saldo Awal, Aktual Cash, & Kasbon per Cabang)
+        ctrl_gudang = {
+            cab: {"saldo_awal": 0.0, "aktual_cash": 0.0, "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0}
+            for cab in DAFTAR_CABANG
+        }
+        try:
+            rows_ctrl = ss.worksheet("CONTROL_GUDANG").get_all_values()[1:]
+            for r in rows_ctrl:
+                if len(r) < 2:
                     continue
-                d = parse_date_matrix(r[0])
-                if d and d.month == bulan and d.year == tahun:
-                    tgl_fmt = d.strftime("%d/%m/%Y")
-                    for cab, m in GUDANG_BRANCH_MAP.items():
-                        if len(r) > m["s_tf"]:
-                            v_msk = parse_num(r[m["msk"]])
-                            v_bbm = parse_num(r[m["bbm"]])
-                            v_lb  = parse_num(r[m["lb"]])
-                            v_tot = parse_num(r[m["tot_setor"]])
-                            if v_tot == 0 and (v_msk > 0 or v_bbm > 0 or v_lb > 0):
-                                v_tot = v_msk - v_bbm + v_lb
-                            v_lok = parse_num(r[m["lokalan"]])
-                            v_tmsk = parse_num(r[m["tag_msk"]])
-                            v_tdst = parse_num(r[m["tag_dist"]])
-                            v_cash = parse_num(r[m["s_cash"]])
-                            v_tf   = parse_num(r[m["s_tf"]])
+                cb = str(r[0]).replace(" .", "").strip().upper()
+                if cb in ctrl_gudang:
+                    ctrl_gudang[cb]["saldo_awal"] = parse_num(r[1]) if len(r) > 1 else 0.0
+                    ctrl_gudang[cb]["aktual_cash"] = parse_num(r[2]) if len(r) > 2 else 0.0
+                    ctrl_gudang[cb]["kasbon_lama"] = parse_num(r[3]) if len(r) > 3 else 0.0
+                    ctrl_gudang[cb]["kasbon_baru"] = parse_num(r[4]) if len(r) > 4 else 0.0
+                    ctrl_gudang[cb]["cicilan_masuk"] = parse_num(r[5]) if len(r) > 5 else 0.0
+        except Exception:
+            pass
 
-                            if any([v_msk, v_bbm, v_lb, v_tot, v_lok, v_tmsk, v_tdst, v_cash, v_tf]):
-                                rec = rekap_gudang_cab[cab]
-                                rec["msk"] += v_msk
-                                rec["bbm"] += v_bbm
-                                rec["lb"] += v_lb
-                                rec["tot_setor"] += v_tot
-                                rec["lokalan"] += v_lok
-                                rec["tag_msk"] += v_tmsk
-                                rec["tag_dist"] += v_tdst
-                                rec["s_cash"] += v_cash
-                                rec["s_tf"] += v_tf
+        # Hitung Rekap Kas Gudang Sesuai Aturan Purwokerto vs Cabang Lain
+        for cab, rec in rekap_gudang_cab.items():
+            c_data = ctrl_gudang[cab]
+            rec["saldo_awal"] = c_data["saldo_awal"]
+            rec["aktual_cash"] = c_data["aktual_cash"]
+            rec["kasbon_lama"] = c_data["kasbon_lama"]
+            rec["kasbon_baru"] = c_data["kasbon_baru"]
+            rec["cicilan_masuk"] = c_data["cicilan_masuk"]
+            rec["sisa_kasbon"] = c_data["kasbon_lama"] + c_data["kasbon_baru"] - c_data["cicilan_masuk"]
 
-                                riwayat_gudang_harian.append({
-                                    "tanggal": tgl_fmt,
-                                    "cabang": cab,
-                                    "msk": v_msk,
-                                    "bbm": v_bbm,
-                                    "lb": v_lb,
-                                    "tot_setor": v_tot,
-                                    "lokalan": v_lok,
-                                    "tag_msk": v_tmsk,
-                                    "tag_dist": v_tdst,
-                                    "s_cash": v_cash,
-                                    "s_tf": v_tf
-                                })
-    except Exception:
-        pass
+            tot_pemasukan = rec["msk"] + rec["lb"] + rec["lokalan"] + rec["tag_msk"] + rec["cicilan_masuk"]
+            rec["total_pemasukan"] = tot_pemasukan
 
-    # Baca CONTROL_GUDANG (Saldo Awal, Aktual Cash, & Kasbon per Cabang)
-    ctrl_gudang = {
-        cab: {"saldo_awal": 0.0, "aktual_cash": 0.0, "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0}
-        for cab in DAFTAR_CABANG
-    }
-    try:
-        rows_ctrl = ss.worksheet("CONTROL_GUDANG").get_all_values()[1:]
-        for r in rows_ctrl:
-            if len(r) < 2: continue
-            cb = str(r[0]).replace(" .", "").strip().upper()
-            if cb in ctrl_gudang:
-                ctrl_gudang[cb]["saldo_awal"] = parse_num(r[1]) if len(r) > 1 else 0.0
-                ctrl_gudang[cb]["aktual_cash"] = parse_num(r[2]) if len(r) > 2 else 0.0
-                ctrl_gudang[cb]["kasbon_lama"] = parse_num(r[3]) if len(r) > 3 else 0.0
-                ctrl_gudang[cb]["kasbon_baru"] = parse_num(r[4]) if len(r) > 4 else 0.0
-                ctrl_gudang[cb]["cicilan_masuk"] = parse_num(r[5]) if len(r) > 5 else 0.0
-    except Exception:
-        pass
+            if cab == "PURWOKERTO":
+                tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["kasbon_baru"]
+            else:
+                tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["s_tf"] + rec["kasbon_baru"]
 
-    # Hitung Rekap Kas Gudang Sesuai Aturan Purwokerto vs Cabang Lain
-    for cab, rec in rekap_gudang_cab.items():
-        c_data = ctrl_gudang[cab]
-        rec["saldo_awal"] = c_data["saldo_awal"]
-        rec["aktual_cash"] = c_data["aktual_cash"]
-        rec["kasbon_lama"] = c_data["kasbon_lama"]
-        rec["kasbon_baru"] = c_data["kasbon_baru"]
-        rec["cicilan_masuk"] = c_data["cicilan_masuk"]
-        rec["sisa_kasbon"] = c_data["kasbon_lama"] + c_data["kasbon_baru"] - c_data["cicilan_masuk"]
+            rec["total_pengeluaran"] = tot_pengeluaran
+            rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
+            rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
+            rec["selisih_tagihan"] = rec["tag_dist"] - rec["tag_msk"]
 
-        # Total Pemasukan = Setoran Masuk + LB + Lokalan Tunai + Tagihan Masuk + Cicilan Kasbon
-        tot_pemasukan = rec["msk"] + rec["lb"] + rec["lokalan"] + rec["tag_msk"] + rec["cicilan_masuk"]
-        rec["total_pemasukan"] = tot_pemasukan
-
-        # Total Pengeluaran:
-        # Purwokerto: BBM + Lain-lain + Setor Cash + Kasbon Baru (Setor TF dicatat di Catatan)
-        # Cabang Lain: BBM + Lain-lain + Setor Cash + Setor TF + Kasbon Baru
-        if cab == "PURWOKERTO":
-            tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["kasbon_baru"]
-        else:
-            tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["s_tf"] + rec["kasbon_baru"]
-
-        rec["total_pengeluaran"] = tot_pengeluaran
-        rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
-        rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
-        rec["selisih_tagihan"] = rec["tag_dist"] - rec["tag_msk"]
-
-    return JSONResponse({
-        "kas": {
-            "saldoAwal": {
-                "cash": saldo_awal_cash,
-                "rekening": saldo_awal_bank,
-                "total": saldo_awal_cash + saldo_awal_bank
+        return JSONResponse({
+            "kas": {
+                "saldoAwal": {
+                    "cash": saldo_awal_cash,
+                    "rekening": saldo_awal_bank,
+                    "total": saldo_awal_cash + saldo_awal_bank
+                },
+                "saldoAkhir": {
+                    "cashGudang": saldo_cash_akhir,
+                    "rekeningBank": saldo_bank_akhir,
+                    "totalSaldo": saldo_cash_akhir + saldo_bank_akhir
+                },
+                "rekapMutasi": {
+                    "totalSetoranCabang": total_setoran_cabang,
+                    "totalSetoranPusat": setor_pusat_tf,
+                    "totalPengeluaran": keluar_cash + keluar_bank
+                },
+                "estimasiKewajiban": estimasi_kewajiban,
+                "tanggalEstimasiTerakhir": tgl_estimasi_terakhir,
+                "rincianEstimasiTanggal": rincian_estimasi_tanggal,
+                "riwayatSetoran": riwayat_setoran,
+                "riwayatSetorBank": riwayat_bank,
+                "riwayatPusat": riwayat_pusat,
+                "riwayatPengeluaran": riwayat_keluar
             },
-            "saldoAkhir": {
-                "cashGudang": saldo_cash_akhir,
-                "rekeningBank": saldo_bank_akhir,
-                "totalSaldo": saldo_cash_akhir + saldo_bank_akhir
+            "omset": {
+                "totalTerima": tot_terima,
+                "totalKirim": tot_kirim,
+                "totalGabungan": tot_terima + tot_kirim,
+                "terimaPerCabang": rekap_terima,
+                "kirimPerCabang": rekap_kirim,
+                "riwayatTerima": riw_terima,
+                "riwayatKirim": riw_kirim
             },
-            "rekapMutasi": {
-                "totalSetoranCabang": total_setoran_cabang,
-                "totalSetoranPusat": setor_pusat_tf,
-                "totalPengeluaran": keluar_cash + keluar_bank
+            "gudang": {
+                "rekapPerCabang": rekap_gudang_cab,
+                "riwayatHarian": riwayat_gudang_harian,
+                "riwayatPengeluaran": riwayat_keluar_gudang
             },
-            "estimasiKewajiban": estimasi_kewajiban,
-            "tanggalEstimasiTerakhir": tgl_estimasi_terakhir,
-            "rincianEstimasiTanggal": rincian_estimasi_tanggal,
-            "riwayatSetoran": riwayat_setoran,
-            "riwayatSetorBank": riwayat_bank,
-            "riwayatPusat": riwayat_pusat,
-            "riwayatPengeluaran": riwayat_keluar
-        },
-        "omset": {
-            "totalTerima": tot_terima,
-            "totalKirim": tot_kirim,
-            "totalGabungan": tot_terima + tot_kirim,
-            "terimaPerCabang": rekap_terima,
-            "kirimPerCabang": rekap_kirim,
-            "riwayatTerima": riw_terima,
-            "riwayatKirim": riw_kirim
-        },
-        "gudang": {
-            "rekapPerCabang": rekap_gudang_cab,
-            "riwayatHarian": riwayat_gudang_harian,
-            "riwayatPengeluaran": riwayat_keluar_gudang
-        },
-    })
+        })
+    except Exception as e:
+        return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/setor-bank")
 async def post_setor_bank(data: SetorBankInput):
@@ -586,11 +598,11 @@ async def tambah_pengeluaran_gudang(request: Request):
         if cabang not in PENGELUARAN_GUDANG_MAP:
             return JSONResponse({"success": False, "message": "Cabang tidak valid"}, status_code=400)
 
-        col_idx = PENGELUARAN_GUDANG_MAP[cabang]["tgl"] + 1  # 1-based column index
+        col_idx = PENGELUARAN_GUDANG_MAP[cabang]["tgl"] + 1
         col_values = ws.col_values(col_idx)
         next_row = max(3, len(col_values) + 1)
 
-        tgl_str = format_date_indo(body.get("tanggal"))
+        tgl_str = datetime.strptime(body.get("tanggal"), "%Y-%m-%d").strftime("%d/%m/%Y")
         rincian = str(body.get("kategori", "Operasional Gudang"))
         nominal = float(body.get("nominal", 0))
         ket = str(body.get("keterangan", ""))
@@ -601,4 +613,4 @@ async def tambah_pengeluaran_gudang(request: Request):
 
         return JSONResponse({"success": True, "message": f"Pengeluaran gudang {cabang} berhasil dicatat!"})
     except Exception as e:
-        return JSONResponse({"success": False, "message": f"Gagal menyimpan: {str(e)}"}, status_code=500)        
+        return JSONResponse({"success": False, "message": f"Gagal menyimpan: {str(e)}"}, status_code=500)
