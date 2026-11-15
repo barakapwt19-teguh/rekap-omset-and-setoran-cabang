@@ -453,11 +453,50 @@ async def get_dashboard(bulan: int, tahun: int):
     except Exception:
         pass
 
-    # Hitung Perkiraan Uang Masih di Cabang & Selisih Tagihan per Cabang
+    # Baca CONTROL_GUDANG (Saldo Awal, Aktual Cash, & Kasbon per Cabang)
+    ctrl_gudang = {
+        cab: {"saldo_awal": 0.0, "aktual_cash": 0.0, "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0}
+        for cab in DAFTAR_CABANG
+    }
+    try:
+        rows_ctrl = ss.worksheet("CONTROL_GUDANG").get_all_values()[1:]
+        for r in rows_ctrl:
+            if len(r) < 2: continue
+            cb = str(r[0]).replace(" .", "").strip().upper()
+            if cb in ctrl_gudang:
+                ctrl_gudang[cb]["saldo_awal"] = parse_num(r[1]) if len(r) > 1 else 0.0
+                ctrl_gudang[cb]["aktual_cash"] = parse_num(r[2]) if len(r) > 2 else 0.0
+                ctrl_gudang[cb]["kasbon_lama"] = parse_num(r[3]) if len(r) > 3 else 0.0
+                ctrl_gudang[cb]["kasbon_baru"] = parse_num(r[4]) if len(r) > 4 else 0.0
+                ctrl_gudang[cb]["cicilan_masuk"] = parse_num(r[5]) if len(r) > 5 else 0.0
+    except Exception:
+        pass
+
+    # Hitung Rekap Kas Gudang Sesuai Aturan Purwokerto vs Cabang Lain
     for cab, rec in rekap_gudang_cab.items():
-        uang_masuk = rec["tot_setor"] + rec["lokalan"] + rec["tag_msk"]
-        sudah_disetor = rec["s_cash"] + rec["s_tf"]
-        rec["sisa_kas"] = uang_masuk - sudah_disetor - rec["keluar_lain"]
+        c_data = ctrl_gudang[cab]
+        rec["saldo_awal"] = c_data["saldo_awal"]
+        rec["aktual_cash"] = c_data["aktual_cash"]
+        rec["kasbon_lama"] = c_data["kasbon_lama"]
+        rec["kasbon_baru"] = c_data["kasbon_baru"]
+        rec["cicilan_masuk"] = c_data["cicilan_masuk"]
+        rec["sisa_kasbon"] = c_data["kasbon_lama"] + c_data["kasbon_baru"] - c_data["cicilan_masuk"]
+
+        # Total Pemasukan = Setoran Masuk + LB + Lokalan Tunai + Tagihan Masuk + Cicilan Kasbon
+        tot_pemasukan = rec["msk"] + rec["lb"] + rec["lokalan"] + rec["tag_msk"] + rec["cicilan_masuk"]
+        rec["total_pemasukan"] = tot_pemasukan
+
+        # Total Pengeluaran:
+        # Purwokerto: BBM + Lain-lain + Setor Cash + Kasbon Baru (Setor TF dicatat di Catatan)
+        # Cabang Lain: BBM + Lain-lain + Setor Cash + Setor TF + Kasbon Baru
+        if cab == "PURWOKERTO":
+            tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["kasbon_baru"]
+        else:
+            tot_pengeluaran = rec["bbm"] + rec["keluar_lain"] + rec["s_cash"] + rec["s_tf"] + rec["kasbon_baru"]
+
+        rec["total_pengeluaran"] = tot_pengeluaran
+        rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
+        rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
         rec["selisih_tagihan"] = rec["tag_dist"] - rec["tag_msk"]
 
     return JSONResponse({

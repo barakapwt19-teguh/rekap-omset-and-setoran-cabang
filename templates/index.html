@@ -342,11 +342,11 @@
       <!-- ========================================================= -->
       <div class="tab-pane fade" id="modul-gudang" role="tabpanel">
 
-        <!-- KARTU UTAMA: PERKIRAAN SISA UANG DI CABANG (BELUM DISETOR) -->
+        <!-- KARTU UTAMA: POSISI SALDO KAS GUDANG -->
         <div class="saldo-unified-card p-3 p-md-4 mb-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <span class="text-white-50 fw-bold small" id="lblHeaderGudang">
-              <i class="bi bi-shop me-2"></i>CASHFLOW KAS GUDANG (SEMUA CABANG)
+              <i class="bi bi-shop me-2"></i>REKAP KAS GUDANG (SEMUA CABANG)
             </span>
             <span class="badge fw-bold px-2 py-1" style="background-color: #fde047; color: #0a192f; font-size: 0.72rem;">
               Audit Cabang &amp; Tagihan
@@ -354,109 +354,116 @@
           </div>
 
           <div class="row g-2 g-md-3">
-            <!-- Perkiraan Sisa Uang Masih di Cabang -->
+            <!-- Saldo Kas Akhir -->
             <div class="col-12 col-md-4">
               <div class="saldo-sub-box saldo-sub-box-highlight" style="cursor: pointer;" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="text-white-50 fw-bold small">PERKIRAAN SISA UANG CABANG</span>
-                  <span class="tap-hint-light"><i class="bi bi-table"></i> Rincian</span>
+                  <span class="text-white-50 fw-bold small">SALDO KAS AKHIR GUDANG</span>
+                  <span class="tap-hint-light"><i class="bi bi-table"></i> Rekap</span>
                 </div>
                 <div class="metric-value text-white" id="gSisaUangCabang">Rp 0</div>
                 <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small">
-                  <span class="text-white-50">Masuk - Setor - Keluar</span>
-                  <span class="fw-bold text-warning">Belum Disetor</span>
+                  <span class="text-white-50">Saldo Kas Awal:</span>
+                  <span class="fw-bold tabular-nums" id="gSaldoAwal">Rp 0</span>
                 </div>
               </div>
             </div>
 
-            <!-- Total Uang Masuk Gudang (Setoran Msk - BBM + LB + Lokalan + Tagihan Msk) -->
+            <!-- Total Pemasukan -->
             <div class="col-6 col-md-4">
               <div class="saldo-sub-box" style="cursor: pointer;" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="text-white-50 fw-bold small">TOTAL UANG MASUK</span>
+                  <span class="text-white-50 fw-bold small">TOTAL PEMASUKAN</span>
                   <span class="tap-hint-light"><i class="bi bi-table"></i> Harian</span>
                 </div>
                 <div class="metric-value text-white" id="gTotalUangMasuk">Rp 0</div>
                 <div class="mt-2 pt-2 border-top border-white border-opacity-20 d-flex justify-content-between small">
-                  <span class="text-white-50">Net Setoran + Lokalan + Tagihan</span>
+                  <span class="text-white-50">Setoran + LB + Lokalan + Tagihan</span>
                 </div>
               </div>
             </div>
 
-            <!-- Pengeluaran Operasional Gudang (Non-BBM) -->
+            <!-- Total Pengeluaran -->
             <div class="col-6 col-md-4">
               <div class="saldo-sub-box" style="cursor: pointer;" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangPengeluaran')">
                 <div class="d-flex justify-content-between align-items-center mb-1">
-                  <span class="text-white-50 fw-bold small">PENGELUARAN LAIN-LAIN</span>
+                  <span class="text-white-50 fw-bold small">TOTAL PENGELUARAN</span>
                   <span class="tap-hint-light"><i class="bi bi-table"></i> Rincian</span>
                 </div>
-                <div class="metric-value text-white" id="gTotalKeluarLain">Rp 0</div>
+                <div class="metric-value text-white" id="gTotalPengeluaran">Rp 0</div>
                 <div class="mt-2 pt-2 border-top border-white border-opacity-20 d-flex justify-content-between align-items-center small">
-                  <span class="text-white-50">Non-BBM</span>
-                  <button type="button" class="btn btn-xs btn-light text-primary fw-bold py-0 px-2 rounded-2" style="font-size: 0.72rem;" onclick="event.stopPropagation()" data-bs-toggle="modal" data-bs-target="#modalPengeluaranGudang">+ Input</button>
+                  <span class="text-white-50">BBM + Lain-lain + Setor</span>
+                  <button type="button" class="btn btn-xs btn-light text-primary fw-bold py-0 px-2 rounded-2" style="font-size: 0.72rem;" onclick="event.stopPropagation()" data-bs-toggle="modal" data-bs-target="#modalPengeluaranGudang">+ Lain-lain</button>
                 </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- BADGE 2: SETOR CASH VS SETOR TRANSFER (UNTUK AUDIT KE KAS PENAMPUNG) -->
+        <!-- LEMBAR REKAP KAS GUDANG (FORMAT PEMBUKUAN CABANG) -->
         <div class="modern-card p-3 p-md-4 mb-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <span class="fw-bold text-dark small"><i class="bi bi-arrow-left-right text-primary me-2"></i>REALISASI SETORAN DARI GUDANG (CASH VS TRANSFER)</span>
-            <span class="text-muted small">Klik kotak untuk lihat tabel harian</span>
+            <span class="fw-bold text-dark small" id="titleLembarRekapGudang"><i class="bi bi-file-earmark-spreadsheet-fill text-primary me-2"></i>RINCIAN REKAP KAS GUDANG</span>
+            <div class="d-flex gap-2">
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')"><i class="bi bi-calendar3 me-1"></i>Tabel Harian</button>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')"><i class="bi bi-building me-1"></i>Bandingkan 6 Cabang</button>
+            </div>
           </div>
-          <div class="row g-2 g-md-3">
-            <div class="col-12 col-md-6">
-              <div class="metric-click-box" id="box-drawerGudangHarian" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <small class="text-muted fw-bold">SETOR CASH (KE PENAMPUNG)</small>
-                  <span class="tap-hint"><i class="bi bi-table"></i> Matriks Harian</span>
-                </div>
-                <div class="fs-4 fw-extrabold text-success tabular-nums" id="gSetorCash">Rp 0</div>
+
+          <div class="row g-3">
+            <!-- Kolom Kiri: Pemasukan & Pengeluaran -->
+            <div class="col-12 col-lg-6">
+              <div class="p-3 rounded-4 border border-primary-subtle bg-light bg-opacity-50 h-100">
+                <div class="fw-bold text-primary small mb-2">PEMASUKAN GUDANG</div>
+                <div class="d-flex justify-content-between small py-1"><span>Setoran Masuk</span><span class="fw-semibold tabular-nums" id="rGdgMsk">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1"><span>LB (Penerusan)</span><span class="fw-semibold tabular-nums" id="rGdgLb">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1"><span>Lokalan Tunai - Cash</span><span class="fw-semibold tabular-nums" id="rGdgLokalan">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1"><span>Tagihan Masuk</span><span class="fw-semibold tabular-nums" id="rGdgTagMsk">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1 border-bottom pb-2"><span>Cicilan Kasbon Masuk</span><span class="fw-semibold tabular-nums" id="rGdgCicilan">Rp 0</span></div>
+                <div class="d-flex justify-content-between fw-bold text-success small pt-2 mb-3"><span>TOTAL PEMASUKAN</span><span class="tabular-nums" id="rGdgTotMasuk">Rp 0</span></div>
+
+                <div class="fw-bold text-danger small mb-2">PENGELUARAN GUDANG</div>
+                <div class="d-flex justify-content-between small py-1"><span>BBM</span><span class="fw-semibold tabular-nums" id="rGdgBbm">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1"><span>Lain-Lain (Non-BBM)</span><span class="fw-semibold tabular-nums" id="rGdgLain">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1"><span id="lblGdgSetorKeluar">Setor Cash (+ TF Cabang)</span><span class="fw-semibold tabular-nums" id="rGdgSetor">Rp 0</span></div>
+                <div class="d-flex justify-content-between small py-1 border-bottom pb-2"><span>Kasbon Bulan Ini</span><span class="fw-semibold tabular-nums" id="rGdgKasbonBaru">Rp 0</span></div>
+                <div class="d-flex justify-content-between fw-bold text-danger small pt-2"><span>TOTAL PENGELUARAN</span><span class="tabular-nums" id="rGdgTotKeluar">Rp 0</span></div>
               </div>
             </div>
-            <div class="col-12 col-md-6">
-              <div class="metric-click-box" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')">
-                <div class="d-flex justify-content-between align-items-center mb-1">
-                  <small class="text-muted fw-bold">SETOR TRANSFER (PENAMPUNG &amp; PEMILIK)</small>
-                  <span class="tap-hint"><i class="bi bi-table"></i> Matriks Harian</span>
+
+            <!-- Kolom Kanan: Saldo Akhir, Aktual Cash, Catatan Tagihan & Kasbon -->
+            <div class="col-12 col-lg-6">
+              <div class="p-3 rounded-4 border border-primary-subtle bg-white h-100 d-flex flex-column justify-content-between">
+                <div>
+                  <div class="fw-bold text-dark small mb-2">REKONSILIASI SALDO &amp; OPNAME FISIK</div>
+                  <div class="d-flex justify-content-between small py-1"><span>Saldo Kas Awal</span><span class="fw-bold tabular-nums" id="rGdgSaldoAwal2">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1"><span>Saldo Kas Akhir (Sistem)</span><span class="fw-extrabold text-primary tabular-nums" id="rGdgSaldoAkhir2">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1"><span>Aktual Cash (Opname Fisik)</span><span class="fw-semibold tabular-nums" id="rGdgAktualCash">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Selisih (Aktual - Sistem)</span><span class="fw-bold tabular-nums" id="rGdgSelisih">Rp 0</span></div>
+
+                  <div class="fw-bold text-primary small mb-2">CATATAN TAGIHAN &amp; TRANSFER MASUK</div>
+                  <div class="d-flex justify-content-between small py-1"><span>Total Tagihan Dist+Retur</span><span class="fw-semibold text-danger tabular-nums" id="gTagihanDist">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1"><span>Tagihan Masuk</span><span class="fw-semibold text-success tabular-nums" id="gTagihanMasuk">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1"><span>Sisa Tagihan Belum Bayar</span><span class="fw-bold tabular-nums" id="gSelisihTagihan">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Transfer Masuk (Setor TF)</span><span class="fw-bold text-primary tabular-nums" id="gSetorTransfer">Rp 0</span></div>
                 </div>
-                <div class="fs-4 fw-extrabold text-primary tabular-nums" id="gSetorTransfer">Rp 0</div>
+
+                <div class="p-2 rounded-3 bg-light">
+                  <div class="d-flex justify-content-between small">
+                    <span class="text-muted fw-semibold">Kasbon Lama: <strong class="text-dark" id="rGdgKasbonLama">Rp 0</strong></span>
+                    <span class="text-muted fw-semibold">Sisa Terhutang: <strong class="text-danger" id="rGdgSisaKasbon">Rp 0</strong></span>
+                  </div>
+                </div>
               </div>
             </div>
           </div>
         </div>
 
-        <!-- BADGE 3: AUDIT TAGIHAN (TAGIHAN DIST+RETUR VS TAGIHAN MASUK) -->
-        <div class="modern-card p-3 p-md-4 mb-3">
-          <div class="metric-click-box" id="box-drawerGudangRekapCabang" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
-              <span class="fw-bold text-dark small"><i class="bi bi-clipboard-check-fill text-primary me-2"></i>AUDIT TAGIHAN &amp; REKAP PER CABANG</span>
-              <span class="tap-hint"><i class="bi bi-table"></i> Klik untuk tabel rekap 6 cabang</span>
-            </div>
-            <div class="row g-2 text-center text-md-start">
-              <div class="col-4">
-                <small class="text-muted d-block fw-semibold">Tagihan Dist+Retur</small>
-                <span class="fw-extrabold text-danger tabular-nums" id="gTagihanDist">Rp 0</span>
-              </div>
-              <div class="col-4">
-                <small class="text-muted d-block fw-semibold">Tagihan Masuk</small>
-                <span class="fw-extrabold text-success tabular-nums" id="gTagihanMasuk">Rp 0</span>
-              </div>
-              <div class="col-4">
-                <small class="text-muted d-block fw-semibold">Selisih Masih Tagihan</small>
-                <span class="fw-extrabold text-dark tabular-nums" id="gSelisihTagihan">Rp 0</span>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 1 GUDANG: REKAPITULASI & SISA UANG PER CABANG -->
+        <!-- DRAWER 1 GUDANG: PERBANDINGAN 6 CABANG -->
         <div class="collapse mb-3" id="drawerGudangRekapCabang">
           <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <h6 class="fw-bold text-dark mb-0"><i class="bi bi-building-check text-primary me-2"></i>Rekapitulasi Kas Gudang &amp; Audit Per Cabang</h6>
+              <h6 class="fw-bold text-dark mb-0"><i class="bi bi-building-check text-primary me-2"></i>Rekapitulasi Kas Gudang Per Cabang</h6>
               <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
             <div class="table-modern-wrapper">
@@ -464,17 +471,14 @@
                 <thead>
                   <tr>
                     <th>Cabang</th>
-                    <th class="text-end">Setoran Msk</th>
+                    <th class="text-end">Saldo Awal</th>
+                    <th class="text-end">Pemasukan</th>
                     <th class="text-end">BBM</th>
-                    <th class="text-end">LB (+)</th>
-                    <th class="text-end">Total Setoran</th>
-                    <th class="text-end">Lokalan</th>
-                    <th class="text-end">Tagihan Msk</th>
-                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
+                    <th class="text-end">Lain-Lain</th>
                     <th class="text-end">Setor Cash</th>
                     <th class="text-end">Setor TF</th>
-                    <th class="text-end">Keluar Lain</th>
-                    <th class="text-end col-total-cabang">Sisa Uang Cabang</th>
+                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
+                    <th class="text-end col-total-cabang">Saldo Kas Akhir</th>
                   </tr>
                 </thead>
                 <tbody id="tblGudangRekapCabangBody" class="tabular-nums"></tbody>
@@ -513,7 +517,7 @@
           </div>
         </div>
 
-        <!-- DRAWER 3 GUDANG: PENGELUARAN OPERASIONAL GUDANG (NON-BBM) -->
+        <!-- DRAWER 3 GUDANG: PENGELUARAN LAIN-LAIN GUDANG (NON-BBM) -->
         <div class="collapse mb-4" id="drawerGudangPengeluaran">
           <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -528,7 +532,7 @@
             </div>
             <div class="table-modern-wrapper" style="max-height: 380px;">
               <table class="table table-modern align-middle">
-                <thead><tr><th>Tanggal</th><th>Cabang</th><th>Kategori</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
+                <thead><tr><th>Tanggal</th><th>Cabang</th><th>Rincian</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
                 <tbody id="tblGudangPengeluaranBody" class="tabular-nums"></tbody>
               </table>
             </div>
@@ -871,53 +875,93 @@
           ? ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN']
           : [selectedCabang];
 
-        let sumSisa = 0, sumMasuk = 0, sumKeluarLain = 0, sumCash = 0, sumTf = 0, sumTagDist = 0, sumTagMsk = 0;
+        let sumAwal = 0, sumSisa = 0, sumMasuk = 0, sumKeluar = 0;
+        let sumMsk = 0, sumLb = 0, sumLok = 0, sumTagMsk = 0, sumCicilan = 0;
+        let sumBbm = 0, sumLain = 0, sumSetorKeluar = 0, sumKasbonBaru = 0;
+        let sumAktual = 0, sumSelisih = 0, sumTagDist = 0, sumTf = 0, sumKasbonLama = 0, sumSisaKasbon = 0;
 
         listCabGdg.forEach(cab => {
           const r = gdg.rekapPerCabang[cab] || {};
+          sumAwal += Number(r.saldo_awal) || 0;
           sumSisa += Number(r.sisa_kas) || 0;
-          sumMasuk += (Number(r.tot_setor) || 0) + (Number(r.lokalan) || 0) + (Number(r.tag_msk) || 0);
-          sumKeluarLain += Number(r.keluar_lain) || 0;
-          sumCash += Number(r.s_cash) || 0;
-          sumTf += Number(r.s_tf) || 0;
-          sumTagDist += Number(r.tag_dist) || 0;
+          sumMasuk += Number(r.total_pemasukan) || 0;
+          sumKeluar += Number(r.total_pengeluaran) || 0;
+
+          sumMsk += Number(r.msk) || 0;
+          sumLb += Number(r.lb) || 0;
+          sumLok += Number(r.lokalan) || 0;
           sumTagMsk += Number(r.tag_msk) || 0;
+          sumCicilan += Number(r.cicilan_masuk) || 0;
+
+          sumBbm += Number(r.bbm) || 0;
+          sumLain += Number(r.keluar_lain) || 0;
+          sumSetorKeluar += (cab === 'PURWOKERTO')
+            ? (Number(r.s_cash) || 0)
+            : ((Number(r.s_cash) || 0) + (Number(r.s_tf) || 0));
+          sumKasbonBaru += Number(r.kasbon_baru) || 0;
+
+          sumAktual += Number(r.aktual_cash) || 0;
+          sumSelisih += Number(r.selisih_aktual) || 0;
+          sumTagDist += Number(r.tag_dist) || 0;
+          sumTf += Number(r.s_tf) || 0;
+          sumKasbonLama += Number(r.kasbon_lama) || 0;
+          sumSisaKasbon += Number(r.sisa_kasbon) || 0;
         });
 
-        document.getElementById('lblHeaderGudang').innerHTML = `<i class="bi bi-shop me-2"></i>CASHFLOW KAS GUDANG (${labelFilter})`;
+        document.getElementById('lblHeaderGudang').innerHTML = `<i class="bi bi-shop me-2"></i>REKAP KAS GUDANG (${labelFilter})`;
+        document.getElementById('titleLembarRekapGudang').innerHTML = `<i class="bi bi-file-earmark-spreadsheet-fill text-primary me-2"></i>RINCIAN REKAP KAS GUDANG (${labelFilter})`;
         document.getElementById('gSisaUangCabang').innerText = formatRupiah(sumSisa);
+        document.getElementById('gSaldoAwal').innerText = formatRupiah(sumAwal);
         document.getElementById('gTotalUangMasuk').innerText = formatRupiah(sumMasuk);
-        document.getElementById('gTotalKeluarLain').innerText = formatRupiah(sumKeluarLain);
-        document.getElementById('gSetorCash').innerText = formatRupiah(sumCash);
-        document.getElementById('gSetorTransfer').innerText = formatRupiah(sumTf);
+        document.getElementById('gTotalPengeluaran').innerText = formatRupiah(sumKeluar);
+
+        document.getElementById('rGdgMsk').innerText = formatRupiah(sumMsk);
+        document.getElementById('rGdgLb').innerText = formatRupiah(sumLb);
+        document.getElementById('rGdgLokalan').innerText = formatRupiah(sumLok);
+        document.getElementById('rGdgTagMsk').innerText = formatRupiah(sumTagMsk);
+        document.getElementById('rGdgCicilan').innerText = formatRupiah(sumCicilan);
+        document.getElementById('rGdgTotMasuk').innerText = formatRupiah(sumMasuk);
+
+        document.getElementById('rGdgBbm').innerText = formatRupiah(sumBbm);
+        document.getElementById('rGdgLain').innerText = formatRupiah(sumLain);
+        document.getElementById('lblGdgSetorKeluar').innerText = selectedCabang === 'PURWOKERTO'
+          ? 'Setor Cash'
+          : (selectedCabang === 'ALL' ? 'Setor Cash (+ TF Non-PWT)' : 'Setor Cash + TF');
+        document.getElementById('rGdgSetor').innerText = formatRupiah(sumSetorKeluar);
+        document.getElementById('rGdgKasbonBaru').innerText = formatRupiah(sumKasbonBaru);
+        document.getElementById('rGdgTotKeluar').innerText = formatRupiah(sumKeluar);
+
+        document.getElementById('rGdgSaldoAwal2').innerText = formatRupiah(sumAwal);
+        document.getElementById('rGdgSaldoAkhir2').innerText = formatRupiah(sumSisa);
+        document.getElementById('rGdgAktualCash').innerText = formatRupiah(sumAktual);
+        document.getElementById('rGdgSelisih').innerText = formatRupiah(sumSelisih);
 
         document.getElementById('gTagihanDist').innerText = formatRupiah(sumTagDist);
         document.getElementById('gTagihanMasuk').innerText = formatRupiah(sumTagMsk);
         document.getElementById('gSelisihTagihan').innerText = formatRupiah(sumTagDist - sumTagMsk);
-        document.getElementById('rTotalKeluarGudangBadge').innerText = `Total: ${formatRupiah(sumKeluarLain)}`;
+        document.getElementById('gSetorTransfer').innerText = formatRupiah(sumTf);
 
-        // Tabel Rekap Per Cabang Gudang
+        document.getElementById('rGdgKasbonLama').innerText = formatRupiah(sumKasbonLama);
+        document.getElementById('rGdgSisaKasbon').innerText = formatRupiah(sumSisaKasbon);
+        document.getElementById('rTotalKeluarGudangBadge').innerText = `Total: ${formatRupiah(sumLain)}`;
+
         document.getElementById('tblGudangRekapCabangBody').innerHTML = listCabGdg.map(cab => {
           const r = gdg.rekapPerCabang[cab] || {};
           return `
             <tr>
               <td>${getBranchBadgeHtml(cab)}</td>
-              <td class="text-end">${formatAngka(r.msk)}</td>
+              <td class="text-end">${formatAngka(r.saldo_awal)}</td>
+              <td class="text-end text-success fw-semibold">${formatAngka(r.total_pemasukan)}</td>
               <td class="text-end text-muted">${formatAngka(r.bbm)}</td>
-              <td class="text-end text-success">${formatAngka(r.lb)}</td>
-              <td class="text-end fw-semibold">${formatAngka(r.tot_setor)}</td>
-              <td class="text-end">${formatAngka(r.lokalan)}</td>
-              <td class="text-end">${formatAngka(r.tag_msk)}</td>
-              <td class="text-end text-danger">${formatAngka(r.tag_dist)}</td>
-              <td class="text-end text-success fw-semibold">${formatAngka(r.s_cash)}</td>
-              <td class="text-end text-primary fw-semibold">${formatAngka(r.s_tf)}</td>
               <td class="text-end text-danger">${formatAngka(r.keluar_lain)}</td>
+              <td class="text-end">${formatAngka(r.s_cash)}</td>
+              <td class="text-end text-primary">${formatAngka(r.s_tf)}</td>
+              <td class="text-end text-danger">${formatAngka(r.tag_dist)}</td>
               <td class="text-end col-total-cabang">${formatRupiah(r.sisa_kas)}</td>
             </tr>
           `;
         }).join('');
 
-        // Tabel Harian Gudang
         const filteredGdgHarian = (selectedCabang === 'ALL'
           ? gdg.riwayatHarian
           : gdg.riwayatHarian.filter(item => item.cabang === selectedCabang)
@@ -942,7 +986,6 @@
             </tr>
           `).join('');
 
-        // Tabel Pengeluaran Gudang Non-BBM
         const filteredGdgKeluar = selectedCabang === 'ALL'
           ? gdg.riwayatPengeluaran
           : gdg.riwayatPengeluaran.filter(item => item.cabang === selectedCabang);
@@ -959,7 +1002,7 @@
             </tr>
           `).join('');
       }
-
+      
       // ================= 3. MODUL OMSET BARANG =================
       const omset = data.omset;
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
