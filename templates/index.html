@@ -441,11 +441,10 @@
                   <div class="d-flex justify-content-between small py-1"><span>Aktual Cash (Opname Fisik)</span><span class="fw-semibold tabular-nums" id="rGdgAktualCash">Rp 0</span></div>
                   <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Selisih (Aktual - Sistem)</span><span class="fw-bold tabular-nums" id="rGdgSelisih">Rp 0</span></div>
 
-                  <div class="fw-bold text-primary small mb-2">CATATAN TAGIHAN &amp; TRANSFER MASUK</div>
+                  <div class="fw-bold text-primary small mb-2">CATATAN TAGIHAN &amp; TRANSFER CUSTOMER</div>
                   <div class="d-flex justify-content-between small py-1"><span>Total Tagihan Dist+Retur</span><span class="fw-semibold text-danger tabular-nums" id="gTagihanDist">Rp 0</span></div>
-                  <div class="d-flex justify-content-between small py-1"><span>Tagihan Masuk</span><span class="fw-semibold text-success tabular-nums" id="gTagihanMasuk">Rp 0</span></div>
-                  <div class="d-flex justify-content-between small py-1"><span>Sisa Tagihan Belum Bayar</span><span class="fw-bold tabular-nums" id="gSelisihTagihan">Rp 0</span></div>
-                  <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Transfer Masuk (Setor TF)</span><span class="fw-bold text-primary tabular-nums" id="gSetorTransfer">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1"><span>Transfer Masuk Customer (Cabang)</span><span class="fw-bold text-warning-emphasis tabular-nums" id="gTfCustCabang">Rp 0</span></div>
+                  <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Setoran / Transfer Langsung ke Pemilik</span><span class="fw-bold text-primary tabular-nums" id="gSetorPemilik">Rp 0</span></div>
                 </div>
 
                 <div class="p-2 rounded-3 bg-light">
@@ -878,10 +877,14 @@
         let sumAwal = 0, sumSisa = 0, sumMasuk = 0, sumKeluar = 0;
         let sumMsk = 0, sumLb = 0, sumLok = 0, sumTagMsk = 0, sumCicilan = 0;
         let sumBbm = 0, sumLain = 0, sumSetorKeluar = 0, sumKasbonBaru = 0;
-        let sumAktual = 0, sumSelisih = 0, sumTagDist = 0, sumTf = 0, sumKasbonLama = 0, sumSisaKasbon = 0;
+        let sumAktual = 0, sumSelisih = 0, sumTagDist = 0, sumKasbonLama = 0, sumSisaKasbon = 0;
+        let sumTfCustCabang = 0, sumSetorPemilik = 0;
 
         listCabGdg.forEach(cab => {
           const r = gdg.rekapPerCabang[cab] || {};
+          const vCash = Number(r.s_cash) || 0;
+          const vTf = Number(r.s_tf) || 0;
+
           sumAwal += Number(r.saldo_awal) || 0;
           sumSisa += Number(r.sisa_kas) || 0;
           sumMasuk += Number(r.total_pemasukan) || 0;
@@ -895,17 +898,17 @@
 
           sumBbm += Number(r.bbm) || 0;
           sumLain += Number(r.keluar_lain) || 0;
-          sumSetorKeluar += (cab === 'PURWOKERTO')
-            ? (Number(r.s_cash) || 0)
-            : ((Number(r.s_cash) || 0) + (Number(r.s_tf) || 0));
+          sumSetorKeluar += (cab === 'PURWOKERTO') ? vCash : (vCash + vTf);
           sumKasbonBaru += Number(r.kasbon_baru) || 0;
 
           sumAktual += Number(r.aktual_cash) || 0;
           sumSelisih += Number(r.selisih_aktual) || 0;
           sumTagDist += Number(r.tag_dist) || 0;
-          sumTf += Number(r.s_tf) || 0;
           sumKasbonLama += Number(r.kasbon_lama) || 0;
           sumSisaKasbon += Number(r.sisa_kasbon) || 0;
+
+          sumTfCustCabang += Number(r.tf_cust_cabang) || 0;
+          sumSetorPemilik += Number(r.setor_pemilik) || 0;
         });
 
         document.getElementById('lblHeaderGudang').innerHTML = `<i class="bi bi-shop me-2"></i>REKAP KAS GUDANG (${labelFilter})`;
@@ -937,9 +940,8 @@
         document.getElementById('rGdgSelisih').innerText = formatRupiah(sumSelisih);
 
         document.getElementById('gTagihanDist').innerText = formatRupiah(sumTagDist);
-        document.getElementById('gTagihanMasuk').innerText = formatRupiah(sumTagMsk);
-        document.getElementById('gSelisihTagihan').innerText = formatRupiah(sumTagDist - sumTagMsk);
-        document.getElementById('gSetorTransfer').innerText = formatRupiah(sumTf);
+        document.getElementById('gTfCustCabang').innerText = formatRupiah(sumTfCustCabang);
+        document.getElementById('gSetorPemilik').innerText = formatRupiah(sumSetorPemilik);
 
         document.getElementById('rGdgKasbonLama').innerText = formatRupiah(sumKasbonLama);
         document.getElementById('rGdgSisaKasbon').innerText = formatRupiah(sumSisaKasbon);

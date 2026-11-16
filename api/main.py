@@ -114,6 +114,28 @@ def parse_date_matrix(raw_tgl) -> Optional[datetime]:
                 return None
     return None
 
+def parse_periode_bulan_tahun(raw_val) -> Optional[tuple]:
+    if not raw_val:
+        return None
+    s = str(raw_val).strip()
+    # Format mm/yyyy atau mm-yyyy (misal: 11/2026 atau 11-2026)
+    for sep in ("/", "-"):
+        parts = s.split(sep)
+        if len(parts) == 2:
+            try:
+                p1, p2 = int(parts[0]), int(parts[1])
+                if 1 <= p1 <= 12 and p2 >= 2000:
+                    return (p1, p2)
+                if p1 >= 2000 and 1 <= p2 <= 12:
+                    return (p2, p1)
+            except ValueError:
+                pass
+    # Format tanggal lengkap (misal: 01/11/2026 atau 1-Nov-26)
+    dt = parse_date_matrix(s)
+    if dt:
+        return (dt.month, dt.year)
+    return None
+
 # --- AUTO SYNC BIAYA ADMIN BANK ---
 def sync_admin_bank(ss):
     try:
@@ -466,23 +488,31 @@ async def get_dashboard(bulan: int, tahun: int):
         except Exception:
             pass
 
-        # Baca CONTROL_GUDANG (Saldo Awal, Aktual Cash, & Kasbon per Cabang)
+        # Baca CONTROL_GUDANG (Filter per Periode Bulan & Tahun)
         ctrl_gudang = {
-            cab: {"saldo_awal": 0.0, "aktual_cash": 0.0, "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0}
+            cab: {
+                "saldo_awal": 0.0, "aktual_cash": 0.0,
+                "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0,
+                "tf_cust_cabang": 0.0, "setor_pemilik": 0.0
+            }
             for cab in DAFTAR_CABANG
         }
         try:
             rows_ctrl = ss.worksheet("CONTROL_GUDANG").get_all_values()[1:]
             for r in rows_ctrl:
-                if len(r) < 2:
+                if len(r) < 3:
                     continue
-                cb = str(r[0]).replace(" .", "").strip().upper()
-                if cb in ctrl_gudang:
-                    ctrl_gudang[cb]["saldo_awal"] = parse_num(r[1]) if len(r) > 1 else 0.0
-                    ctrl_gudang[cb]["aktual_cash"] = parse_num(r[2]) if len(r) > 2 else 0.0
-                    ctrl_gudang[cb]["kasbon_lama"] = parse_num(r[3]) if len(r) > 3 else 0.0
-                    ctrl_gudang[cb]["kasbon_baru"] = parse_num(r[4]) if len(r) > 4 else 0.0
-                    ctrl_gudang[cb]["cicilan_masuk"] = parse_num(r[5]) if len(r) > 5 else 0.0
+                per = parse_periode_bulan_tahun(r[0])
+                if per and per == (bulan, tahun):
+                    cb = str(r[1]).replace(" .", "").strip().upper()
+                    if cb in ctrl_gudang:
+                        ctrl_gudang[cb]["saldo_awal"] = parse_num(r[2]) if len(r) > 2 else 0.0
+                        ctrl_gudang[cb]["aktual_cash"] = parse_num(r[3]) if len(r) > 3 else 0.0
+                        ctrl_gudang[cb]["kasbon_lama"] = parse_num(r[4]) if len(r) > 4 else 0.0
+                        ctrl_gudang[cb]["kasbon_baru"] = parse_num(r[5]) if len(r) > 5 else 0.0
+                        ctrl_gudang[cb]["cicilan_masuk"] = parse_num(r[6]) if len(r) > 6 else 0.0
+                        ctrl_gudang[cb]["tf_cust_cabang"] = parse_num(r[7]) if len(r) > 7 else 0.0
+                        ctrl_gudang[cb]["setor_pemilik"] = parse_num(r[8]) if len(r) > 8 else 0.0
         except Exception:
             pass
 
@@ -494,6 +524,8 @@ async def get_dashboard(bulan: int, tahun: int):
             rec["kasbon_lama"] = c_data["kasbon_lama"]
             rec["kasbon_baru"] = c_data["kasbon_baru"]
             rec["cicilan_masuk"] = c_data["cicilan_masuk"]
+            rec["tf_cust_cabang"] = c_data["tf_cust_cabang"]
+            rec["setor_pemilik"] = c_data["setor_pemilik"]
             rec["sisa_kasbon"] = c_data["kasbon_lama"] + c_data["kasbon_baru"] - c_data["cicilan_masuk"]
 
             tot_pemasukan = rec["msk"] + rec["lb"] + rec["lokalan"] + rec["tag_msk"] + rec["cicilan_masuk"]
@@ -507,7 +539,6 @@ async def get_dashboard(bulan: int, tahun: int):
             rec["total_pengeluaran"] = tot_pengeluaran
             rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
             rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
-            rec["selisih_tagihan"] = rec["tag_dist"] - rec["tag_msk"]
 
         return JSONResponse({
             "kas": {
