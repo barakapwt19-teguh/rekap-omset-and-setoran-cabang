@@ -553,6 +553,11 @@
                 <span class="tap-hint-light"><i class="bi bi-table"></i> Tabel</span>
               </div>
               <div class="metric-value text-white" id="mTotalOmsetTerima">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small text-white-50 tabular-nums">
+                <span>Tunai: <strong class="text-white" id="subTerimaTunai">Rp 0</strong></span>
+                <span>Tujuan: <strong class="text-white" id="subTerimaTujuan">Rp 0</strong></span>
+                <span>VA: <strong class="text-white" id="subTerimaVa">Rp 0</strong></span>
+              </div>
             </div>
           </div>
 
@@ -563,6 +568,11 @@
                 <span class="tap-hint"><i class="bi bi-table"></i> Tabel</span>
               </div>
               <div class="metric-value text-primary" id="mTotalOmsetKirim">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-primary-subtle d-flex justify-content-between small text-muted tabular-nums">
+                <span>Tunai: <strong class="text-dark" id="subKirimTunai">Rp 0</strong></span>
+                <span>Tujuan: <strong class="text-dark" id="subKirimTujuan">Rp 0</strong></span>
+                <span>VA: <strong class="text-dark" id="subKirimVa">Rp 0</strong></span>
+              </div>
             </div>
           </div>
 
@@ -570,10 +580,14 @@
             <div class="modern-card p-3 p-md-4 h-100 d-flex flex-column justify-content-center">
               <small class="text-muted fw-bold mb-1" id="lblOmsetGabungan">TOTAL GABUNGAN OMSET</small>
               <div class="metric-value text-dark" id="mTotalOmsetGabungan">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted tabular-nums">
+                <span>Tunai: <strong class="text-dark" id="subGabunganTunai">Rp 0</strong></span>
+                <span>Tujuan: <strong class="text-dark" id="subGabunganTujuan">Rp 0</strong></span>
+                <span>VA: <strong class="text-dark" id="subGabunganVa">Rp 0</strong></span>
+              </div>
             </div>
           </div>
         </div>
-
         <!-- DRAWER MATRIKS BARANG TERIMA -->
         <div class="collapse mb-4" id="drawerOmsetTerima">
           <div class="modern-card p-3 p-md-4">
@@ -1010,21 +1024,41 @@
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
 
-      const totTerimaView = selectedCabang === 'ALL'
-        ? omset.totalTerima
-        : ((omset.terimaPerCabang[selectedCabang] && omset.terimaPerCabang[selectedCabang].total) || 0);
+      let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0;
+      let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
 
-      const totKirimView = selectedCabang === 'ALL'
-        ? omset.totalKirim
-        : ((omset.kirimPerCabang[selectedCabang] && omset.kirimPerCabang[selectedCabang].total) || 0);
+      activeCabMatrix.forEach(cab => {
+        const t = omset.terimaPerCabang[cab] || {};
+        totTerimaView += Number(t.total) || 0;
+        terimaTunai += Number(t.tunai) || 0;
+        terimaTujuan += Number(t.tujuan) || 0;
+        terimaVa += Number(t.va) || 0;
+
+        const k = omset.kirimPerCabang[cab] || {};
+        totKirimView += Number(k.total) || 0;
+        kirimTunai += Number(k.tunai) || 0;
+        kirimTujuan += Number(k.tujuan) || 0;
+        kirimVa += Number(k.va) || 0;
+      });
 
       document.getElementById('lblOmsetTerima').innerText = `OMSET BARANG TERIMA (${labelFilter})`;
       document.getElementById('lblOmsetKirim').innerText = `OMSET BARANG KIRIM (${labelFilter})`;
       document.getElementById('lblOmsetGabungan').innerText = `TOTAL GABUNGAN OMSET (${labelFilter})`;
 
       document.getElementById('mTotalOmsetTerima').innerText = formatRupiah(totTerimaView);
+      document.getElementById('subTerimaTunai').innerText = formatAngka(terimaTunai);
+      document.getElementById('subTerimaTujuan').innerText = formatAngka(terimaTujuan);
+      document.getElementById('subTerimaVa').innerText = formatAngka(terimaVa);
+
       document.getElementById('mTotalOmsetKirim').innerText = formatRupiah(totKirimView);
+      document.getElementById('subKirimTunai').innerText = formatAngka(kirimTunai);
+      document.getElementById('subKirimTujuan').innerText = formatAngka(kirimTujuan);
+      document.getElementById('subKirimVa').innerText = formatAngka(kirimVa);
+
       document.getElementById('mTotalOmsetGabungan').innerText = formatRupiah(totTerimaView + totKirimView);
+      document.getElementById('subGabunganTunai').innerText = formatAngka(terimaTunai + kirimTunai);
+      document.getElementById('subGabunganTujuan').innerText = formatAngka(terimaTujuan + kirimTujuan);
+      document.getElementById('subGabunganVa').innerText = formatAngka(terimaVa + kirimVa);
 
       document.getElementById('rTotalOmsetTerimaBadge').innerText = `Total: ${formatRupiah(totTerimaView)}`;
       document.getElementById('rTotalOmsetKirimBadge').innerText = `Total: ${formatRupiah(totKirimView)}`;
