@@ -75,7 +75,7 @@ def get_spreadsheet():
     return client.open_by_key(SPREADSHEET_ID)
 
 def fetch_all_sheets_batch(ss) -> dict:
-    """Membaca seluruh sheet dalam 1x API call (values_batch_get) untuk mencegah error 429 Quota Exceeded."""
+    """Membaca seluruh sheet dalam 1x API call (values_batch_get) dengan range luas A:DZ."""
     sheet_names = [
         "SETORAN_CABANG",
         "SETOR_TUNAI_BANK",
@@ -93,7 +93,7 @@ def fetch_all_sheets_batch(ss) -> dict:
     if not valid_names:
         return {}
 
-    ranges = [f"'{name}'!A:CK" for name in valid_names]
+    ranges = [f"'{name}'!A:DZ" for name in valid_names]
     res = ss.values_batch_get(ranges)
     value_ranges = res.get("valueRanges", [])
 
@@ -117,8 +117,8 @@ def parse_num(val) -> float:
 def parse_date_slash(raw_tgl) -> Optional[datetime]:
     if not raw_tgl:
         return None
-    s = str(raw_tgl).strip()
-    for fmt in ("%d/%m/%Y", "%d/%m/%y", "%Y-%m-%d", "%d-%m-%Y", "%d-%m-%y"):
+    s = str(raw_tgl).strip().split(" ")[0]  # buang jam jika ada timestamp
+    for fmt in ("%d/%m/%Y", "%d/%m/%y", "%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d-%m-%y"):
         try:
             return datetime.strptime(s, fmt)
         except ValueError:
@@ -128,27 +128,39 @@ def parse_date_slash(raw_tgl) -> Optional[datetime]:
 def parse_date_matrix(raw_tgl) -> Optional[datetime]:
     if not raw_tgl:
         return None
-    s = str(raw_tgl).strip()
+    s = str(raw_tgl).strip().split(" ")[0]
     dt = parse_date_slash(s)
     if dt:
         return dt
-    parts = s.split("-")
-    if len(parts) == 3:
-        months = {
-            "jan": 1, "feb": 2, "mar": 3, "apr": 4, "mei": 5, "may": 5,
-            "jun": 6, "jul": 7, "agu": 8, "aug": 8, "sep": 9,
-            "okt": 10, "oct": 10, "nov": 11, "des": 12, "dec": 12
-        }
-        m_str = parts[1].lower()[:3]
-        m = months.get(m_str)
-        if m:
+
+    months = {
+        "jan": 1, "feb": 2, "mar": 3, "apr": 4, "mei": 5, "may": 5,
+        "jun": 6, "jul": 7, "agu": 8, "aug": 8, "sep": 9,
+        "okt": 10, "oct": 10, "nov": 11, "nop": 11, "des": 12, "dec": 12
+    }
+
+    for sep in ("-", "/", " "):
+        parts = [p.strip() for p in s.split(sep) if p.strip()]
+        if len(parts) == 3:
+            m_str = parts[1].lower()[:3]
+            m = months.get(m_str)
+            if m:
+                try:
+                    day = int(parts[0])
+                    yr_raw = int(parts[2])
+                    year = 2000 + yr_raw if yr_raw < 100 else yr_raw
+                    return datetime(year, m, day)
+                except ValueError:
+                    pass
+        elif len(parts) == 2:
+            # Jika format di sheet hanya tanggal & bulan tanpa tahun (misal 17-Nov atau 17/11)
             try:
                 day = int(parts[0])
-                yr_raw = int(parts[2])
-                year = 2000 + yr_raw if yr_raw < 100 else yr_raw
-                return datetime(year, m, day)
+                m = int(parts[1]) if parts[1].isdigit() else months.get(parts[1].lower()[:3])
+                if m and 1 <= m <= 12 and 1 <= day <= 31:
+                    return datetime(datetime.now().year, m, day)
             except ValueError:
-                return None
+                pass
     return None
 
 def parse_periode_bulan_tahun(raw_val) -> Optional[tuple]:
