@@ -559,9 +559,15 @@
                 <span>Tujuan: <strong class="text-white" id="subTerimaTujuan">Rp 0</strong></span>
                 <span>VA: <strong class="text-white" id="subTerimaVa">Rp 0</strong></span>
               </div>
-              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small tabular-nums">
-                <span class="text-white-50">Terkirim (Fee): <strong class="text-warning" id="subTerimaTerkirim">Rp 0</strong></span>
-                <span class="text-white-50">Belum Terkirim: <strong class="text-white" id="subTerimaPending">Rp 0</strong></span>
+              <div class="mt-2 pt-2 border-top border-white border-opacity-25 small tabular-nums">
+                <div class="d-flex justify-content-between">
+                  <span class="text-white-50">Terkirim (Fee): <strong class="text-warning" id="subTerimaTerkirim">Rp 0</strong></span>
+                  <span class="text-white-50">Belum Terkirim: <strong class="text-white" id="subTerimaPending">Rp 0</strong></span>
+                </div>
+                <div class="d-flex justify-content-between mt-1">
+                  <span class="text-white-50">Termasuk Sisa Bln Lalu:</span>
+                  <strong class="text-info" id="subTerimaSisaLalu">Rp 0</strong>
+                </div>
               </div>
             </div>
           </div>
@@ -1140,7 +1146,7 @@
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
 
-      let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0;
+      let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0, totTerimaSisaLalu = 0;
       let totTerimaTerkirim = 0;
       let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
       let sumFeeTerima = 0, sumFeeKirim = 0, sumTotalFee = 0;
@@ -1152,6 +1158,7 @@
         terimaTunai += Number(t.tunai) || 0;
         terimaTujuan += Number(t.tujuan) || 0;
         terimaVa += Number(t.va) || 0;
+        totTerimaSisaLalu += Number(t.sisa_lalu) || 0;
 
         const k = omset.kirimPerCabang[cab] || {};
         totKirimView += Number(k.total) || 0;
@@ -1179,6 +1186,7 @@
       document.getElementById('subTerimaVa').innerText = formatAngka(terimaVa);
       document.getElementById('subTerimaTerkirim').innerText = formatAngka(totTerimaTerkirim);
       document.getElementById('subTerimaPending').innerText = formatAngka(totTerimaPending);
+      document.getElementById('subTerimaSisaLalu').innerText = formatAngka(totTerimaSisaLalu);
 
       document.getElementById('mTotalOmsetKirim').innerText = formatRupiah(totKirimView);
       document.getElementById('subKirimTunai').innerText = formatAngka(kirimTunai);
@@ -1261,7 +1269,18 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = {
+            tanggal: item.tanggal,
+            is_sisa: Boolean(item.is_sisa),
+            label_sisa: item.label_sisa || '',
+            cabang: item.cabang,
+            omset_terima: 0,
+            omset_terkirim: 0,
+            omset_kirim: 0,
+            fee_terima: 0,
+            fee_kirim: 0,
+            total_fee: 0
+          };
         }
         harianMap[key].omset_terima += Number(item.jumlah) || 0;
       });
@@ -1269,7 +1288,7 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
         }
         harianMap[key].omset_kirim += Number(item.jumlah) || 0;
       });
@@ -1277,7 +1296,7 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
         }
         harianMap[key].omset_terkirim += Number(item.omset_terkirim) || 0;
         harianMap[key].fee_terima += Number(item.fee_terima) || 0;
@@ -1285,23 +1304,32 @@
         harianMap[key].total_fee += Number(item.total_fee) || 0;
       });
 
-      const listRekapHarian = Object.values(harianMap).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+      const listRekapHarian = Object.values(harianMap).sort((a, b) => {
+        if (a.is_sisa && !b.is_sisa) return -1;
+        if (!a.is_sisa && b.is_sisa) return 1;
+        return a.tanggal.localeCompare(b.tanggal);
+      });
 
       document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian (${labelFilter})`;
       document.getElementById('tblFeeHarianBody').innerHTML = listRekapHarian.length === 0
         ? '<tr><td colspan="8" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
-        : listRekapHarian.map(i => `
-            <tr>
-              <td class="sticky-col fw-semibold">${i.tanggal}</td>
-              <td>${getBranchBadgeHtml(i.cabang)}</td>
-              <td class="text-end">${formatAngka(i.omset_terima)}</td>
-              <td class="text-end text-success fw-semibold">${formatAngka(i.omset_terkirim)}</td>
-              <td class="text-end">${formatAngka(i.omset_kirim)}</td>
-              <td class="text-end text-success fw-bold">${formatRupiah(i.fee_terima)}</td>
-              <td class="text-end text-primary fw-bold">${formatRupiah(i.fee_kirim)}</td>
-              <td class="text-end col-total-cabang">${formatRupiah(i.total_fee)}</td>
-            </tr>
-          `).join('');
+        : listRekapHarian.map(i => {
+            const labelTanggal = i.is_sisa
+              ? `<span class="badge bg-warning-subtle text-warning-emphasis fw-bold">${i.label_sisa}</span>`
+              : i.tanggal;
+            return `
+              <tr class="${i.is_sisa ? 'table-warning bg-opacity-25' : ''}">
+                <td class="sticky-col fw-semibold">${labelTanggal}</td>
+                <td>${getBranchBadgeHtml(i.cabang)}</td>
+                <td class="text-end">${formatAngka(i.omset_terima)}</td>
+                <td class="text-end text-success fw-semibold">${i.is_sisa ? '-' : formatAngka(i.omset_terkirim)}</td>
+                <td class="text-end">${i.is_sisa ? '-' : formatAngka(i.omset_kirim)}</td>
+                <td class="text-end text-success fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_terima)}</td>
+                <td class="text-end text-primary fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_kirim)}</td>
+                <td class="text-end col-total-cabang">${i.is_sisa ? '-' : formatRupiah(i.total_fee)}</td>
+              </tr>
+            `;
+          }).join('');
     }
 
     function renderMatriksTable(headId, bodyId, footId, listRiwayat, rekapCabang, listCab) {
@@ -1330,11 +1358,15 @@
         document.getElementById(bodyId).innerHTML = `<tr><td colspan="${totalCols}" class="text-center py-4 text-muted">Tidak ada data transaksi pada periode ini</td></tr>`;
       } else {
         document.getElementById(bodyId).innerHTML = sortedDates.map(tgl => {
+          const sampleItem = Object.values(dataPerTanggal[tgl])[0] || {};
+          const labelTgl = sampleItem.is_sisa
+            ? `<span class="badge bg-warning-subtle text-warning-emphasis fw-bold">${sampleItem.label_sisa}</span>`
+            : tgl;
           const cols = listCab.map(cab => {
             const c = dataPerTanggal[tgl][cab] || { tunai: 0, tujuan: 0, va: 0, jumlah: 0 };
             return `<td class="text-end text-muted">${formatAngka(c.tunai)}</td><td class="text-end text-muted">${formatAngka(c.tujuan)}</td><td class="text-end text-muted">${formatAngka(c.va)}</td><td class="text-end col-total-cabang">${formatAngka(c.jumlah)}</td>`;
           }).join('');
-          return `<tr><td class="sticky-col fw-semibold text-center">${tgl}</td>${cols}</tr>`;
+          return `<tr class="${sampleItem.is_sisa ? 'table-warning bg-opacity-25' : ''}"><td class="sticky-col fw-semibold text-center">${labelTgl}</td>${cols}</tr>`;
         }).join('');
       }
 

@@ -521,17 +521,60 @@ async def get_dashboard(bulan: int, tahun: int):
 
         # --- 3. MODUL OMSET MATRIKS (4 SUB-KOLOM) ---
         def baca_matriks_omset(nama_sheet):
-            rekap_cb = {cab: {"tunai": 0.0, "tujuan": 0.0, "va": 0.0, "total": 0.0} for cab in DAFTAR_CABANG}
+            rekap_cb = {
+                cab: {
+                    "tunai": 0.0, "tujuan": 0.0, "va": 0.0, "total": 0.0,
+                    "sisa_lalu": 0.0, "bulan_ini": 0.0
+                } for cab in DAFTAR_CABANG
+            }
             total_all = 0.0
             riwayat = []
             rows = sheets_data.get(nama_sheet, [])
             if len(rows) >= 4:
-                for r in rows[3:]:
-                    if not r:
+                data_rows = rows[3:]
+                parsed_dates = [
+                    parse_date_matrix(r[0]) if (r and r[0]) else None
+                    for r in data_rows
+                ]
+
+                for idx, r in enumerate(data_rows):
+                    if not r or not r[0]:
                         continue
-                    d = parse_date_matrix(r[0])
-                    if d and d.month == bulan and d.year == tahun:
+                    label_col0 = str(r[0]).strip()
+                    upper_col0 = label_col0.upper()
+                    if "TOTAL" in upper_col0:
+                        continue
+
+                    d = parsed_dates[idx]
+                    is_sisa_row = False
+                    target_bulan, target_tahun = None, None
+                    tgl_fmt = ""
+
+                    if d:
+                        target_bulan, target_tahun = d.month, d.year
                         tgl_fmt = d.strftime("%d/%m/%Y")
+                    elif "SISA" in upper_col0:
+                        is_sisa_row = True
+                        # Tentukan periode bulan dari tanggal terdekat di bawahnya (sebelum tgl 1) atau di atasnya (setelah tgl 30)
+                        context_dt = None
+                        for next_d in parsed_dates[idx + 1:]:
+                            if next_d:
+                                context_dt = next_d
+                                break
+                        if not context_dt:
+                            for prev_d in reversed(parsed_dates[:idx]):
+                                if prev_d:
+                                    context_dt = prev_d
+                                    break
+                        if context_dt:
+                            target_bulan, target_tahun = context_dt.month, context_dt.year
+                        else:
+                            target_bulan, target_tahun = bulan, tahun
+                        tgl_fmt = f"00/00 ({upper_col0})"
+                    else:
+                        continue
+
+                    if target_bulan == bulan and target_tahun == tahun:
                         for cab, m in BRANCH_MAP.items():
                             if len(r) > m["total"]:
                                 t_val = parse_num(r[m["tunai"]])
@@ -545,9 +588,15 @@ async def get_dashboard(bulan: int, tahun: int):
                                     rekap_cb[cab]["tujuan"] += tuj_val
                                     rekap_cb[cab]["va"] += va_val
                                     rekap_cb[cab]["total"] += tot_val
+                                    if is_sisa_row:
+                                        rekap_cb[cab]["sisa_lalu"] += tot_val
+                                    else:
+                                        rekap_cb[cab]["bulan_ini"] += tot_val
                                     total_all += tot_val
                                     riwayat.append({
                                         "tanggal": tgl_fmt,
+                                        "is_sisa": is_sisa_row,
+                                        "label_sisa": upper_col0 if is_sisa_row else "",
                                         "cabang": cab,
                                         "tunai": t_val,
                                         "tujuan": tuj_val,
