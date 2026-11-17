@@ -225,7 +225,7 @@
                 </div>
                 <div class="d-flex justify-content-between align-items-center flex-wrap gap-2">
                   <div class="fs-4 fw-extrabold text-primary tabular-nums" id="cardSetoranPusat">Rp 0</div>
-                  <button type="button" class="btn btn-sm btn-blue-modern" onclick="event.stopPropagation()" data-bs-toggle="modal" data-bs-target="#modalSetorPusat">+ Setor Pusat</button>
+                  <button type="button" class="btn btn-sm btn-blue-modern" onclick="event.stopPropagation(); autoFillEstimasiPusat();" data-bs-toggle="modal" data-bs-target="#modalSetorPusat">+ Setor Pusat</button>
                 </div>
               </div>
             </div>
@@ -541,7 +541,7 @@
       </div>
 
       <!-- ========================================================= -->
-      <!-- MODUL 3: MONITORING OMSET BARANG (KLIK NOMINAL -> TABEL)  -->
+      <!-- MODUL 3: MONITORING OMSET BARANG & FEE                    -->
       <!-- ========================================================= -->
       <div class="tab-pane fade" id="modul-omset" role="tabpanel">
 
@@ -654,7 +654,9 @@
                   <th class="text-end">Omset Kirim</th>
                   <th class="text-end text-success">Fee Terima</th>
                   <th class="text-end text-primary">Fee Kirim</th>
-                  <th class="text-end col-total-cabang">Total Fee Cabang</th>
+                  <th class="text-end col-total-cabang">Total Fee</th>
+                  <th class="text-end">Target Setor Pusat</th>
+                  <th class="text-end text-info">Realisasi Setor</th>
                 </tr>
               </thead>
               <tbody id="tblRekapOmsetFeeCabangBody" class="tabular-nums"></tbody>
@@ -736,7 +738,7 @@
   <div class="modal fade" id="modalSetorBank" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Setor Tunai Cash ke Bank</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/setor-bank', 'modalSetorBank', () => ({ tanggal: document.getElementById('tglSetor').value, nominal: Number(document.getElementById('nomSetor').value), bank: document.getElementById('bankTujuan').value, keterangan: document.getElementById('ketSetor').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal</label><input type="date" id="tglSetor" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Nominal Cash (Rp)</label><input type="number" id="nomSetor" class="form-control rounded-3" min="1" required></div><div class="mb-3"><label class="form-label small fw-semibold">Bank Tujuan</label><select id="bankTujuan" class="form-select rounded-3" required><option value="MANDIRI">MANDIRI</option><option value="BCA">BCA</option><option value="BRI">BRI</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Catatan</label><input type="text" id="ketSetor" class="form-control rounded-3" placeholder="Setor Tunai CRM Mandiri"></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
 
   <!-- MODAL 2: SETOR PUSAT -->
-  <div class="modal fade" id="modalSetorPusat" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Setoran Kewajiban ke Pusat</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/setor-pusat', 'modalSetorPusat', () => ({ tanggal: document.getElementById('tglPusat').value, cabang: document.getElementById('cabangPusat').value, estimasi: Number(document.getElementById('estPusat').value), setoran: Number(document.getElementById('nomPusat').value), keterangan: document.getElementById('ketPusat').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal Transfer</label><input type="date" id="tglPusat" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Nama Cabang</label><select id="cabangPusat" class="form-select rounded-3" required><option value="PURWOKERTO">PURWOKERTO</option><option value="CILACAP">CILACAP</option><option value="PURBALINGGA">PURBALINGGA</option><option value="BANJARNEGARA">BANJARNEGARA</option><option value="KEBUMEN">KEBUMEN</option><option value="BANYUMAS SELATAN">BANYUMAS SELATAN</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Estimasi (Rp)</label><input type="number" id="estPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Realisasi Setoran (Rp)</label><input type="number" id="nomPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketPusat" class="form-control rounded-3"></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
+  <div class="modal fade" id="modalSetorPusat" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Setoran Kewajiban ke Pusat</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/setor-pusat', 'modalSetorPusat', () => ({ tanggal: document.getElementById('tglPusat').value, cabang: document.getElementById('cabangPusat').value, estimasi: Number(document.getElementById('estPusat').value), setoran: Number(document.getElementById('nomPusat').value), keterangan: document.getElementById('ketPusat').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal Transfer</label><input type="date" id="tglPusat" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Nama Cabang</label><select id="cabangPusat" class="form-select rounded-3" onchange="autoFillEstimasiPusat()" required><option value="PURWOKERTO">PURWOKERTO</option><option value="CILACAP">CILACAP</option><option value="PURBALINGGA">PURBALINGGA</option><option value="BANJARNEGARA">BANJARNEGARA</option><option value="KEBUMEN">KEBUMEN</option><option value="BANYUMAS SELATAN">BANYUMAS SELATAN</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Estimasi (Rp)</label><input type="number" id="estPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Realisasi Setoran (Rp)</label><input type="number" id="nomPusat" class="form-control rounded-3" min="0" required></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketPusat" class="form-control rounded-3"></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
 
   <!-- MODAL 3: PENGELUARAN PENAMPUNG -->
   <div class="modal fade" id="modalPengeluaran" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Tambah Pengeluaran Penampung</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/pengeluaran', 'modalPengeluaran', () => ({ tanggal: document.getElementById('tglKeluar').value, sumberDana: document.getElementById('sumberDana').value, nominal: Number(document.getElementById('nomKeluar').value), kategori: document.getElementById('katKeluar').value, keterangan: document.getElementById('ketKeluar').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal</label><input type="date" id="tglKeluar" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Sumber Dana</label><select id="sumberDana" class="form-select rounded-3" required><option value="KAS CASH">KAS CASH</option><option value="REKENING BANK">REKENING BANK</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Nominal (Rp)</label><input type="number" id="nomKeluar" class="form-control rounded-3" min="1" required></div><div class="mb-3"><label class="form-label small fw-semibold">Kategori</label><select id="katKeluar" class="form-select rounded-3" required><option value="Operasional Gudang">Operasional Gudang</option><option value="BBM / Transport">BBM / Transport</option><option value="ATK & Perlengkapan">ATK &amp; Perlengkapan</option><option value="Biaya Admin Bank">Biaya Admin Bank</option><option value="Lain-Lain">Lain-Lain</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketKeluar" class="form-control rounded-3" required></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan</button></div></form></div></div></div>
@@ -777,6 +779,15 @@
       else if (cab.includes('BANJARNEGARA')) badgeClass = 'badge-banjarnegara';
       else if (cab.includes('BANYUMAS SELATAN')) badgeClass = 'badge-banyumas-selatan';
       return `<span class="badge-cabang ${badgeClass}">${cab}</span>`;
+    }
+
+    function autoFillEstimasiPusat() {
+      if (!cachedDashboardData) return;
+      const cab = document.getElementById('cabangPusat').value;
+      const estMap = cachedDashboardData.kas?.estimasiKewajiban || {};
+      const sisa = Number(estMap[cab]) || 0;
+      const inputEst = document.getElementById('estPusat');
+      if (inputEst) inputEst.value = sisa;
     }
 
     function toggleTableDrawer(modulId, drawerId) {
@@ -1117,7 +1128,7 @@
             </tr>
           `).join('');
       }
-      
+
       // ================= 3. MODUL REKAP OMZET & FEE =================
       const omset = data.omset;
       const feeData = data.fee || { rekapPerCabang: {}, riwayatHarian: [] };
@@ -1127,6 +1138,7 @@
       let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0;
       let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
       let sumFeeTerima = 0, sumFeeKirim = 0, sumTotalFee = 0;
+      let sumTargetSetor = 0, sumRealisasiSetor = 0;
 
       activeCabMatrix.forEach(cab => {
         const t = omset.terimaPerCabang[cab] || {};
@@ -1187,6 +1199,12 @@
         const t = omset.terimaPerCabang[cab] || {};
         const k = omset.kirimPerCabang[cab] || {};
         const f = feeData.rekapPerCabang[cab] || {};
+        const targetSetor = (Number(f.estimasi) || 0) > 0 ? Number(f.estimasi) : (Number(f.kewajiban) || 0);
+        const realisasiSetor = Number(f.setor_pusat_penampung) || 0;
+
+        sumTargetSetor += targetSetor;
+        sumRealisasiSetor += realisasiSetor;
+
         return `
           <tr>
             <td>${getBranchBadgeHtml(cab)}</td>
@@ -1195,6 +1213,8 @@
             <td class="text-end text-success fw-bold">${formatRupiah(f.fee_terima)}</td>
             <td class="text-end text-primary fw-bold">${formatRupiah(f.fee_kirim)}</td>
             <td class="text-end col-total-cabang">${formatRupiah(f.total_fee)}</td>
+            <td class="text-end fw-semibold">${formatRupiah(targetSetor)}</td>
+            <td class="text-end text-info fw-bold">${formatRupiah(realisasiSetor)}</td>
           </tr>
         `;
       }).join('');
@@ -1207,6 +1227,8 @@
           <td class="text-end bg-light text-success">${formatRupiah(sumFeeTerima)}</td>
           <td class="text-end bg-light text-primary">${formatRupiah(sumFeeKirim)}</td>
           <td class="text-end col-total-cabang">${formatRupiah(sumTotalFee)}</td>
+          <td class="text-end bg-light fw-bold">${formatRupiah(sumTargetSetor)}</td>
+          <td class="text-end bg-light text-info fw-bold">${formatRupiah(sumRealisasiSetor)}</td>
         </tr>
       `;
 
