@@ -375,6 +375,43 @@ async def get_dashboard(bulan: int, tahun: int):
 
         rows_gdg = sheets_data.get("KAS_Gudang", [])
         if len(rows_gdg) >= 3:
+            # Auto-deteksi posisi kolom cabang berdasarkan header baris 1 & 2 di KAS_Gudang
+            dynamic_gudang_map = {cab: dict(m) for cab, m in GUDANG_BRANCH_MAP.items()}
+            header_r1 = [str(c).replace(" .", "").strip().upper() for c in rows_gdg[0]]
+            header_r2 = [str(c).strip().upper() for c in rows_gdg[1]]
+
+            # Cari kolom awal masing-masing cabang dari baris 1
+            cab_start_cols = {}
+            for idx_c, title_c in enumerate(header_r1):
+                for cab in DAFTAR_CABANG:
+                    if cab in title_c and cab not in cab_start_cols:
+                        cab_start_cols[cab] = idx_c
+
+            sorted_cabs = sorted(cab_start_cols.items(), key=lambda x: x[1])
+            for i_cab, (cab, start_c) in enumerate(sorted_cabs):
+                end_c = sorted_cabs[i_cab + 1][1] if i_cab + 1 < len(sorted_cabs) else len(header_r2)
+                m = dynamic_gudang_map[cab]
+                for c_idx in range(start_c, end_c):
+                    sub_h = header_r2[c_idx] if c_idx < len(header_r2) else ""
+                    if "MASUK" in sub_h and "TAGIHAN" not in sub_h:
+                        m["msk"] = c_idx
+                    elif "BBM" in sub_h:
+                        m["bbm"] = c_idx
+                    elif "LEBIH" in sub_h or "LB" in sub_h:
+                        m["lb"] = c_idx
+                    elif "TOTAL" in sub_h and "SETOR" in sub_h:
+                        m["tot_setor"] = c_idx
+                    elif "LOKAL" in sub_h:
+                        m["lokalan"] = c_idx
+                    elif "TAGIHAN" in sub_h and "MASUK" in sub_h:
+                        m["tag_msk"] = c_idx
+                    elif "DISTRIBUSI" in sub_h or ("TAGIHAN" in sub_h and "DIST" in sub_h):
+                        m["tag_dist"] = c_idx
+                    elif "CASH" in sub_h:
+                        m["s_cash"] = c_idx
+                    elif "TRANSFER" in sub_h or "TF" in sub_h:
+                        m["s_tf"] = c_idx
+
             for r in rows_gdg[2:]:
                 if not r or not r[0]:
                     continue
@@ -385,21 +422,22 @@ async def get_dashboard(bulan: int, tahun: int):
                     continue
                 tgl_fmt = d.strftime("%d/%m/%Y")
 
-                for cab, m in GUDANG_BRANCH_MAP.items():
-                    if len(r) > m["s_tf"]:
-                        v_msk  = parse_num(r[m["msk"]])
-                        v_bbm  = parse_num(r[m["bbm"]])
-                        v_lb   = parse_num(r[m["lb"]])
-                        v_tot  = parse_num(r[m["tot_setor"]])
+                for cab, m in dynamic_gudang_map.items():
+                    max_col_needed = max(m.values())
+                    if len(r) > m["msk"]:
+                        v_msk  = parse_num(r[m["msk"]]) if len(r) > m["msk"] else 0.0
+                        v_bbm  = parse_num(r[m["bbm"]]) if len(r) > m["bbm"] else 0.0
+                        v_lb   = parse_num(r[m["lb"]]) if len(r) > m["lb"] else 0.0
+                        v_tot  = parse_num(r[m["tot_setor"]]) if len(r) > m["tot_setor"] else 0.0
                         if v_tot == 0 and (v_msk > 0 or v_bbm > 0 or v_lb > 0):
                             v_tot = v_msk - v_bbm + v_lb
-                        v_lok  = parse_num(r[m["lokalan"]])
-                        v_tmsk = parse_num(r[m["tag_msk"]])
-                        v_tdst = parse_num(r[m["tag_dist"]])
-                        v_cash = parse_num(r[m["s_cash"]])
-                        v_tf   = parse_num(r[m["s_tf"]])
+                        v_lok  = parse_num(r[m["lokalan"]]) if len(r) > m["lokalan"] else 0.0
+                        v_tmsk = parse_num(r[m["tag_msk"]]) if len(r) > m["tag_msk"] else 0.0
+                        v_tdst = parse_num(r[m["tag_dist"]]) if len(r) > m["tag_dist"] else 0.0
+                        v_cash = parse_num(r[m["s_cash"]]) if len(r) > m["s_cash"] else 0.0
+                        v_tf   = parse_num(r[m["s_tf"]]) if len(r) > m["s_tf"] else 0.0
 
-                        if v_cash > 0 and (tgl_fmt, cab, "CASH") not in existing_setoran_keys:
+                        if v_cash > 0:
                             if d < start_date:
                                 saldo_awal_cash += v_cash
                             elif d.month == bulan and d.year == tahun:
@@ -415,7 +453,7 @@ async def get_dashboard(bulan: int, tahun: int):
                                 })
 
                         tf_ke_penampung = 0.0 if cab == "PURWOKERTO" else v_tf
-                        if tf_ke_penampung > 0 and (tgl_fmt, cab, "TRANSFER") not in existing_setoran_keys:
+                        if tf_ke_penampung > 0:
                             if d < start_date:
                                 saldo_awal_bank += tf_ke_penampung
                             elif d.month == bulan and d.year == tahun:
