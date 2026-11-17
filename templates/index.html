@@ -715,25 +715,25 @@
 
         <!-- DRAWER 3: REKAP OMSET & FEE HARIAN -->
         <div class="collapse mb-4" id="drawerFeeHarian">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+          <div class="modern-card p-3 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
               <h6 class="fw-bold text-dark mb-0" id="titleFeeHarian"><i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian</h6>
               <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
-            <div class="table-modern-wrapper" style="max-height: 450px;">
-              <table class="table table-modern align-middle">
+            <div class="table-modern-wrapper" style="max-height: 460px;">
+              <table class="table table-modern table-sm align-middle mb-0" style="font-size: 0.76rem;">
                 <thead>
                   <tr>
-                    <th class="sticky-col">Tanggal</th>
-                    <th>Cabang</th>
-                    <th class="text-end">Terima (Total)</th>
-                    <th class="text-end text-success">Terima Terkirim</th>
-                    <th class="text-end">Omset Kirim</th>
-                    <th class="text-end text-success">Fee Terima (Rp)</th>
-                    <th class="text-end text-primary">Fee Kirim (Rp)</th>
-                    <th class="text-end col-total-cabang">Total Fee (Rp)</th>
-                    <th class="text-end">Estimasi Setor Pusat</th>
-                    <th class="text-end text-info">Setoran ke Pusat</th>
+                    <th class="sticky-col px-2">Tanggal</th>
+                    <th class="px-2">Cabang</th>
+                    <th class="text-end px-2">Terima Total</th>
+                    <th class="text-end text-success px-2">Terima Terkirim</th>
+                    <th class="text-end px-2">Omset Kirim</th>
+                    <th class="text-end text-success px-2">Fee Terima</th>
+                    <th class="text-end text-primary px-2">Fee Kirim</th>
+                    <th class="text-end col-total-cabang px-2">Total Fee</th>
+                    <th class="text-end px-2">Est. Setor Pusat</th>
+                    <th class="text-end text-info px-2">Setor Pusat</th>
                   </tr>
                 </thead>
                 <tbody id="tblFeeHarianBody" class="tabular-nums"></tbody>
@@ -1266,16 +1266,14 @@
       renderMatriksTable('tblMatriksTerimaHead', 'tblMatriksTerimaBody', 'tblMatriksTerimaFoot', omset.riwayatTerima, omset.terimaPerCabang, activeCabMatrix);
       renderMatriksTable('tblMatriksKirimHead', 'tblMatriksKirimBody', 'tblMatriksKirimFoot', omset.riwayatKirim, omset.kirimPerCabang, activeCabMatrix);
 
-      // Drawer Rekap Omset & Fee Harian
+      // Drawer Rekap Omset & Fee Harian (Tanpa baris SISA bulan lalu)
       const harianMap = {};
       omset.riwayatTerima.forEach(item => {
-        if (!activeCabMatrix.includes(item.cabang)) return;
+        if (item.is_sisa || !activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
           harianMap[key] = {
             tanggal: item.tanggal,
-            is_sisa: Boolean(item.is_sisa),
-            label_sisa: item.label_sisa || '',
             cabang: item.cabang,
             omset_terima: 0,
             omset_terkirim: 0,
@@ -1290,10 +1288,10 @@
         harianMap[key].omset_terima += Number(item.jumlah) || 0;
       });
       omset.riwayatKirim.forEach(item => {
-        if (!activeCabMatrix.includes(item.cabang)) return;
+        if (item.is_sisa || !activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
         }
         harianMap[key].omset_kirim += Number(item.jumlah) || 0;
       });
@@ -1301,7 +1299,7 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
         }
         const estItem = (Number(item.estimasi) || 0) > 0 ? Number(item.estimasi) : (Number(item.kewajiban) || 0);
         harianMap[key].omset_terkirim += Number(item.omset_terkirim) || 0;
@@ -1312,34 +1310,25 @@
         harianMap[key].setor_pusat += Number(item.setor_pusat) || 0;
       });
 
-      const listRekapHarian = Object.values(harianMap).sort((a, b) => {
-        if (a.is_sisa && !b.is_sisa) return -1;
-        if (!a.is_sisa && b.is_sisa) return 1;
-        return a.tanggal.localeCompare(b.tanggal);
-      });
+      const listRekapHarian = Object.values(harianMap).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
 
       document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian (${labelFilter})`;
       document.getElementById('tblFeeHarianBody').innerHTML = listRekapHarian.length === 0
         ? '<tr><td colspan="10" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
-        : listRekapHarian.map(i => {
-            const labelTanggal = i.is_sisa
-              ? `<span class="badge bg-warning-subtle text-warning-emphasis fw-bold">${i.label_sisa}</span>`
-              : i.tanggal;
-            return `
-              <tr class="${i.is_sisa ? 'table-warning bg-opacity-25' : ''}">
-                <td class="sticky-col fw-semibold">${labelTanggal}</td>
-                <td>${getBranchBadgeHtml(i.cabang)}</td>
-                <td class="text-end">${formatAngka(i.omset_terima)}</td>
-                <td class="text-end text-success fw-semibold">${i.is_sisa ? '-' : formatAngka(i.omset_terkirim)}</td>
-                <td class="text-end">${i.is_sisa ? '-' : formatAngka(i.omset_kirim)}</td>
-                <td class="text-end text-success fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_terima)}</td>
-                <td class="text-end text-primary fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_kirim)}</td>
-                <td class="text-end col-total-cabang">${i.is_sisa ? '-' : formatRupiah(i.total_fee)}</td>
-                <td class="text-end fw-semibold">${i.is_sisa ? '-' : formatRupiah(i.estimasi)}</td>
-                <td class="text-end text-info fw-bold">${i.is_sisa ? '-' : formatRupiah(i.setor_pusat)}</td>
-              </tr>
-            `;
-          }).join('');
+        : listRekapHarian.map(i => `
+            <tr>
+              <td class="sticky-col fw-semibold px-2 text-nowrap">${i.tanggal}</td>
+              <td class="px-2 text-nowrap">${getBranchBadgeHtml(i.cabang)}</td>
+              <td class="text-end px-2">${formatAngka(i.omset_terima)}</td>
+              <td class="text-end text-success fw-semibold px-2">${formatAngka(i.omset_terkirim)}</td>
+              <td class="text-end px-2">${formatAngka(i.omset_kirim)}</td>
+              <td class="text-end text-success fw-bold px-2">${formatAngka(i.fee_terima)}</td>
+              <td class="text-end text-primary fw-bold px-2">${formatAngka(i.fee_kirim)}</td>
+              <td class="text-end col-total-cabang px-2">${formatAngka(i.total_fee)}</td>
+              <td class="text-end fw-semibold px-2">${formatAngka(i.estimasi)}</td>
+              <td class="text-end text-info fw-bold px-2">${formatAngka(i.setor_pusat)}</td>
+            </tr>
+          `).join('');
     }
 
     function renderMatriksTable(headId, bodyId, footId, listRiwayat, rekapCabang, listCab) {

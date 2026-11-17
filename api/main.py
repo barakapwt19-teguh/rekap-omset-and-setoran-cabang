@@ -77,7 +77,7 @@ def get_spreadsheet():
 def fetch_all_sheets_batch(ss) -> dict:
     """Membaca seluruh sheet dalam 1x API call (values_batch_get)."""
     sheet_names = [
-        "SETORAN_CABANG",
+        "SETORAN CABANG",
         "SETOR_TUNAI_BANK",
         "PENGELUARAN",
         "OMSET_TERIMA",
@@ -701,12 +701,11 @@ async def get_dashboard(bulan: int, tahun: int):
                                     })
 
                                 target_harian = v_est if v_est > 0 else v_kew
-                                selisih_harian = target_harian - v_pusat
-                                if selisih_harian > 0:
+                                if target_harian > 0 and v_pusat == 0:
                                     rincian_estimasi_tanggal.append({
                                         "tanggal": tgl_fmt,
                                         "cabang": cab,
-                                        "nominal": selisih_harian
+                                        "nominal": target_harian
                                     })
 
                                 riwayat_fee_harian.append({
