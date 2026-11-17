@@ -559,6 +559,10 @@
                 <span>Tujuan: <strong class="text-white" id="subTerimaTujuan">Rp 0</strong></span>
                 <span>VA: <strong class="text-white" id="subTerimaVa">Rp 0</strong></span>
               </div>
+              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small tabular-nums">
+                <span class="text-white-50">Terkirim (Fee): <strong class="text-warning" id="subTerimaTerkirim">Rp 0</strong></span>
+                <span class="text-white-50">Belum Terkirim: <strong class="text-white" id="subTerimaPending">Rp 0</strong></span>
+              </div>
             </div>
           </div>
 
@@ -646,7 +650,9 @@
               <thead>
                 <tr>
                   <th>Cabang</th>
-                  <th class="text-end">Omset Terima</th>
+                  <th class="text-end">Omset Terima (Total)</th>
+                  <th class="text-end text-success">Terima Terkirim</th>
+                  <th class="text-end text-warning-emphasis">Belum Terkirim</th>
                   <th class="text-end">Omset Kirim</th>
                   <th class="text-end text-success">Fee Terima</th>
                   <th class="text-end text-primary">Fee Kirim</th>
@@ -714,7 +720,8 @@
                   <tr>
                     <th class="sticky-col">Tanggal</th>
                     <th>Cabang</th>
-                    <th class="text-end">Omset Terima</th>
+                    <th class="text-end">Terima (Total)</th>
+                    <th class="text-end text-success">Terima Terkirim</th>
                     <th class="text-end">Omset Kirim</th>
                     <th class="text-end text-success">Fee Terima (Rp)</th>
                     <th class="text-end text-primary">Fee Kirim (Rp)</th>
@@ -1134,6 +1141,7 @@
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
 
       let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0;
+      let totTerimaTerkirim = 0;
       let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
       let sumFeeTerima = 0, sumFeeKirim = 0, sumTotalFee = 0;
       let sumTargetSetor = 0, sumRealisasiSetor = 0;
@@ -1152,10 +1160,13 @@
         kirimVa += Number(k.va) || 0;
 
         const f = feeData.rekapPerCabang[cab] || {};
+        totTerimaTerkirim += Number(f.omset_terkirim) || 0;
         sumFeeTerima += Number(f.fee_terima) || 0;
         sumFeeKirim += Number(f.fee_kirim) || 0;
         sumTotalFee += Number(f.total_fee) || 0;
       });
+
+      const totTerimaPending = Math.max(0, totTerimaView - totTerimaTerkirim);
 
       // Kartu Omzet
       document.getElementById('lblOmsetTerima').innerText = `OMSET BARANG TERIMA (${labelFilter})`;
@@ -1166,6 +1177,8 @@
       document.getElementById('subTerimaTunai').innerText = formatAngka(terimaTunai);
       document.getElementById('subTerimaTujuan').innerText = formatAngka(terimaTujuan);
       document.getElementById('subTerimaVa').innerText = formatAngka(terimaVa);
+      document.getElementById('subTerimaTerkirim').innerText = formatAngka(totTerimaTerkirim);
+      document.getElementById('subTerimaPending').innerText = formatAngka(totTerimaPending);
 
       document.getElementById('mTotalOmsetKirim').innerText = formatRupiah(totKirimView);
       document.getElementById('subKirimTunai').innerText = formatAngka(kirimTunai);
@@ -1192,6 +1205,10 @@
         const t = omset.terimaPerCabang[cab] || {};
         const k = omset.kirimPerCabang[cab] || {};
         const f = feeData.rekapPerCabang[cab] || {};
+        const omsetTotTerima = Number(t.total) || 0;
+        const omsetTerkirim = Number(f.omset_terkirim) || 0;
+        const omsetPending = Math.max(0, omsetTotTerima - omsetTerkirim);
+
         const targetSetor = (Number(f.estimasi) || 0) > 0 ? Number(f.estimasi) : (Number(f.kewajiban) || 0);
         const realisasiSetor = Number(f.setor_pusat_penampung) || 0;
 
@@ -1201,7 +1218,9 @@
         return `
           <tr>
             <td>${getBranchBadgeHtml(cab)}</td>
-            <td class="text-end">${formatAngka(t.total)}</td>
+            <td class="text-end">${formatAngka(omsetTotTerima)}</td>
+            <td class="text-end text-success fw-semibold">${formatAngka(omsetTerkirim)}</td>
+            <td class="text-end text-warning-emphasis">${formatAngka(omsetPending)}</td>
             <td class="text-end">${formatAngka(k.total)}</td>
             <td class="text-end text-success fw-bold">${formatRupiah(f.fee_terima)}</td>
             <td class="text-end text-primary fw-bold">${formatRupiah(f.fee_kirim)}</td>
@@ -1216,6 +1235,8 @@
         <tr>
           <td class="bg-primary text-white">TOTAL GLOBAL</td>
           <td class="text-end bg-light">${formatAngka(totTerimaView)}</td>
+          <td class="text-end bg-light text-success">${formatAngka(totTerimaTerkirim)}</td>
+          <td class="text-end bg-light text-warning-emphasis">${formatAngka(totTerimaPending)}</td>
           <td class="text-end bg-light">${formatAngka(totKirimView)}</td>
           <td class="text-end bg-light text-success">${formatRupiah(sumFeeTerima)}</td>
           <td class="text-end bg-light text-primary">${formatRupiah(sumFeeKirim)}</td>
@@ -1234,13 +1255,13 @@
       renderMatriksTable('tblMatriksTerimaHead', 'tblMatriksTerimaBody', 'tblMatriksTerimaFoot', omset.riwayatTerima, omset.terimaPerCabang, activeCabMatrix);
       renderMatriksTable('tblMatriksKirimHead', 'tblMatriksKirimBody', 'tblMatriksKirimFoot', omset.riwayatKirim, omset.kirimPerCabang, activeCabMatrix);
 
-      // Drawer Rekap Omset & Fee Harian (Gabungan Omset Terima, Omset Kirim, Fee Terima, Fee Kirim)
+      // Drawer Rekap Omset & Fee Harian
       const harianMap = {};
       omset.riwayatTerima.forEach(item => {
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
         }
         harianMap[key].omset_terima += Number(item.jumlah) || 0;
       });
@@ -1248,7 +1269,7 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
         }
         harianMap[key].omset_kirim += Number(item.jumlah) || 0;
       });
@@ -1256,8 +1277,9 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
         }
+        harianMap[key].omset_terkirim += Number(item.omset_terkirim) || 0;
         harianMap[key].fee_terima += Number(item.fee_terima) || 0;
         harianMap[key].fee_kirim += Number(item.fee_kirim) || 0;
         harianMap[key].total_fee += Number(item.total_fee) || 0;
@@ -1267,12 +1289,13 @@
 
       document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian (${labelFilter})`;
       document.getElementById('tblFeeHarianBody').innerHTML = listRekapHarian.length === 0
-        ? '<tr><td colspan="7" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
+        ? '<tr><td colspan="8" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
         : listRekapHarian.map(i => `
             <tr>
               <td class="sticky-col fw-semibold">${i.tanggal}</td>
               <td>${getBranchBadgeHtml(i.cabang)}</td>
               <td class="text-end">${formatAngka(i.omset_terima)}</td>
+              <td class="text-end text-success fw-semibold">${formatAngka(i.omset_terkirim)}</td>
               <td class="text-end">${formatAngka(i.omset_kirim)}</td>
               <td class="text-end text-success fw-bold">${formatRupiah(i.fee_terima)}</td>
               <td class="text-end text-primary fw-bold">${formatRupiah(i.fee_kirim)}</td>
