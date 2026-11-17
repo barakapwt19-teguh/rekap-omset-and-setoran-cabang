@@ -599,9 +599,8 @@
                 <span class="tap-hint"><i class="bi bi-table"></i> Harian</span>
               </div>
               <div class="metric-value text-success" id="fTotalTerima">Rp 0</div>
-              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted">
-                <span>Distribusi Terkirim</span>
-                <span class="fw-semibold text-success" id="fPorsiTerima">0% dari Total Fee</span>
+              <div class="mt-2 pt-2 border-top border-light-subtle small text-muted">
+                <div style="font-size: 0.72rem; line-height: 1.35;">(Kg+(M3*250))*2350*(% leadtime) 1hari 22%, 2hari 18%, 3hari 15%, 4hari 11%, 5hari 6%, 6hari 0%, seterusnya -1</div>
               </div>
             </div>
           </div>
@@ -613,9 +612,8 @@
                 <span class="tap-hint"><i class="bi bi-table"></i> Harian</span>
               </div>
               <div class="metric-value text-primary" id="fTotalKirim">Rp 0</div>
-              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted">
-                <span>Tonase Kirim</span>
-                <span class="fw-semibold text-primary" id="fPorsiKirim">0% dari Total Fee</span>
+              <div class="mt-2 pt-2 border-top border-light-subtle small text-muted">
+                <div style="font-size: 0.75rem;">(Kg+(M3*250))*2350*15%</div>
               </div>
             </div>
           </div>
@@ -640,9 +638,7 @@
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
             <h6 class="fw-bold text-dark mb-0" id="titleRekapOmsetFeeCabang"><i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee Per Cabang</h6>
             <div class="d-flex gap-2 flex-wrap">
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')"><i class="bi bi-table me-1"></i>Harian Terima</button>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetKirim')"><i class="bi bi-table me-1"></i>Harian Kirim</button>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-percent me-1"></i>Harian Fee</button>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-table me-1"></i>Rekap Omset &amp; Fee Harian</button>
             </div>
           </div>
           <div class="table-modern-wrapper">
@@ -705,11 +701,11 @@
           </div>
         </div>
 
-        <!-- DRAWER 3: RINCIAN HARIAN FEE TERIMA & FEE KIRIM -->
+        <!-- DRAWER 3: REKAP OMSET & FEE HARIAN -->
         <div class="collapse mb-4" id="drawerFeeHarian">
           <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <h6 class="fw-bold text-dark mb-0" id="titleFeeHarian"><i class="bi bi-calendar-check text-primary me-2"></i>Rincian Harian Fee Terima &amp; Fee Kirim</h6>
+              <h6 class="fw-bold text-dark mb-0" id="titleFeeHarian"><i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian</h6>
               <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
             <div class="table-modern-wrapper" style="max-height: 450px;">
@@ -718,6 +714,8 @@
                   <tr>
                     <th class="sticky-col">Tanggal</th>
                     <th>Cabang</th>
+                    <th class="text-end">Omset Terima</th>
+                    <th class="text-end">Omset Kirim</th>
                     <th class="text-end text-success">Fee Terima (Rp)</th>
                     <th class="text-end text-primary">Fee Kirim (Rp)</th>
                     <th class="text-end col-total-cabang">Total Fee (Rp)</th>
@@ -1159,9 +1157,6 @@
         sumTotalFee += Number(f.total_fee) || 0;
       });
 
-      const porsiTerima = sumTotalFee > 0 ? ((sumFeeTerima / sumTotalFee) * 100).toFixed(1) : '0';
-      const porsiKirim = sumTotalFee > 0 ? ((sumFeeKirim / sumTotalFee) * 100).toFixed(1) : '0';
-
       // Kartu Omzet
       document.getElementById('lblOmsetTerima').innerText = `OMSET BARANG TERIMA (${labelFilter})`;
       document.getElementById('lblOmsetKirim').innerText = `OMSET BARANG KIRIM (${labelFilter})`;
@@ -1188,9 +1183,7 @@
       document.getElementById('lblTotalFeeGabungan').innerText = `TOTAL GABUNGAN FEE (${labelFilter})`;
 
       document.getElementById('fTotalTerima').innerText = formatRupiah(sumFeeTerima);
-      document.getElementById('fPorsiTerima').innerText = `${porsiTerima}% dari Total Fee`;
       document.getElementById('fTotalKirim').innerText = formatRupiah(sumFeeKirim);
-      document.getElementById('fPorsiKirim').innerText = `${porsiKirim}% dari Total Fee`;
       document.getElementById('fTotalGabungan').innerText = formatRupiah(sumTotalFee);
 
       // Tabel Rekapitulasi Global Omzet & Fee Per Cabang
@@ -1241,19 +1234,46 @@
       renderMatriksTable('tblMatriksTerimaHead', 'tblMatriksTerimaBody', 'tblMatriksTerimaFoot', omset.riwayatTerima, omset.terimaPerCabang, activeCabMatrix);
       renderMatriksTable('tblMatriksKirimHead', 'tblMatriksKirimBody', 'tblMatriksKirimFoot', omset.riwayatKirim, omset.kirimPerCabang, activeCabMatrix);
 
-      // Drawer Harian Fee
-      const filteredFeeHarian = (selectedCabang === 'ALL'
-        ? feeData.riwayatHarian
-        : feeData.riwayatHarian.filter(item => item.cabang === selectedCabang)
-      ).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+      // Drawer Rekap Omset & Fee Harian (Gabungan Omset Terima, Omset Kirim, Fee Terima, Fee Kirim)
+      const harianMap = {};
+      omset.riwayatTerima.forEach(item => {
+        if (!activeCabMatrix.includes(item.cabang)) return;
+        const key = `${item.tanggal}|${item.cabang}`;
+        if (!harianMap[key]) {
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+        }
+        harianMap[key].omset_terima += Number(item.jumlah) || 0;
+      });
+      omset.riwayatKirim.forEach(item => {
+        if (!activeCabMatrix.includes(item.cabang)) return;
+        const key = `${item.tanggal}|${item.cabang}`;
+        if (!harianMap[key]) {
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+        }
+        harianMap[key].omset_kirim += Number(item.jumlah) || 0;
+      });
+      feeData.riwayatHarian.forEach(item => {
+        if (!activeCabMatrix.includes(item.cabang)) return;
+        const key = `${item.tanggal}|${item.cabang}`;
+        if (!harianMap[key]) {
+          harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+        }
+        harianMap[key].fee_terima += Number(item.fee_terima) || 0;
+        harianMap[key].fee_kirim += Number(item.fee_kirim) || 0;
+        harianMap[key].total_fee += Number(item.total_fee) || 0;
+      });
 
-      document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rincian Harian Fee Terima &amp; Fee Kirim (${labelFilter})`;
-      document.getElementById('tblFeeHarianBody').innerHTML = filteredFeeHarian.length === 0
-        ? '<tr><td colspan="5" class="text-center py-4 text-muted">Belum ada data pada sheet FEE_OMSET periode ini</td></tr>'
-        : filteredFeeHarian.map(i => `
+      const listRekapHarian = Object.values(harianMap).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+
+      document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian (${labelFilter})`;
+      document.getElementById('tblFeeHarianBody').innerHTML = listRekapHarian.length === 0
+        ? '<tr><td colspan="7" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
+        : listRekapHarian.map(i => `
             <tr>
               <td class="sticky-col fw-semibold">${i.tanggal}</td>
               <td>${getBranchBadgeHtml(i.cabang)}</td>
+              <td class="text-end">${formatAngka(i.omset_terima)}</td>
+              <td class="text-end">${formatAngka(i.omset_kirim)}</td>
               <td class="text-end text-success fw-bold">${formatRupiah(i.fee_terima)}</td>
               <td class="text-end text-primary fw-bold">${formatRupiah(i.fee_kirim)}</td>
               <td class="text-end col-total-cabang">${formatRupiah(i.total_fee)}</td>

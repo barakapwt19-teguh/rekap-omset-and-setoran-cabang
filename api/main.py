@@ -77,6 +77,7 @@ def get_spreadsheet():
 def fetch_all_sheets_batch(ss) -> dict:
     """Membaca seluruh sheet dalam 1x API call (values_batch_get) untuk mencegah error 429 Quota Exceeded."""
     sheet_names = [
+        "SETORAN_CABANG",
         "SETOR_TUNAI_BANK",
         "PENGELUARAN",
         "SETORAN_PUSAT",
@@ -272,7 +273,41 @@ async def get_dashboard(bulan: int, tahun: int):
         riwayat_keluar = []
         riwayat_pusat = []
 
-        # --- 1. MODUL KAS GUDANG (SEKALIGUS SUMBER SETORAN CABANG KE PENAMPUNG) ---
+        # --- 0. BACA SETORAN_CABANG (DATA INPUT MANUAL SEBELUMNYA) ---
+        existing_setoran_keys = set()
+        rows_setoran_manual = sheets_data.get("SETORAN_CABANG", [])[1:]
+        for r in rows_setoran_manual:
+            if len(r) < 5:
+                continue
+            d = parse_date_slash(r[1])
+            cb = str(r[2]).replace(" .", "").strip().upper()
+            nom = parse_num(r[3])
+            jenis = str(r[4]).strip().upper()
+            if d and nom > 0:
+                is_cash = "CASH" in jenis
+                jenis_clean = "CASH" if is_cash else "TRANSFER"
+                tgl_fmt = d.strftime("%d/%m/%Y")
+                existing_setoran_keys.add((tgl_fmt, cb, jenis_clean))
+
+                if d < start_date:
+                    if is_cash:
+                        saldo_awal_cash += nom
+                    else:
+                        saldo_awal_bank += nom
+                elif d.month == bulan and d.year == tahun:
+                    if is_cash:
+                        cash_masuk += nom
+                    else:
+                        tf_masuk += nom
+                    total_setoran_cabang += nom
+                    riwayat_setoran.insert(0, {
+                        "tanggal": tgl_fmt,
+                        "cabang": cb,
+                        "nominal": nom,
+                        "jenis": jenis_clean
+                    })
+
+        # --- 1. MODUL KAS GUDANG (SEKALIGUS SUMBER SETORAN CABANG OTOMATIS KE PENAMPUNG) ---
         rekap_gudang_cab = {
             cab: {
                 "msk": 0.0, "bbm": 0.0, "lb": 0.0, "tot_setor": 0.0,
@@ -302,7 +337,7 @@ async def get_dashboard(bulan: int, tahun: int):
                                 "keterangan": r[m["ket"]] if len(r) > m["ket"] and r[m["ket"]] else "-"
                             })
 
-        # Baca KAS_Gudang -> mengisi Kas Gudang & Setoran Cabang ke Kas Penampung
+        # Baca KAS_Gudang -> mengisi Kas Gudang & melengkapi Setoran Cabang ke Kas Penampung jika belum ada di SETORAN_CABANG
         rows_gdg = sheets_data.get("KAS_Gudang", [])
         if len(rows_gdg) >= 3:
             for r in rows_gdg[2:]:
@@ -329,15 +364,11 @@ async def get_dashboard(bulan: int, tahun: int):
                         v_cash = parse_num(r[m["s_cash"]])
                         v_tf   = parse_num(r[m["s_tf"]])
 
-                        # Setoran Cabang ke Kas Penampung:
-                        # - Setor Cash dari semua 6 cabang masuk ke Cash Penampung
-                        # - Setor Transfer masuk ke Rekening Penampung (kecuali PURWOKERTO yang langsung ke Pemilik)
-                        tf_ke_penampung = 0.0 if cab == "PURWOKERTO" else v_tf
-                        if d < start_date:
-                            saldo_awal_cash += v_cash
-                            saldo_awal_bank += tf_ke_penampung
-                        elif d.month == bulan and d.year == tahun:
-                            if v_cash > 0:
+                        # Setoran Cabang ke Kas Penampung (hanya ditambahkan jika tanggal+cabang+jenis belum ada di SETORAN_CABANG)
+                        if v_cash > 0 and (tgl_fmt, cab, "CASH") not in existing_setoran_keys:
+                            if d < start_date:
+                                saldo_awal_cash += v_cash
+                            elif d.month == bulan and d.year == tahun:
                                 cash_masuk += v_cash
                                 total_setoran_cabang += v_cash
                                 riwayat_setoran.insert(0, {
@@ -346,7 +377,12 @@ async def get_dashboard(bulan: int, tahun: int):
                                     "nominal": v_cash,
                                     "jenis": "CASH"
                                 })
-                            if tf_ke_penampung > 0:
+
+                        tf_ke_penampung = 0.0 if cab == "PURWOKERTO" else v_tf
+                        if tf_ke_penampung > 0 and (tgl_fmt, cab, "TRANSFER") not in existing_setoran_keys:
+                            if d < start_date:
+                                saldo_awal_bank += tf_ke_penampung
+                            elif d.month == bulan and d.year == tahun:
                                 tf_masuk += tf_ke_penampung
                                 total_setoran_cabang += tf_ke_penampung
                                 riwayat_setoran.insert(0, {
