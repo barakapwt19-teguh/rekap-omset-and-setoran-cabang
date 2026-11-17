@@ -81,7 +81,7 @@
         </li>
         <li class="nav-item" role="presentation">
           <button class="nav-link" data-bs-toggle="pill" data-bs-target="#modul-omset" type="button">
-            <i class="bi bi-box-seam me-1"></i> Omzet Barang
+            <i class="bi bi-box-seam me-1"></i> Rekap Omzet &amp; Fee
           </button>
         </li>
       </ul>
@@ -545,6 +545,7 @@
       <!-- ========================================================= -->
       <div class="tab-pane fade" id="modul-omset" role="tabpanel">
 
+        <!-- BARIS 1: 3 KARTU OMZET BARANG (DENGAN RINCIAN TUNAI, TUJUAN, VA) -->
         <div class="row g-3 mb-3">
           <div class="col-12 col-md-4">
             <div class="metric-click-primary" id="box-drawerOmsetTerima" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')">
@@ -588,41 +589,139 @@
             </div>
           </div>
         </div>
-        <!-- DRAWER MATRIKS BARANG TERIMA -->
+
+        <!-- BARIS 2: 3 KARTU PENDAPATAN FEE (TERIMA, KIRIM, TOTAL FEE) -->
+        <div class="row g-3 mb-3">
+          <div class="col-12 col-md-4">
+            <div class="metric-click-box" id="box-drawerFeeHarian" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted fw-bold" id="lblFeeTerima">FEE BARANG TERIMA</small>
+                <span class="tap-hint"><i class="bi bi-table"></i> Harian</span>
+              </div>
+              <div class="metric-value text-success" id="fTotalTerima">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted">
+                <span>Distribusi Terkirim</span>
+                <span class="fw-semibold text-success" id="fPorsiTerima">0% dari Total Fee</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="metric-click-box" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted fw-bold" id="lblFeeKirim">FEE BARANG KIRIM</small>
+                <span class="tap-hint"><i class="bi bi-table"></i> Harian</span>
+              </div>
+              <div class="metric-value text-primary" id="fTotalKirim">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted">
+                <span>Tonase Kirim</span>
+                <span class="fw-semibold text-primary" id="fPorsiKirim">0% dari Total Fee</span>
+              </div>
+            </div>
+          </div>
+
+          <div class="col-12 col-md-4">
+            <div class="modern-card p-3 p-md-4 h-100 d-flex flex-column justify-content-center" style="border-left: 4px solid #01B574 !important;">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <small class="text-muted fw-bold" id="lblTotalFeeGabungan">TOTAL GABUNGAN FEE</small>
+                <span class="badge bg-success-subtle text-success fw-bold">Berbasis Tonase</span>
+              </div>
+              <div class="metric-value text-dark" id="fTotalGabungan">Rp 0</div>
+              <div class="mt-2 pt-2 border-top border-light-subtle d-flex justify-content-between small text-muted">
+                <span>Fee Terima + Fee Kirim</span>
+                <span class="fw-semibold text-dark">6 Cabang</span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- TABEL REKAPITULASI GLOBAL OMZET & FEE PER CABANG -->
+        <div class="modern-card p-3 p-md-4 mb-3">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-dark mb-0" id="titleRekapOmsetFeeCabang"><i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee Per Cabang</h6>
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')"><i class="bi bi-table me-1"></i>Harian Terima</button>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetKirim')"><i class="bi bi-table me-1"></i>Harian Kirim</button>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-percent me-1"></i>Harian Fee</button>
+            </div>
+          </div>
+          <div class="table-modern-wrapper">
+            <table class="table table-modern align-middle">
+              <thead>
+                <tr>
+                  <th>Cabang</th>
+                  <th class="text-end">Omset Terima</th>
+                  <th class="text-end">Omset Kirim</th>
+                  <th class="text-end text-success">Fee Terima</th>
+                  <th class="text-end text-primary">Fee Kirim</th>
+                  <th class="text-end col-total-cabang">Total Fee Cabang</th>
+                </tr>
+              </thead>
+              <tbody id="tblRekapOmsetFeeCabangBody" class="tabular-nums"></tbody>
+              <tfoot class="fw-bold" id="tblRekapOmsetFeeCabangFoot"></tfoot>
+            </table>
+          </div>
+        </div>
+
+        <!-- DRAWER 1: MATRIKS HARIAN OMSET BARANG TERIMA -->
         <div class="collapse mb-4" id="drawerOmsetTerima">
-          <div class="modern-card p-3 p-md-4">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
               <div class="d-flex align-items-center flex-wrap gap-2">
                 <h6 class="fw-bold text-dark mb-0" id="titleMatriksTerima"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Terima</h6>
-                <span class="badge-total-tabel bg-primary-subtle text-primary" id="rTotalOmsetTerimaBadge">Total: Rp 0</span>
+                <span class="badge-total-tabel" id="rTotalOmsetTerimaBadge">Total: Rp 0</span>
               </div>
               <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
-            <div class="table-modern-wrapper" style="max-height: 540px;">
-              <table class="table table-modern table-matrix-sticky align-middle">
+            <div class="table-modern-wrapper" style="max-height: 480px;">
+              <table class="table table-modern align-middle">
                 <thead id="tblMatriksTerimaHead"></thead>
                 <tbody id="tblMatriksTerimaBody" class="tabular-nums"></tbody>
-                <tfoot class="fw-bold" id="tblMatriksTerimaFoot"></tfoot>
+                <tfoot id="tblMatriksTerimaFoot"></tfoot>
               </table>
             </div>
           </div>
         </div>
 
-        <!-- DRAWER MATRIKS BARANG KIRIM -->
+        <!-- DRAWER 2: MATRIKS HARIAN OMSET BARANG KIRIM -->
         <div class="collapse mb-4" id="drawerOmsetKirim">
-          <div class="modern-card p-3 p-md-4">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
               <div class="d-flex align-items-center flex-wrap gap-2">
                 <h6 class="fw-bold text-dark mb-0" id="titleMatriksKirim"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Kirim</h6>
-                <span class="badge-total-tabel bg-primary-subtle text-primary" id="rTotalOmsetKirimBadge">Total: Rp 0</span>
+                <span class="badge-total-tabel" id="rTotalOmsetKirimBadge">Total: Rp 0</span>
               </div>
               <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetKirim')"><i class="bi bi-x-lg"></i> Tutup</button>
             </div>
-            <div class="table-modern-wrapper" style="max-height: 540px;">
-              <table class="table table-modern table-matrix-sticky align-middle">
+            <div class="table-modern-wrapper" style="max-height: 480px;">
+              <table class="table table-modern align-middle">
                 <thead id="tblMatriksKirimHead"></thead>
                 <tbody id="tblMatriksKirimBody" class="tabular-nums"></tbody>
-                <tfoot class="fw-bold" id="tblMatriksKirimFoot"></tfoot>
+                <tfoot id="tblMatriksKirimFoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWER 3: RINCIAN HARIAN FEE TERIMA & FEE KIRIM -->
+        <div class="collapse mb-4" id="drawerFeeHarian">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <h6 class="fw-bold text-dark mb-0" id="titleFeeHarian"><i class="bi bi-calendar-check text-primary me-2"></i>Rincian Harian Fee Terima &amp; Fee Kirim</h6>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 450px;">
+              <table class="table table-modern align-middle">
+                <thead>
+                  <tr>
+                    <th class="sticky-col">Tanggal</th>
+                    <th>Cabang</th>
+                    <th class="text-end text-success">Fee Terima (Rp)</th>
+                    <th class="text-end text-primary">Fee Kirim (Rp)</th>
+                    <th class="text-end col-total-cabang">Total Fee (Rp)</th>
+                  </tr>
+                </thead>
+                <tbody id="tblFeeHarianBody" class="tabular-nums"></tbody>
               </table>
             </div>
           </div>
@@ -1019,13 +1118,15 @@
           `).join('');
       }
       
-      // ================= 3. MODUL OMSET BARANG =================
+      // ================= 3. MODUL REKAP OMZET & FEE =================
       const omset = data.omset;
+      const feeData = data.fee || { rekapPerCabang: {}, riwayatHarian: [] };
       const allCabMatrix = ['PURWOKERTO', 'KEBUMEN', 'CILACAP', 'PURBALINGGA', 'BANJARNEGARA', 'BANYUMAS SELATAN'];
       const activeCabMatrix = selectedCabang === 'ALL' ? allCabMatrix : [selectedCabang];
 
       let totTerimaView = 0, terimaTunai = 0, terimaTujuan = 0, terimaVa = 0;
       let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
+      let sumFeeTerima = 0, sumFeeKirim = 0, sumTotalFee = 0;
 
       activeCabMatrix.forEach(cab => {
         const t = omset.terimaPerCabang[cab] || {};
@@ -1039,8 +1140,17 @@
         kirimTunai += Number(k.tunai) || 0;
         kirimTujuan += Number(k.tujuan) || 0;
         kirimVa += Number(k.va) || 0;
+
+        const f = feeData.rekapPerCabang[cab] || {};
+        sumFeeTerima += Number(f.fee_terima) || 0;
+        sumFeeKirim += Number(f.fee_kirim) || 0;
+        sumTotalFee += Number(f.total_fee) || 0;
       });
 
+      const porsiTerima = sumTotalFee > 0 ? ((sumFeeTerima / sumTotalFee) * 100).toFixed(1) : '0';
+      const porsiKirim = sumTotalFee > 0 ? ((sumFeeKirim / sumTotalFee) * 100).toFixed(1) : '0';
+
+      // Kartu Omzet
       document.getElementById('lblOmsetTerima').innerText = `OMSET BARANG TERIMA (${labelFilter})`;
       document.getElementById('lblOmsetKirim').innerText = `OMSET BARANG KIRIM (${labelFilter})`;
       document.getElementById('lblOmsetGabungan').innerText = `TOTAL GABUNGAN OMSET (${labelFilter})`;
@@ -1060,14 +1170,73 @@
       document.getElementById('subGabunganTujuan').innerText = formatAngka(terimaTujuan + kirimTujuan);
       document.getElementById('subGabunganVa').innerText = formatAngka(terimaVa + kirimVa);
 
+      // Kartu Fee
+      document.getElementById('lblFeeTerima').innerText = `FEE BARANG TERIMA (${labelFilter})`;
+      document.getElementById('lblFeeKirim').innerText = `FEE BARANG KIRIM (${labelFilter})`;
+      document.getElementById('lblTotalFeeGabungan').innerText = `TOTAL GABUNGAN FEE (${labelFilter})`;
+
+      document.getElementById('fTotalTerima').innerText = formatRupiah(sumFeeTerima);
+      document.getElementById('fPorsiTerima').innerText = `${porsiTerima}% dari Total Fee`;
+      document.getElementById('fTotalKirim').innerText = formatRupiah(sumFeeKirim);
+      document.getElementById('fPorsiKirim').innerText = `${porsiKirim}% dari Total Fee`;
+      document.getElementById('fTotalGabungan').innerText = formatRupiah(sumTotalFee);
+
+      // Tabel Rekapitulasi Global Omzet & Fee Per Cabang
+      document.getElementById('titleRekapOmsetFeeCabang').innerHTML = `<i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee (${labelFilter})`;
+      document.getElementById('tblRekapOmsetFeeCabangBody').innerHTML = activeCabMatrix.map(cab => {
+        const t = omset.terimaPerCabang[cab] || {};
+        const k = omset.kirimPerCabang[cab] || {};
+        const f = feeData.rekapPerCabang[cab] || {};
+        return `
+          <tr>
+            <td>${getBranchBadgeHtml(cab)}</td>
+            <td class="text-end">${formatAngka(t.total)}</td>
+            <td class="text-end">${formatAngka(k.total)}</td>
+            <td class="text-end text-success fw-bold">${formatRupiah(f.fee_terima)}</td>
+            <td class="text-end text-primary fw-bold">${formatRupiah(f.fee_kirim)}</td>
+            <td class="text-end col-total-cabang">${formatRupiah(f.total_fee)}</td>
+          </tr>
+        `;
+      }).join('');
+
+      document.getElementById('tblRekapOmsetFeeCabangFoot').innerHTML = `
+        <tr>
+          <td class="bg-primary text-white">TOTAL GLOBAL</td>
+          <td class="text-end bg-light">${formatAngka(totTerimaView)}</td>
+          <td class="text-end bg-light">${formatAngka(totKirimView)}</td>
+          <td class="text-end bg-light text-success">${formatRupiah(sumFeeTerima)}</td>
+          <td class="text-end bg-light text-primary">${formatRupiah(sumFeeKirim)}</td>
+          <td class="text-end col-total-cabang">${formatRupiah(sumTotalFee)}</td>
+        </tr>
+      `;
+
+      // Drawer Harian Omzet
       document.getElementById('rTotalOmsetTerimaBadge').innerText = `Total: ${formatRupiah(totTerimaView)}`;
       document.getElementById('rTotalOmsetKirimBadge').innerText = `Total: ${formatRupiah(totKirimView)}`;
-
       document.getElementById('titleMatriksTerima').innerHTML = `<i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Terima (${labelFilter})`;
       document.getElementById('titleMatriksKirim').innerHTML = `<i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Kirim (${labelFilter})`;
 
       renderMatriksTable('tblMatriksTerimaHead', 'tblMatriksTerimaBody', 'tblMatriksTerimaFoot', omset.riwayatTerima, omset.terimaPerCabang, activeCabMatrix);
       renderMatriksTable('tblMatriksKirimHead', 'tblMatriksKirimBody', 'tblMatriksKirimFoot', omset.riwayatKirim, omset.kirimPerCabang, activeCabMatrix);
+
+      // Drawer Harian Fee
+      const filteredFeeHarian = (selectedCabang === 'ALL'
+        ? feeData.riwayatHarian
+        : feeData.riwayatHarian.filter(item => item.cabang === selectedCabang)
+      ).sort((a, b) => a.tanggal.localeCompare(b.tanggal));
+
+      document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rincian Harian Fee Terima &amp; Fee Kirim (${labelFilter})`;
+      document.getElementById('tblFeeHarianBody').innerHTML = filteredFeeHarian.length === 0
+        ? '<tr><td colspan="5" class="text-center py-4 text-muted">Belum ada data pada sheet FEE_OMSET periode ini</td></tr>'
+        : filteredFeeHarian.map(i => `
+            <tr>
+              <td class="sticky-col fw-semibold">${i.tanggal}</td>
+              <td>${getBranchBadgeHtml(i.cabang)}</td>
+              <td class="text-end text-success fw-bold">${formatRupiah(i.fee_terima)}</td>
+              <td class="text-end text-primary fw-bold">${formatRupiah(i.fee_kirim)}</td>
+              <td class="text-end col-total-cabang">${formatRupiah(i.total_fee)}</td>
+            </tr>
+          `).join('');
     }
 
     function renderMatriksTable(headId, bodyId, footId, listRiwayat, rekapCabang, listCab) {

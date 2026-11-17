@@ -50,6 +50,15 @@ PENGELUARAN_GUDANG_MAP = {
     "BANYUMAS SELATAN": {"tgl": 25, "rincian": 26, "nom": 27, "ket": 28},
 }
 
+FEE_OMSET_MAP = {
+    "PURWOKERTO":       {"t_tunai": 1,  "t_tujuan": 2,  "t_va": 3,  "t_tot": 4,  "k_tunai": 5,  "k_tujuan": 6,  "k_va": 7,  "k_tot": 8,  "fee_terima": 9,  "fee_kirim": 10, "kewajiban": 11, "estimasi": 12, "setor_pusat": 13},
+    "KEBUMEN":          {"t_tunai": 15, "t_tujuan": 16, "t_va": 17, "t_tot": 18, "k_tunai": 19, "k_tujuan": 20, "k_va": 21, "k_tot": 22, "fee_terima": 23, "fee_kirim": 24, "kewajiban": 25, "estimasi": 26, "setor_pusat": 27},
+    "CILACAP":          {"t_tunai": 29, "t_tujuan": 30, "t_va": 31, "t_tot": 32, "k_tunai": 33, "k_tujuan": 34, "k_va": 35, "k_tot": 36, "fee_terima": 37, "fee_kirim": 38, "kewajiban": 39, "estimasi": 40, "setor_pusat": 41},
+    "PURBALINGGA":      {"t_tunai": 43, "t_tujuan": 44, "t_va": 45, "t_tot": 46, "k_tunai": 47, "k_tujuan": 48, "k_va": 49, "k_tot": 50, "fee_terima": 51, "fee_kirim": 52, "kewajiban": 53, "estimasi": 54, "setor_pusat": 55},
+    "BANJARNEGARA":     {"t_tunai": 57, "t_tujuan": 58, "t_va": 59, "t_tot": 60, "k_tunai": 61, "k_tujuan": 62, "k_va": 63, "k_tot": 64, "fee_terima": 65, "fee_kirim": 66, "kewajiban": 67, "estimasi": 68, "setor_pusat": 69},
+    "BANYUMAS SELATAN": {"t_tunai": 71, "t_tujuan": 72, "t_va": 73, "t_tot": 74, "k_tunai": 75, "k_tujuan": 76, "k_va": 77, "k_tot": 78, "fee_terima": 79, "fee_kirim": 80, "kewajiban": 81, "estimasi": 82, "setor_pusat": 83},
+}
+
 # --- KONEKSI GOOGLE SHEETS ---
 def get_spreadsheet():
     scopes = [
@@ -540,6 +549,76 @@ async def get_dashboard(bulan: int, tahun: int):
             rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
             rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
 
+        # --- MODUL FEE TERIMA & FEE KIRIM (DARI SHEET FEE_OMSET 14 KOLOM/CABANG) ---
+        rekap_fee_cab = {
+            cab: {
+                "omset_terkirim": 0.0,
+                "omset_kirim_fee": 0.0,
+                "fee_terima": 0.0,
+                "fee_kirim": 0.0,
+                "total_fee": 0.0,
+                "kewajiban": 0.0,
+                "estimasi": 0.0,
+                "setor_pusat": 0.0
+            } for cab in DAFTAR_CABANG
+        }
+        riwayat_fee_harian = []
+
+        try:
+            ws_fee = ss.worksheet("FEE_OMSET")
+            rows_fee = ws_fee.get_all_values()
+            if len(rows_fee) >= 3:
+                for r in rows_fee[2:]:
+                    if not r or not r[0]:
+                        continue
+                    if "TOTAL" in str(r[0]).upper():
+                        continue
+                    d = parse_date_matrix(r[0])
+                    if d and d.month == bulan and d.year == tahun:
+                        tgl_fmt = d.strftime("%d/%m/%Y")
+                        for cab, m in FEE_OMSET_MAP.items():
+                            if len(r) > m["fee_kirim"]:
+                                v_ttot   = parse_num(r[m["t_tot"]])
+                                if v_ttot == 0:
+                                    v_ttot = parse_num(r[m["t_tunai"]]) + parse_num(r[m["t_tujuan"]]) + parse_num(r[m["t_va"]])
+
+                                v_ktot   = parse_num(r[m["k_tot"]])
+                                if v_ktot == 0:
+                                    v_ktot = parse_num(r[m["k_tunai"]]) + parse_num(r[m["k_tujuan"]]) + parse_num(r[m["k_va"]])
+
+                                v_terima = parse_num(r[m["fee_terima"]])
+                                v_kirim  = parse_num(r[m["fee_kirim"]])
+                                v_tot_fee = v_terima + v_kirim
+                                v_kew    = parse_num(r[m["kewajiban"]]) if len(r) > m["kewajiban"] else 0.0
+                                v_est    = parse_num(r[m["estimasi"]]) if len(r) > m["estimasi"] else 0.0
+                                v_pusat  = parse_num(r[m["setor_pusat"]]) if len(r) > m["setor_pusat"] else 0.0
+
+                                if any([v_ttot, v_ktot, v_terima, v_kirim, v_kew, v_est, v_pusat]):
+                                    rec = rekap_fee_cab[cab]
+                                    rec["omset_terkirim"] += v_ttot
+                                    rec["omset_kirim_fee"] += v_ktot
+                                    rec["fee_terima"] += v_terima
+                                    rec["fee_kirim"] += v_kirim
+                                    rec["total_fee"] += v_tot_fee
+                                    rec["kewajiban"] += v_kew
+                                    rec["estimasi"] += v_est
+                                    rec["setor_pusat"] += v_pusat
+
+                                    riwayat_fee_harian.append({
+                                        "tanggal": tgl_fmt,
+                                        "cabang": cab,
+                                        "omset_terkirim": v_ttot,
+                                        "omset_kirim": v_ktot,
+                                        "fee_terima": v_terima,
+                                        "fee_kirim": v_kirim,
+                                        "total_fee": v_tot_fee,
+                                        "kewajiban": v_kew,
+                                        "estimasi": v_est,
+                                        "setor_pusat": v_pusat
+                                    })
+        except Exception:
+            pass    
+
         return JSONResponse({
             "kas": {
                 "saldoAwal": {
@@ -578,6 +657,10 @@ async def get_dashboard(bulan: int, tahun: int):
                 "rekapPerCabang": rekap_gudang_cab,
                 "riwayatHarian": riwayat_gudang_harian,
                 "riwayatPengeluaran": riwayat_keluar_gudang
+            },
+            "fee": {
+                "rekapPerCabang": rekap_fee_cab,
+                "riwayatHarian": riwayat_fee_harian
             },
         })
     except Exception as e:
