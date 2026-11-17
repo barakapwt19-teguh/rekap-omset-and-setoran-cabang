@@ -78,6 +78,7 @@ def fetch_all_sheets_batch(ss) -> dict:
     """Membaca seluruh sheet dalam 1x API call (values_batch_get)."""
     sheet_names = [
         "SETORAN CABANG",
+        "SETORAN_CABANG",
         "SETOR_TUNAI_BANK",
         "PENGELUARAN",
         "OMSET_TERIMA",
@@ -645,6 +646,24 @@ async def get_dashboard(bulan: int, tahun: int):
         rincian_estimasi_tanggal = []
 
         if len(rows_fee) >= 3:
+            # Auto-deteksi indeks kolom ESTIMASI & SETOR PUSAT dari baris header (baris 1-2) tiap blok cabang
+            dynamic_fee_map = {cab: dict(m) for cab, m in FEE_OMSET_MAP.items()}
+            header_rows = rows_fee[:2]
+            for cab, m in dynamic_fee_map.items():
+                start_col = m["t_tunai"]
+                end_col = min(start_col + 15, max((len(hr) for hr in header_rows), default=0))
+                for c_idx in range(start_col, end_col):
+                    h_text = " ".join(
+                        str(hr[c_idx]).strip().upper()
+                        for hr in header_rows if len(hr) > c_idx
+                    )
+                    if "ESTIMASI" in h_text or "EST" in h_text:
+                        m["estimasi"] = c_idx
+                    elif "KEWAJIBAN" in h_text:
+                        m["kewajiban"] = c_idx
+                    elif "SETOR" in h_text and "PUSAT" in h_text:
+                        m["setor_pusat"] = c_idx
+
             for r in rows_fee[2:]:
                 if not r or not r[0]:
                     continue
@@ -654,16 +673,15 @@ async def get_dashboard(bulan: int, tahun: int):
                 if not d:
                     continue
 
-                # Kurangi saldo awal bank dengan realisasi setor pusat bulan-bulan sebelumnya
                 if d < start_date:
-                    for cab, m in FEE_OMSET_MAP.items():
+                    for cab, m in dynamic_fee_map.items():
                         if len(r) > m["setor_pusat"]:
                             v_pusat_prev = parse_num(r[m["setor_pusat"]])
                             if v_pusat_prev > 0:
                                 saldo_awal_bank -= v_pusat_prev
                 elif d.month == bulan and d.year == tahun:
                     tgl_fmt = d.strftime("%d/%m/%Y")
-                    for cab, m in FEE_OMSET_MAP.items():
+                    for cab, m in dynamic_fee_map.items():
                         if len(r) > m["fee_kirim"]:
                             v_ttot = parse_num(r[m["t_tot"]])
                             if v_ttot == 0:
@@ -696,16 +714,16 @@ async def get_dashboard(bulan: int, tahun: int):
                                     riwayat_pusat.insert(0, {
                                         "tanggal": tgl_fmt,
                                         "cabang": cab,
-                                        "estimasi": v_est if v_est > 0 else v_kew,
+                                        "estimasi": v_est,
                                         "setoran": v_pusat
                                     })
 
-                                target_harian = v_est if v_est > 0 else v_kew
-                                if target_harian > 0 and v_pusat == 0:
+                                # Hanya tampilkan rincian per tanggal jika estimasi > 0 dan setor pusat masih kosong
+                                if v_est > 0 and v_pusat == 0:
                                     rincian_estimasi_tanggal.append({
                                         "tanggal": tgl_fmt,
                                         "cabang": cab,
-                                        "nominal": target_harian
+                                        "nominal": v_est
                                     })
 
                                 riwayat_fee_harian.append({
@@ -724,7 +742,7 @@ async def get_dashboard(bulan: int, tahun: int):
         tgl_estimasi_terakhir = ""
         for cab in DAFTAR_CABANG:
             f_rec = rekap_fee_cab[cab]
-            target_setor = f_rec["estimasi"] if f_rec["estimasi"] > 0 else f_rec["kewajiban"]
+            target_setor = f_rec["estimasi"]
             f_rec["selisih_setor_pusat"] = f_rec["setor_pusat"] - target_setor
             estimasi_kewajiban[cab] = max(0.0, target_setor - f_rec["setor_pusat"])
 

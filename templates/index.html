@@ -1301,7 +1301,7 @@
         if (!harianMap[key]) {
           harianMap[key] = { tanggal: item.tanggal, cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
         }
-        const estItem = (Number(item.estimasi) || 0) > 0 ? Number(item.estimasi) : (Number(item.kewajiban) || 0);
+        const estItem = Number(item.estimasi) || 0;
         harianMap[key].omset_terkirim += Number(item.omset_terkirim) || 0;
         harianMap[key].fee_terima += Number(item.fee_terima) || 0;
         harianMap[key].fee_kirim += Number(item.fee_kirim) || 0;
