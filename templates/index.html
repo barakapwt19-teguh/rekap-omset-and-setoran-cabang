@@ -14,25 +14,48 @@
 <body>
 
   <!-- HERO HEADER BIRU -->
-  <header class="hero-header">
+  <header class="sticky-topbar">
     <div class="container-fluid px-3 px-md-4">
-      <div class="d-flex flex-column flex-lg-row justify-content-between align-items-lg-center gap-3">
-        <div class="d-flex align-items-center gap-3">
-          <div class="brand-badge">
+      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2">
+        
+        <!-- Kiri: Brand Ringkas -->
+        <div class="d-flex align-items-center gap-2">
+          <div class="brand-badge-sm">
             <i class="bi bi-truck"></i>
           </div>
-          <div>
-            <span class="badge fw-bold mb-1 px-2 py-1" style="background-color: #fde047; color: #0a192f; font-size: 0.68rem; letter-spacing: 0.05em;">
-              EXECUTIVE CONTROLLER • 6 CABANG
-            </span>
-            <h1 class="h4 fw-bold mb-0">Baraka Express</h1>
-            <p class="mb-0 text-white-50 small">Sistem Terpadu Kas Penampung, Kas Gudang &amp; Omzet</p>
+          <div class="lh-1">
+            <div class="d-flex align-items-center gap-2">
+              <span class="fw-extrabold text-white" style="font-size: 1rem; letter-spacing: -0.01em;">Baraka Express</span>
+              <span class="badge fw-bold px-2 py-0" style="background-color: #fde047; color: #0a192f; font-size: 0.62rem; line-height: 1.5;">
+                6 CABANG
+              </span>
+            </div>
+            <small class="text-white-50" id="badgePeriodeAktif" style="font-size: 0.72rem;">-</small>
           </div>
         </div>
 
-        <!-- FILTER CABANG (DI SEBELAH KIRI BULAN) + BULAN + TAHUN + REFRESH -->
-        <div class="filter-glass d-flex align-items-center gap-2">
-          <select id="selectCabang" class="form-select form-select-sm" style="width: 175px;" onchange="onCabangChange(this.value)">
+        <!-- Tengah: Navigasi 3 Modul Terintegrasi di Header -->
+        <ul class="nav nav-pills nav-pills-topbar order-3 order-xl-2" role="tablist">
+          <li class="nav-item" role="presentation">
+            <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#modul-kas" type="button">
+              <i class="bi bi-wallet2 me-1"></i>Kas Penampung
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#modul-gudang" type="button">
+              <i class="bi bi-shop me-1"></i>Kas Gudang
+            </button>
+          </li>
+          <li class="nav-item" role="presentation">
+            <button class="nav-link" data-bs-toggle="pill" data-bs-target="#modul-omset" type="button">
+              <i class="bi bi-box-seam me-1"></i>Rekap Omzet &amp; Fee
+            </button>
+          </li>
+        </ul>
+
+        <!-- Kanan: Filter Cabang, Bulan, Tahun & Refresh -->
+        <div class="filter-glass-sm d-flex align-items-center gap-1 gap-sm-2 order-2 order-xl-3">
+          <select id="selectCabang" class="form-select form-select-sm" style="width: 155px;" onchange="onCabangChange(this.value)">
             <option value="ALL">Semua Cabang (6)</option>
             <option value="PURWOKERTO">Purwokerto</option>
             <option value="KEBUMEN">Kebumen</option>
@@ -42,51 +65,30 @@
             <option value="BANYUMAS SELATAN">Banyumas Selatan</option>
           </select>
 
-          <select id="selectBulan" class="form-select form-select-sm" style="width: 120px;" onchange="loadAllData()">
+          <select id="selectBulan" class="form-select form-select-sm" style="width: 108px;" onchange="loadAllData()">
             <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
             <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
             <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
             <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
           </select>
 
-          <select id="selectTahun" class="form-select form-select-sm" style="width: 88px;" onchange="loadAllData()">
+          <select id="selectTahun" class="form-select form-select-sm" style="width: 78px;" onchange="loadAllData()">
             <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
           </select>
 
-          <button id="btnRefresh" onclick="triggerRefresh()" class="btn-refresh-modern">
-            <i class="bi bi-arrow-clockwise me-1" id="iconRefresh"></i> Refresh
+          <button id="btnRefresh" onclick="triggerRefresh()" class="btn-refresh-sm" title="Refresh Data">
+            <i class="bi bi-arrow-clockwise" id="iconRefresh"></i>
           </button>
         </div>
+
       </div>
     </div>
   </header>
 
   <!-- KONTEN UTAMA -->
-  <main class="container-fluid px-3 px-md-4 main-container">
+  <main class="container-fluid px-3 px-md-4 pt-3 pb-4">
 
     <div id="statusAlert" class="alert alert-danger rounded-4 shadow-sm d-none mb-3"></div>
-
-    <!-- NAVIGASI 3 MODUL UTAMA -->
-    <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-      <ul class="nav nav-pills nav-pills-modern" role="tablist" style="grid-template-columns: repeat(3, 1fr);">
-        <li class="nav-item" role="presentation">
-          <button class="nav-link active" data-bs-toggle="pill" data-bs-target="#modul-kas" type="button">
-            <i class="bi bi-wallet2 me-1"></i> Kas Penampung
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#modul-gudang" type="button">
-            <i class="bi bi-shop me-1"></i> Kas Gudang
-          </button>
-        </li>
-        <li class="nav-item" role="presentation">
-          <button class="nav-link" data-bs-toggle="pill" data-bs-target="#modul-omset" type="button">
-            <i class="bi bi-box-seam me-1"></i> Rekap Omzet &amp; Fee
-          </button>
-        </li>
-      </ul>
-      <span class="badge-soft-blue" id="badgePeriodeAktif">-</span>
-    </div>
 
     <div class="tab-content">
 
@@ -554,20 +556,18 @@
                 <span class="tap-hint-light"><i class="bi bi-table"></i> Tabel</span>
               </div>
               <div class="metric-value text-white" id="mTotalOmsetTerima">Rp 0</div>
-              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small text-white-50 tabular-nums">
-                <span>Tunai: <strong class="text-white" id="subTerimaTunai">Rp 0</strong></span>
-                <span>Tujuan: <strong class="text-white" id="subTerimaTujuan">Rp 0</strong></span>
-                <span>VA: <strong class="text-white" id="subTerimaVa">Rp 0</strong></span>
+              <div class="d-flex justify-content-between align-items-center small tabular-nums mt-1">
+                <span class="text-white-50">Termasuk Sisa Bln Lalu:</span>
+                <strong class="text-info" id="subTerimaSisaLalu">0</strong>
               </div>
-              <div class="mt-2 pt-2 border-top border-white border-opacity-25 small tabular-nums">
-                <div class="d-flex justify-content-between">
-                  <span class="text-white-50">Terkirim (Fee): <strong class="text-warning" id="subTerimaTerkirim">Rp 0</strong></span>
-                  <span class="text-white-50">Belum Terkirim: <strong class="text-white" id="subTerimaPending">Rp 0</strong></span>
-                </div>
-                <div class="d-flex justify-content-between mt-1">
-                  <span class="text-white-50">Termasuk Sisa Bln Lalu:</span>
-                  <strong class="text-info" id="subTerimaSisaLalu">Rp 0</strong>
-                </div>
+              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small text-white-50 tabular-nums">
+                <span>Tunai: <strong class="text-white" id="subTerimaTunai">0</strong></span>
+                <span>Tujuan: <strong class="text-white" id="subTerimaTujuan">0</strong></span>
+                <span>VA: <strong class="text-white" id="subTerimaVa">0</strong></span>
+              </div>
+              <div class="mt-2 pt-2 border-top border-white border-opacity-25 d-flex justify-content-between small tabular-nums">
+                <span class="text-white-50">Terkirim (Fee): <strong class="text-warning" id="subTerimaTerkirim">0</strong></span>
+                <span class="text-white-50">Belum Terkirim: <strong class="text-white" id="subTerimaPending">0</strong></span>
               </div>
             </div>
           </div>
