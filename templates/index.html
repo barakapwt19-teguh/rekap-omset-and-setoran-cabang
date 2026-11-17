@@ -732,6 +732,8 @@
                     <th class="text-end text-success">Fee Terima (Rp)</th>
                     <th class="text-end text-primary">Fee Kirim (Rp)</th>
                     <th class="text-end col-total-cabang">Total Fee (Rp)</th>
+                    <th class="text-end">Estimasi Setor Pusat</th>
+                    <th class="text-end text-info">Setoran ke Pusat</th>
                   </tr>
                 </thead>
                 <tbody id="tblFeeHarianBody" class="tabular-nums"></tbody>
@@ -789,7 +791,7 @@
       else if (cab.includes('PURBALINGGA')) badgeClass = 'badge-purbalingga';
       else if (cab.includes('BANJARNEGARA')) badgeClass = 'badge-banjarnegara';
       else if (cab.includes('BANYUMAS SELATAN')) badgeClass = 'badge-banyumas-selatan';
-      else if (cab.includes('TAMBAHAN DARI PEMILIK')) return `<span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-3"><i class="bi bi-person-badge me-1"></i>${cab}</span>`;
+      else return `<span class="badge bg-warning text-dark fw-bold px-2 py-1 rounded-3"><i class="bi bi-person-badge me-1"></i>${cab}</span>`;
       return `<span class="badge-cabang ${badgeClass}">${cab}</span>`;
     }
 
@@ -912,7 +914,7 @@
 
       const filteredSetoran = selectedCabang === 'ALL'
         ? kas.riwayatSetoran
-        : kas.riwayatSetoran.filter(i => String(i.cabang).toUpperCase().includes(selectedCabang));
+        : kas.riwayatSetoran.filter(i => i.is_manual || String(i.cabang).toUpperCase().includes(selectedCabang));
 
       const filteredPusat = selectedCabang === 'ALL'
         ? kas.riwayatPusat
@@ -1219,7 +1221,7 @@
         const omsetPending = Math.max(0, omsetTotTerima - omsetTerkirim);
 
         const targetSetor = (Number(f.estimasi) || 0) > 0 ? Number(f.estimasi) : (Number(f.kewajiban) || 0);
-        const realisasiSetor = Number(f.setor_pusat_penampung) || 0;
+        const realisasiSetor = Number(f.setor_pusat) || 0;
 
         sumTargetSetor += targetSetor;
         sumRealisasiSetor += realisasiSetor;
@@ -1280,7 +1282,9 @@
             omset_kirim: 0,
             fee_terima: 0,
             fee_kirim: 0,
-            total_fee: 0
+            total_fee: 0,
+            estimasi: 0,
+            setor_pusat: 0
           };
         }
         harianMap[key].omset_terima += Number(item.jumlah) || 0;
@@ -1289,7 +1293,7 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
         }
         harianMap[key].omset_kirim += Number(item.jumlah) || 0;
       });
@@ -1297,12 +1301,15 @@
         if (!activeCabMatrix.includes(item.cabang)) return;
         const key = `${item.tanggal}|${item.cabang}`;
         if (!harianMap[key]) {
-          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0 };
+          harianMap[key] = { tanggal: item.tanggal, is_sisa: false, label_sisa: '', cabang: item.cabang, omset_terima: 0, omset_terkirim: 0, omset_kirim: 0, fee_terima: 0, fee_kirim: 0, total_fee: 0, estimasi: 0, setor_pusat: 0 };
         }
+        const estItem = (Number(item.estimasi) || 0) > 0 ? Number(item.estimasi) : (Number(item.kewajiban) || 0);
         harianMap[key].omset_terkirim += Number(item.omset_terkirim) || 0;
         harianMap[key].fee_terima += Number(item.fee_terima) || 0;
         harianMap[key].fee_kirim += Number(item.fee_kirim) || 0;
         harianMap[key].total_fee += Number(item.total_fee) || 0;
+        harianMap[key].estimasi += estItem;
+        harianMap[key].setor_pusat += Number(item.setor_pusat) || 0;
       });
 
       const listRekapHarian = Object.values(harianMap).sort((a, b) => {
@@ -1313,7 +1320,7 @@
 
       document.getElementById('titleFeeHarian').innerHTML = `<i class="bi bi-calendar-check text-primary me-2"></i>Rekap Omset &amp; Fee Harian (${labelFilter})`;
       document.getElementById('tblFeeHarianBody').innerHTML = listRekapHarian.length === 0
-        ? '<tr><td colspan="8" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
+        ? '<tr><td colspan="10" class="text-center py-4 text-muted">Belum ada data rekap harian periode ini</td></tr>'
         : listRekapHarian.map(i => {
             const labelTanggal = i.is_sisa
               ? `<span class="badge bg-warning-subtle text-warning-emphasis fw-bold">${i.label_sisa}</span>`
@@ -1328,6 +1335,8 @@
                 <td class="text-end text-success fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_terima)}</td>
                 <td class="text-end text-primary fw-bold">${i.is_sisa ? '-' : formatRupiah(i.fee_kirim)}</td>
                 <td class="text-end col-total-cabang">${i.is_sisa ? '-' : formatRupiah(i.total_fee)}</td>
+                <td class="text-end fw-semibold">${i.is_sisa ? '-' : formatRupiah(i.estimasi)}</td>
+                <td class="text-end text-info fw-bold">${i.is_sisa ? '-' : formatRupiah(i.setor_pusat)}</td>
               </tr>
             `;
           }).join('');

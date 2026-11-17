@@ -75,12 +75,11 @@ def get_spreadsheet():
     return client.open_by_key(SPREADSHEET_ID)
 
 def fetch_all_sheets_batch(ss) -> dict:
-    """Membaca seluruh sheet dalam 1x API call (values_batch_get) dengan range luas A:DZ."""
+    """Membaca seluruh sheet dalam 1x API call (values_batch_get)."""
     sheet_names = [
         "SETORAN_CABANG",
         "SETOR_TUNAI_BANK",
         "PENGELUARAN",
-        "SETORAN_PUSAT",
         "OMSET_TERIMA",
         "OMSET_KIRIM",
         "PENGELUARAN_GUDANG",
@@ -117,7 +116,7 @@ def parse_num(val) -> float:
 def parse_date_slash(raw_tgl) -> Optional[datetime]:
     if not raw_tgl:
         return None
-    s = str(raw_tgl).strip().split(" ")[0]  # buang jam jika ada timestamp
+    s = str(raw_tgl).strip().split(" ")[0]
     for fmt in ("%d/%m/%Y", "%d/%m/%y", "%Y-%m-%d", "%Y/%m/%d", "%d-%m-%Y", "%d-%m-%y"):
         try:
             return datetime.strptime(s, fmt)
@@ -153,7 +152,6 @@ def parse_date_matrix(raw_tgl) -> Optional[datetime]:
                 except ValueError:
                     pass
         elif len(parts) == 2:
-            # Jika format di sheet hanya tanggal & bulan tanpa tahun (misal 17-Nov atau 17/11)
             try:
                 day = int(parts[0])
                 m = int(parts[1]) if parts[1].isdigit() else months.get(parts[1].lower()[:3])
@@ -183,25 +181,30 @@ def parse_periode_bulan_tahun(raw_val) -> Optional[tuple]:
         return (dt.month, dt.year)
     return None
 
-# --- AUTO SYNC BIAYA ADMIN BANK ---
-def sync_admin_bank(ss, rows_pusat=None, rows_keluar=None):
+# --- AUTO SYNC BIAYA ADMIN BANK DARI SHEET FEE_OMSET ---
+def sync_admin_bank_from_fee(ss, rows_fee=None, rows_keluar=None):
     try:
-        if rows_pusat is None:
-            rows_pusat = ss.worksheet("SETORAN_PUSAT").get_all_values()
+        if rows_fee is None:
+            rows_fee = ss.worksheet("FEE_OMSET").get_all_values()
         if rows_keluar is None:
             rows_keluar = ss.worksheet("PENGELUARAN").get_all_values()
     except gspread.WorksheetNotFound:
         return
 
     cabang_per_tgl = {}
-    if len(rows_pusat) > 1:
-        for r in rows_pusat[1:]:
-            if len(r) >= 5:
-                tgl_str = str(r[1]).strip()
-                cb = str(r[2]).strip().upper()
-                realisasi = parse_num(r[4])
-                if realisasi > 0 and tgl_str:
-                    cabang_per_tgl.setdefault(tgl_str, set()).add(cb)
+    if len(rows_fee) >= 3:
+        for r in rows_fee[2:]:
+            if not r or not r[0]:
+                continue
+            d = parse_date_matrix(r[0])
+            if not d:
+                continue
+            tgl_str = d.strftime("%d/%m/%Y")
+            for cab, m in FEE_OMSET_MAP.items():
+                if len(r) > m["setor_pusat"]:
+                    realisasi = parse_num(r[m["setor_pusat"]])
+                    if realisasi > 0:
+                        cabang_per_tgl.setdefault(tgl_str, set()).add(cab)
 
     baris_admin = {}
     if len(rows_keluar) > 1:
@@ -263,9 +266,9 @@ async def get_dashboard(bulan: int, tahun: int):
         ss = get_spreadsheet()
         sheets_data = fetch_all_sheets_batch(ss)
 
-        raw_pusat = sheets_data.get("SETORAN_PUSAT", [])
+        rows_fee = sheets_data.get("FEE_OMSET", [])
         raw_keluar = sheets_data.get("PENGELUARAN", [])
-        sync_admin_bank(ss, raw_pusat, raw_keluar)
+        sync_admin_bank_from_fee(ss, rows_fee, raw_keluar)
 
         start_date = datetime(tahun, bulan, 1)
 
@@ -285,18 +288,33 @@ async def get_dashboard(bulan: int, tahun: int):
         riwayat_keluar = []
         riwayat_pusat = []
 
-        # --- 0. BACA SETORAN_CABANG (DATA INPUT MANUAL SEBELUMNYA) ---
+        # --- 0. BACA SETORAN_CABANG (PENAMBAHAN SALDO PEMILIK / SALDO AWAL / NON-GUDANG) ---
         existing_setoran_keys = set()
         rows_setoran_manual = sheets_data.get("SETORAN_CABANG", [])[1:]
         for r in rows_setoran_manual:
-            if len(r) < 5:
+            if not r:
                 continue
-            d = parse_date_slash(r[1])
-            cb = str(r[2]).replace(" .", "").strip().upper()
-            nom = parse_num(r[3])
-            jenis = str(r[4]).strip().upper()
+            # Deteksi apakah kolom A berisi Tanggal atau Nomor Urut
+            d_col0 = parse_date_matrix(r[0]) if len(r) > 0 else None
+            d_col1 = parse_date_matrix(r[1]) if len(r) > 1 else None
+
+            if d_col0 and len(r) >= 4:
+                d = d_col0
+                cb = str(r[1]).replace(" .", "").strip().upper() or "PEMILIK"
+                nom = parse_num(r[2])
+                jenis = str(r[3]).strip().upper()
+                ket = str(r[4]).strip() if len(r) > 4 else ""
+            elif d_col1 and len(r) >= 5:
+                d = d_col1
+                cb = str(r[2]).replace(" .", "").strip().upper() or "PEMILIK"
+                nom = parse_num(r[3])
+                jenis = str(r[4]).strip().upper()
+                ket = str(r[5]).strip() if len(r) > 5 else ""
+            else:
+                continue
+
             if d and nom > 0:
-                is_cash = "CASH" in jenis
+                is_cash = "CASH" in jenis or "TUNAI" in jenis
                 jenis_clean = "CASH" if is_cash else "TRANSFER"
                 tgl_fmt = d.strftime("%d/%m/%Y")
                 existing_setoran_keys.add((tgl_fmt, cb, jenis_clean))
@@ -316,7 +334,9 @@ async def get_dashboard(bulan: int, tahun: int):
                         "tanggal": tgl_fmt,
                         "cabang": cb,
                         "nominal": nom,
-                        "jenis": jenis_clean
+                        "jenis": jenis_clean,
+                        "keterangan": ket,
+                        "is_manual": True
                     })
 
         # --- 1. MODUL KAS GUDANG (SEKALIGUS SUMBER SETORAN CABANG OTOMATIS KE PENAMPUNG) ---
@@ -331,7 +351,6 @@ async def get_dashboard(bulan: int, tahun: int):
         riwayat_gudang_harian = []
         riwayat_keluar_gudang = []
 
-        # Baca PENGELUARAN_GUDANG
         rows_kg = sheets_data.get("PENGELUARAN_GUDANG", [])
         if len(rows_kg) >= 3:
             for r in rows_kg[2:]:
@@ -349,7 +368,6 @@ async def get_dashboard(bulan: int, tahun: int):
                                 "keterangan": r[m["ket"]] if len(r) > m["ket"] and r[m["ket"]] else "-"
                             })
 
-        # Baca KAS_Gudang -> mengisi Kas Gudang & melengkapi Setoran Cabang ke Kas Penampung jika belum ada di SETORAN_CABANG
         rows_gdg = sheets_data.get("KAS_Gudang", [])
         if len(rows_gdg) >= 3:
             for r in rows_gdg[2:]:
@@ -376,7 +394,6 @@ async def get_dashboard(bulan: int, tahun: int):
                         v_cash = parse_num(r[m["s_cash"]])
                         v_tf   = parse_num(r[m["s_tf"]])
 
-                        # Setoran Cabang ke Kas Penampung (hanya ditambahkan jika tanggal+cabang+jenis belum ada di SETORAN_CABANG)
                         if v_cash > 0 and (tgl_fmt, cab, "CASH") not in existing_setoran_keys:
                             if d < start_date:
                                 saldo_awal_cash += v_cash
@@ -387,7 +404,9 @@ async def get_dashboard(bulan: int, tahun: int):
                                     "tanggal": tgl_fmt,
                                     "cabang": cab,
                                     "nominal": v_cash,
-                                    "jenis": "CASH"
+                                    "jenis": "CASH",
+                                    "keterangan": "",
+                                    "is_manual": False
                                 })
 
                         tf_ke_penampung = 0.0 if cab == "PURWOKERTO" else v_tf
@@ -401,10 +420,11 @@ async def get_dashboard(bulan: int, tahun: int):
                                     "tanggal": tgl_fmt,
                                     "cabang": cab,
                                     "nominal": tf_ke_penampung,
-                                    "jenis": "TRANSFER"
+                                    "jenis": "TRANSFER",
+                                    "keterangan": "",
+                                    "is_manual": False
                                 })
 
-                        # Rekap Harian & Bulanan Kas Gudang
                         if d.month == bulan and d.year == tahun:
                             if any([v_msk, v_bbm, v_lb, v_tot, v_lok, v_tmsk, v_tdst, v_cash, v_tf]):
                                 rec = rekap_gudang_cab[cab]
@@ -426,7 +446,6 @@ async def get_dashboard(bulan: int, tahun: int):
                                     "s_cash": v_cash, "s_tf": v_tf
                                 })
 
-        # Baca CONTROL_GUDANG (Filter per Periode Bulan & Tahun)
         ctrl_gudang = {
             cab: {
                 "saldo_awal": 0.0, "aktual_cash": 0.0,
@@ -519,7 +538,7 @@ async def get_dashboard(bulan: int, tahun: int):
                         "keterangan": r[5] if len(r) > 5 else "-"
                     })
 
-        # --- 3. MODUL OMSET MATRIKS (4 SUB-KOLOM) ---
+        # --- 3. MODUL OMSET MATRIKS (4 SUB-KOLOM, TERMASUK BARIS SISA BULAN SEBELUMNYA) ---
         def baca_matriks_omset(nama_sheet):
             rekap_cb = {
                 cab: {
@@ -555,7 +574,6 @@ async def get_dashboard(bulan: int, tahun: int):
                         tgl_fmt = d.strftime("%d/%m/%Y")
                     elif "SISA" in upper_col0:
                         is_sisa_row = True
-                        # Tentukan periode bulan dari tanggal terdekat di bawahnya (sebelum tgl 1) atau di atasnya (setelah tgl 30)
                         context_dt = None
                         for next_d in parsed_dates[idx + 1:]:
                             if next_d:
@@ -608,7 +626,7 @@ async def get_dashboard(bulan: int, tahun: int):
         tot_terima, rekap_terima, riw_terima = baca_matriks_omset("OMSET_TERIMA")
         tot_kirim, rekap_kirim, riw_kirim = baca_matriks_omset("OMSET_KIRIM")
 
-        # --- 4. MODUL FEE TERIMA & FEE KIRIM (DARI SHEET FEE_OMSET 14 KOLOM/CABANG) ---
+        # --- 4. MODUL FEE TERIMA, FEE KIRIM, ESTIMASI & SETORAN PUSAT (DARI SHEET FEE_OMSET) ---
         rekap_fee_cab = {
             cab: {
                 "omset_terkirim": 0.0,
@@ -619,13 +637,13 @@ async def get_dashboard(bulan: int, tahun: int):
                 "kewajiban": 0.0,
                 "estimasi": 0.0,
                 "setor_pusat": 0.0,
-                "setor_pusat_penampung": 0.0,
                 "selisih_setor_pusat": 0.0
             } for cab in DAFTAR_CABANG
         }
         riwayat_fee_harian = []
+        estimasi_kewajiban = {cab: 0.0 for cab in DAFTAR_CABANG}
+        rincian_estimasi_tanggal = []
 
-        rows_fee = sheets_data.get("FEE_OMSET", [])
         if len(rows_fee) >= 3:
             for r in rows_fee[2:]:
                 if not r or not r[0]:
@@ -633,7 +651,17 @@ async def get_dashboard(bulan: int, tahun: int):
                 if "TOTAL" in str(r[0]).upper():
                     continue
                 d = parse_date_matrix(r[0])
-                if d and d.month == bulan and d.year == tahun:
+                if not d:
+                    continue
+
+                # Kurangi saldo awal bank dengan realisasi setor pusat bulan-bulan sebelumnya
+                if d < start_date:
+                    for cab, m in FEE_OMSET_MAP.items():
+                        if len(r) > m["setor_pusat"]:
+                            v_pusat_prev = parse_num(r[m["setor_pusat"]])
+                            if v_pusat_prev > 0:
+                                saldo_awal_bank -= v_pusat_prev
+                elif d.month == bulan and d.year == tahun:
                     tgl_fmt = d.strftime("%d/%m/%Y")
                     for cab, m in FEE_OMSET_MAP.items():
                         if len(r) > m["fee_kirim"]:
@@ -663,6 +691,24 @@ async def get_dashboard(bulan: int, tahun: int):
                                 rec["estimasi"] += v_est
                                 rec["setor_pusat"] += v_pusat
 
+                                if v_pusat > 0:
+                                    setor_pusat_tf += v_pusat
+                                    riwayat_pusat.insert(0, {
+                                        "tanggal": tgl_fmt,
+                                        "cabang": cab,
+                                        "estimasi": v_est if v_est > 0 else v_kew,
+                                        "setoran": v_pusat
+                                    })
+
+                                target_harian = v_est if v_est > 0 else v_kew
+                                selisih_harian = target_harian - v_pusat
+                                if selisih_harian > 0:
+                                    rincian_estimasi_tanggal.append({
+                                        "tanggal": tgl_fmt,
+                                        "cabang": cab,
+                                        "nominal": selisih_harian
+                                    })
+
                                 riwayat_fee_harian.append({
                                     "tanggal": tgl_fmt,
                                     "cabang": cab,
@@ -676,50 +722,12 @@ async def get_dashboard(bulan: int, tahun: int):
                                     "setor_pusat": v_pusat
                                 })
 
-        # --- 5. SINKRONISASI SETORAN PUSAT (KAS PENAMPUNG) <-> REKAP FEE ---
-        setor_pusat_per_cab = {cab: 0.0 for cab in DAFTAR_CABANG}
-        for r in raw_pusat[1:]:
-            if len(r) < 5:
-                continue
-            d = parse_date_slash(r[1])
-            cb = str(r[2]).replace(" .", "").strip().upper()
-            est = parse_num(r[3])
-            real = parse_num(r[4])
-            if d:
-                if d < start_date:
-                    if real > 0:
-                        saldo_awal_bank -= real
-                elif d.month == bulan and d.year == tahun:
-                    tgl_fmt = d.strftime("%d/%m/%Y")
-                    if real > 0:
-                        setor_pusat_tf += real
-                        if cb in setor_pusat_per_cab:
-                            setor_pusat_per_cab[cb] += real
-                        riwayat_pusat.insert(0, {
-                            "tanggal": tgl_fmt,
-                            "cabang": cb,
-                            "estimasi": est,
-                            "setoran": real
-                        })
-
-        estimasi_kewajiban = {cab: 0.0 for cab in DAFTAR_CABANG}
-        rincian_estimasi_tanggal = []
         tgl_estimasi_terakhir = ""
-
         for cab in DAFTAR_CABANG:
             f_rec = rekap_fee_cab[cab]
-            f_rec["setor_pusat_penampung"] = setor_pusat_per_cab[cab]
             target_setor = f_rec["estimasi"] if f_rec["estimasi"] > 0 else f_rec["kewajiban"]
-            f_rec["selisih_setor_pusat"] = f_rec["setor_pusat_penampung"] - target_setor
-
-            sisa_kewajiban = max(0.0, target_setor - setor_pusat_per_cab[cab])
-            estimasi_kewajiban[cab] = sisa_kewajiban
-            if sisa_kewajiban > 0:
-                rincian_estimasi_tanggal.append({
-                    "tanggal": f"Rekap {bulan:02d}/{tahun}",
-                    "cabang": cab,
-                    "nominal": sisa_kewajiban
-                })
+            f_rec["selisih_setor_pusat"] = f_rec["setor_pusat"] - target_setor
+            estimasi_kewajiban[cab] = max(0.0, target_setor - f_rec["setor_pusat"])
 
         if riwayat_fee_harian:
             tgl_estimasi_terakhir = sorted([x["tanggal"] for x in riwayat_fee_harian])[-1]
@@ -790,11 +798,33 @@ async def post_setor_bank(data: SetorBankInput):
 async def post_setor_pusat(data: SetorPusatInput):
     try:
         ss = get_spreadsheet()
-        ws = ss.worksheet("SETORAN_PUSAT")
-        tgl_fmt = datetime.strptime(data.tanggal, "%Y-%m-%d").strftime("%d/%m/%Y")
-        no = len(ws.get_all_values())
-        ws.append_row([no, tgl_fmt, data.cabang, data.estimasi, data.setoran, data.keterangan or "Setoran Transfer Pusat", datetime.now().strftime("%d/%m/%Y %H:%M:%S")])
-        return {"success": True, "message": f"Setoran pusat cabang {data.cabang} berhasil dicatat!"}
+        ws = ss.worksheet("FEE_OMSET")
+        cabang = data.cabang.strip().upper()
+        if cabang not in FEE_OMSET_MAP:
+            return {"success": False, "message": "Cabang tidak valid!"}
+
+        target_dt = datetime.strptime(data.tanggal, "%Y-%m-%d")
+        all_rows = ws.get_all_values()
+        target_row_idx = None
+
+        for idx, r in enumerate(all_rows[2:], start=3):
+            if r and r[0]:
+                d = parse_date_matrix(r[0])
+                if d and d.year == target_dt.year and d.month == target_dt.month and d.day == target_dt.day:
+                    target_row_idx = idx
+                    break
+
+        col_pusat = FEE_OMSET_MAP[cabang]["setor_pusat"] + 1  # 1-indexed gspread
+        if target_row_idx:
+            existing_val = parse_num(all_rows[target_row_idx - 1][col_pusat - 1]) if len(all_rows[target_row_idx - 1]) >= col_pusat else 0.0
+            ws.update_cell(target_row_idx, col_pusat, existing_val + data.setoran)
+        else:
+            next_row = len(all_rows) + 1
+            tgl_str = target_dt.strftime("%d-%b-%y")
+            ws.update_cell(next_row, 1, tgl_str)
+            ws.update_cell(next_row, col_pusat, data.setoran)
+
+        return {"success": True, "message": f"Setoran pusat cabang {cabang} berhasil dicatat ke FEE_OMSET!"}
     except Exception as e:
         return {"success": False, "message": str(e)}
 
