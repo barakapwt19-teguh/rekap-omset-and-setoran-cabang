@@ -291,7 +291,11 @@ async def get_dashboard(bulan: int, tahun: int):
 
         # --- 0. BACA SETORAN_CABANG (PENAMBAHAN SALDO PEMILIK / SALDO AWAL / NON-GUDANG) ---
         existing_setoran_keys = set()
-        rows_setoran_manual = sheets_data.get("SETORAN_CABANG", [])[1:]
+        rows_setoran_manual = (
+            sheets_data.get("SETORAN CABANG")
+            or sheets_data.get("SETORAN_CABANG")
+            or []
+        )[1:]
         for r in rows_setoran_manual:
             if not r:
                 continue
