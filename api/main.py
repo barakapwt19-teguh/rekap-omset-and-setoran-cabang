@@ -87,6 +87,7 @@ def fetch_all_sheets_batch(ss) -> dict:
         "KAS_Gudang",
         "CONTROL_GUDANG",
         "FEE_OMSET",
+        "SETORAN_PEMILIK",
     ]
     existing_titles = {ws.title for ws in ss.worksheets()}
     valid_names = [name for name in sheet_names if name in existing_titles]
@@ -289,8 +290,7 @@ async def get_dashboard(bulan: int, tahun: int):
         riwayat_keluar = []
         riwayat_pusat = []
 
-        # --- 0. BACA SETORAN_CABANG (PENAMBAHAN SALDO PEMILIK / SALDO AWAL / NON-GUDANG) ---
-        existing_setoran_keys = set()
+        # --- 0A. BACA SETORAN CABANG (TAMBAHAN SALDO PEMILIK / SALDO AWAL / NON-GUDANG) ---
         rows_setoran_manual = (
             sheets_data.get("SETORAN CABANG")
             or sheets_data.get("SETORAN_CABANG")
@@ -299,30 +299,28 @@ async def get_dashboard(bulan: int, tahun: int):
         for r in rows_setoran_manual:
             if not r:
                 continue
-            # Deteksi apakah kolom A berisi Tanggal atau Nomor Urut
             d_col0 = parse_date_matrix(r[0]) if len(r) > 0 else None
             d_col1 = parse_date_matrix(r[1]) if len(r) > 1 else None
 
-            if d_col0 and len(r) >= 4:
-                d = d_col0
-                cb = str(r[1]).replace(" .", "").strip().upper() or "PEMILIK"
-                nom = parse_num(r[2])
-                jenis = str(r[3]).strip().upper()
-                ket = str(r[4]).strip() if len(r) > 4 else ""
-            elif d_col1 and len(r) >= 5:
+            if d_col1 and len(r) >= 4:
                 d = d_col1
-                cb = str(r[2]).replace(" .", "").strip().upper() or "PEMILIK"
+                cb = str(r[2]).replace(" .", "").strip().upper() or "TAMBAHAN DARI PEMILIK"
                 nom = parse_num(r[3])
-                jenis = str(r[4]).strip().upper()
+                jenis = str(r[4]).strip().upper() if len(r) > 4 else "TRANSFER"
                 ket = str(r[5]).strip() if len(r) > 5 else ""
+            elif d_col0 and len(r) >= 3:
+                d = d_col0
+                cb = str(r[1]).replace(" .", "").strip().upper() or "TAMBAHAN DARI PEMILIK"
+                nom = parse_num(r[2])
+                jenis = str(r[3]).strip().upper() if len(r) > 3 else "TRANSFER"
+                ket = str(r[4]).strip() if len(r) > 4 else ""
             else:
                 continue
 
-            if d and nom > 0:
+            if d and nom != 0:
                 is_cash = "CASH" in jenis or "TUNAI" in jenis
                 jenis_clean = "CASH" if is_cash else "TRANSFER"
                 tgl_fmt = d.strftime("%d/%m/%Y")
-                existing_setoran_keys.add((tgl_fmt, cb, jenis_clean))
 
                 if d < start_date:
                     if is_cash:
@@ -513,6 +511,40 @@ async def get_dashboard(bulan: int, tahun: int):
                     ctrl_gudang[cb]["tf_cust_cabang"] = parse_num(r[7]) if len(r) > 7 else 0.0
                     ctrl_gudang[cb]["setor_pemilik"] = parse_num(r[8]) if len(r) > 8 else 0.0
 
+        # --- 1B. BACA SETORAN LANGSUNG KE PEMILIK (CASH & TRANSFER) ---
+        pemilik_per_cab = {
+            cab: {"cash": 0.0, "transfer": 0.0, "total": 0.0}
+            for cab in DAFTAR_CABANG
+        }
+        riwayat_pemilik = []
+        rows_pemilik = sheets_data.get("SETORAN_PEMILIK", [])[1:]
+        for r in rows_pemilik:
+            if len(r) < 5:
+                continue
+            d = parse_date_matrix(r[1])
+            cb = str(r[2]).replace(" .", "").strip().upper()
+            metode = str(r[3]).strip().upper()
+            nom = parse_num(r[4])
+            ket = str(r[5]).strip() if len(r) > 5 and r[5] else "-"
+
+            if d and d.month == bulan and d.year == tahun and nom != 0:
+                is_cash = "CASH" in metode or "TUNAI" in metode
+                metode_clean = "CASH" if is_cash else "TRANSFER"
+                if cb in pemilik_per_cab:
+                    if is_cash:
+                        pemilik_per_cab[cb]["cash"] += nom
+                    else:
+                        pemilik_per_cab[cb]["transfer"] += nom
+                    pemilik_per_cab[cb]["total"] += nom
+
+                riwayat_pemilik.insert(0, {
+                    "tanggal": d.strftime("%d/%m/%Y"),
+                    "cabang": cb,
+                    "metode": metode_clean,
+                    "nominal": nom,
+                    "keterangan": ket
+                })
+
         for cab, rec in rekap_gudang_cab.items():
             c_data = ctrl_gudang[cab]
             rec["saldo_awal"] = c_data["saldo_awal"]
@@ -521,7 +553,11 @@ async def get_dashboard(bulan: int, tahun: int):
             rec["kasbon_baru"] = c_data["kasbon_baru"]
             rec["cicilan_masuk"] = c_data["cicilan_masuk"]
             rec["tf_cust_cabang"] = c_data["tf_cust_cabang"]
-            rec["setor_pemilik"] = c_data["setor_pemilik"]
+
+            # ---> UBAH BARIS INI <---
+            pemilik_bulan_ini = pemilik_per_cab[cab]["total"]
+            rec["setor_pemilik"] = pemilik_bulan_ini if pemilik_bulan_ini != 0 else c_data["setor_pemilik"]
+
             rec["sisa_kasbon"] = c_data["kasbon_lama"] + c_data["kasbon_baru"] - c_data["cicilan_masuk"]
 
             tot_pemasukan = rec["msk"] + rec["lb"] + rec["lokalan"] + rec["tag_msk"] + rec["cicilan_masuk"]
@@ -837,6 +873,10 @@ async def get_dashboard(bulan: int, tahun: int):
                 "rekapPerCabang": rekap_fee_cab,
                 "riwayatHarian": riwayat_fee_harian
             },
+            "pemilik": {
+                "perCabang": pemilik_per_cab,
+                "riwayat": riwayat_pemilik
+            },
         })
     except Exception as e:
         return JSONResponse({"error": str(e)}, status_code=500)
@@ -925,3 +965,35 @@ async def tambah_pengeluaran_gudang(request: Request):
         return JSONResponse({"success": True, "message": f"Pengeluaran gudang {cabang} berhasil dicatat!"})
     except Exception as e:
         return JSONResponse({"success": False, "message": f"Gagal menyimpan: {str(e)}"}, status_code=500)
+
+class SetorPemilikInput(BaseModel):
+    tanggal: str
+    cabang: str
+    metode: str  # CASH atau TRANSFER
+    nominal: float
+    keterangan: Optional[str] = ""
+
+@app.post("/api/setor-pemilik")
+async def post_setor_pemilik(data: SetorPemilikInput):
+    try:
+        ss = get_spreadsheet()
+        try:
+            ws = ss.worksheet("SETORAN_PEMILIK")
+        except gspread.WorksheetNotFound:
+            ws = ss.add_worksheet(title="SETORAN_PEMILIK", rows=1000, cols=7)
+            ws.append_row(["NO", "TANGGAL", "CABANG", "METODE", "NOMINAL", "KETERANGAN", "TIMESTAMP"])
+
+        tgl_fmt = datetime.strptime(data.tanggal, "%Y-%m-%d").strftime("%d/%m/%Y")
+        no = len(ws.get_all_values())
+        ws.append_row([
+            no,
+            tgl_fmt,
+            data.cabang.strip().upper(),
+            data.metode.strip().upper(),
+            data.nominal,
+            data.keterangan or "Setoran Langsung ke Pemilik",
+            datetime.now().strftime("%d/%m/%Y %H:%M:%S")
+        ])
+        return {"success": True, "message": f"Setoran ke pemilik ({data.cabang} - {data.metode}) berhasil dicatat!"}
+    except Exception as e:
+        return {"success": False, "message": str(e)}

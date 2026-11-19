@@ -446,7 +446,15 @@
                   <div class="fw-bold text-primary small mb-2">CATATAN TAGIHAN &amp; TRANSFER CUSTOMER</div>
                   <div class="d-flex justify-content-between small py-1"><span>Total Tagihan Dist+Retur</span><span class="fw-semibold text-danger tabular-nums" id="gTagihanDist">Rp 0</span></div>
                   <div class="d-flex justify-content-between small py-1"><span>Transfer Masuk Customer (Cabang)</span><span class="fw-bold text-warning-emphasis tabular-nums" id="gTfCustCabang">Rp 0</span></div>
-                  <div class="d-flex justify-content-between small py-1 border-bottom pb-2 mb-3"><span>Setoran / Transfer Langsung ke Pemilik</span><span class="fw-bold text-primary tabular-nums" id="gSetorPemilik">Rp 0</span></div>
+                  <div class="d-flex justify-content-between align-items-center small py-1 border-bottom pb-2 mb-3">
+                    <span style="cursor: pointer;" onclick="toggleTableDrawer('modul-gudang', 'drawerSetorPemilik')">
+                      Setoran / Transfer Langsung ke Pemilik <i class="bi bi-table text-primary ms-1"></i>
+                    </span>
+                    <div class="d-flex align-items-center gap-2">
+                      <span class="fw-bold text-primary tabular-nums" id="gSetorPemilik" style="cursor: pointer;" onclick="toggleTableDrawer('modul-gudang', 'drawerSetorPemilik')">Rp 0</span>
+                      <button type="button" class="btn btn-xs btn-soft-blue py-0 px-2" style="font-size: 0.72rem;" data-bs-toggle="modal" data-bs-target="#modalSetorPemilik">+ Catat</button>
+                    </div>
+                  </div>
                 </div>
 
                 <div class="p-2 rounded-3 bg-light">
@@ -513,6 +521,37 @@
                   </tr>
                 </thead>
                 <tbody id="tblGudangHarianBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWER 4 GUDANG: RIWAYAT SETORAN LANGSUNG KE PEMILIK -->
+        <div class="collapse mb-4" id="drawerSetorPemilik">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-person-check-fill text-primary me-2"></i>Riwayat Setoran Langsung ke Pemilik (Cash &amp; Transfer)</h6>
+                <span class="badge-total-tabel bg-success-subtle text-success" id="rTotalPemilikCash">Cash: Rp 0</span>
+                <span class="badge-total-tabel bg-primary-subtle text-primary" id="rTotalPemilikTf">Transfer: Rp 0</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalSetorPemilik">+ Catat Setor Pemilik</button>
+                <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerSetorPemilik')"><i class="bi bi-x-lg"></i></button>
+              </div>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead>
+                  <tr>
+                    <th>Tanggal</th>
+                    <th>Cabang</th>
+                    <th class="text-center">Metode</th>
+                    <th class="text-end">Nominal</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
+                <tbody id="tblSetorPemilikBody" class="tabular-nums"></tbody>
               </table>
             </div>
           </div>
@@ -759,6 +798,55 @@
   <!-- MODAL 4: PENGELUARAN GUDANG (OPERASIONAL NON-BBM) -->
   <div class="modal fade" id="modalPengeluaranGudang" tabindex="-1"><div class="modal-dialog modal-dialog-centered"><div class="modal-content border-0 rounded-4 shadow"><div class="modal-header border-0 pb-0"><h5 class="fw-bold modal-title">Pengeluaran Operasional Gudang (Non-BBM)</h5><button type="button" class="btn-close" data-bs-dismiss="modal"></button></div><form onsubmit="submitForm(event, '/api/pengeluaran-gudang', 'modalPengeluaranGudang', () => ({ tanggal: document.getElementById('tglKeluarGdg').value, cabang: document.getElementById('cabangKeluarGdg').value, nominal: Number(document.getElementById('nomKeluarGdg').value), kategori: document.getElementById('katKeluarGdg').value, keterangan: document.getElementById('ketKeluarGdg').value }))"><div class="modal-body"><div class="mb-3"><label class="form-label small fw-semibold">Tanggal</label><input type="date" id="tglKeluarGdg" class="form-control rounded-3" required></div><div class="mb-3"><label class="form-label small fw-semibold">Cabang Gudang</label><select id="cabangKeluarGdg" class="form-select rounded-3" required><option value="PURWOKERTO">PURWOKERTO</option><option value="KEBUMEN">KEBUMEN</option><option value="CILACAP">CILACAP</option><option value="PURBALINGGA">PURBALINGGA</option><option value="BANJARNEGARA">BANJARNEGARA</option><option value="BANYUMAS SELATAN">BANYUMAS SELATAN</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Nominal (Rp)</label><input type="number" id="nomKeluarGdg" class="form-control rounded-3" min="1" required></div><div class="mb-3"><label class="form-label small fw-semibold">Kategori</label><select id="katKeluarGdg" class="form-select rounded-3" required><option value="Operasional Gudang">Operasional Gudang</option><option value="ATK & Lakban">ATK &amp; Lakban</option><option value="Konsumsi / Lembur">Konsumsi / Lembur</option><option value="Perawatan / Servis">Perawatan / Servis</option><option value="Lain-Lain">Lain-Lain</option></select></div><div class="mb-3"><label class="form-label small fw-semibold">Keterangan</label><input type="text" id="ketKeluarGdg" class="form-control rounded-3" placeholder="Contoh: Beli lakban & plastik wrapping" required></div></div><div class="modal-footer border-0 pt-0"><button type="submit" class="btn btn-blue-modern w-100">Simpan Pengeluaran Gudang</button></div></form></div></div></div>
 
+  <!-- MODAL 5: SETOR LANGSUNG KE PEMILIK -->
+  <div class="modal fade" id="modalSetorPemilik" tabindex="-1">
+    <div class="modal-dialog modal-dialog-centered">
+      <div class="modal-content border-0 rounded-4 shadow">
+        <div class="modal-header border-0 pb-0">
+          <h5 class="fw-bold modal-title">Catat Setoran Langsung ke Pemilik</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+        </div>
+        <form onsubmit="submitForm(event, '/api/setor-pemilik', 'modalSetorPemilik', () => ({ tanggal: document.getElementById('tglPemilik').value, cabang: document.getElementById('cabangPemilik').value, metode: document.getElementById('metodePemilik').value, nominal: Number(document.getElementById('nomPemilik').value), keterangan: document.getElementById('ketPemilik').value }))">
+          <div class="modal-body">
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Tanggal</label>
+              <input type="date" id="tglPemilik" class="form-control rounded-3" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Cabang Asal</label>
+              <select id="cabangPemilik" class="form-select rounded-3" required>
+                <option value="PURWOKERTO">PURWOKERTO</option>
+                <option value="KEBUMEN">KEBUMEN</option>
+                <option value="CILACAP">CILACAP</option>
+                <option value="PURBALINGGA">PURBALINGGA</option>
+                <option value="BANJARNEGARA">BANJARNEGARA</option>
+                <option value="BANYUMAS SELATAN">BANYUMAS SELATAN</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Metode Penyerahan</label>
+              <select id="metodePemilik" class="form-select rounded-3" required>
+                <option value="CASH">CASH (Tunai Langsung)</option>
+                <option value="TRANSFER">TRANSFER (Rekening Pemilik)</option>
+              </select>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Nominal (Rp)</label>
+              <input type="number" id="nomPemilik" class="form-control rounded-3" min="1" required>
+            </div>
+            <div class="mb-3">
+              <label class="form-label small fw-semibold">Keterangan</label>
+              <input type="text" id="ketPemilik" class="form-control rounded-3" placeholder="Contoh: Diambil tunai pemilik di gudang">
+            </div>
+          </div>
+          <div class="modal-footer border-0 pt-0">
+            <button type="submit" class="btn btn-blue-modern w-100">Simpan Catatan</button>
+          </div>
+        </form>
+      </div>
+    </div>
+  </div>
+
   <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/js/bootstrap.bundle.min.js"></script>
   <script>
     let cachedDashboardData = null;
@@ -839,8 +927,10 @@
       if (cabang !== 'ALL') {
         const selectModalPusat = document.getElementById('cabangPusat');
         const selectModalGdg = document.getElementById('cabangKeluarGdg');
+        const selectModalPemilik = document.getElementById('cabangPemilik');
         if (selectModalPusat) selectModalPusat.value = cabang;
         if (selectModalGdg) selectModalGdg.value = cabang;
+        if (selectModalPemilik) selectModalPemilik.value = cabang;
       }
       if (cachedDashboardData) {
         renderDashboardView(cachedDashboardData);
@@ -1080,6 +1170,27 @@
         document.getElementById('gTagihanDist').innerText = formatRupiah(sumTagDist);
         document.getElementById('gTfCustCabang').innerText = formatRupiah(sumTfCustCabang);
         document.getElementById('gSetorPemilik').innerText = formatRupiah(sumSetorPemilik);
+          const pemilikData = data.pemilik || { perCabang: {}, riwayat: [] };
+          const filteredPemilik = selectedCabang === 'ALL'
+            ? pemilikData.riwayat
+            : pemilikData.riwayat.filter(i => i.cabang === selectedCabang);
+
+          const totPemilikCash = filteredPemilik.filter(i => i.metode === 'CASH').reduce((a, b) => a + (Number(b.nominal) || 0), 0);
+          const totPemilikTf = filteredPemilik.filter(i => i.metode === 'TRANSFER').reduce((a, b) => a + (Number(b.nominal) || 0), 0);
+
+          document.getElementById('rTotalPemilikCash').innerText = `Cash: ${formatRupiah(totPemilikCash)}`;
+          document.getElementById('rTotalPemilikTf').innerText = `Transfer: ${formatRupiah(totPemilikTf)}`;
+          document.getElementById('tblSetorPemilikBody').innerHTML = filteredPemilik.length === 0
+            ? '<tr><td colspan="5" class="text-center py-4 text-muted">Belum ada catatan setoran langsung ke pemilik</td></tr>'
+            : filteredPemilik.map(i => `
+                <tr>
+                  <td class="small text-muted">${i.tanggal}</td>
+                  <td>${getBranchBadgeHtml(i.cabang)}</td>
+                  <td class="text-center"><span class="badge ${i.metode === 'CASH' ? 'bg-success-subtle text-success' : 'bg-primary-subtle text-primary'}">${i.metode}</span></td>
+                  <td class="text-end fw-bold">${formatRupiah(i.nominal)}</td>
+                  <td class="small text-muted">${i.keterangan}</td>
+                </tr>
+              `).join('');
 
         document.getElementById('rGdgKasbonLama').innerText = formatRupiah(sumKasbonLama);
         document.getElementById('rGdgSisaKasbon').innerText = formatRupiah(sumSisaKasbon);
