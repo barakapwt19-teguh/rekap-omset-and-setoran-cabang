@@ -527,9 +527,20 @@ async def get_dashboard(bulan: int, tahun: int):
             nom = parse_num(r[4])
             ket = str(r[5]).strip() if len(r) > 5 and r[5] else "-"
 
-            if d and d.month == bulan and d.year == tahun and nom != 0:
-                is_cash = "CASH" in metode or "TUNAI" in metode
-                metode_clean = "CASH" if is_cash else "TRANSFER"
+            if not d or nom == 0:
+                continue
+
+            is_cash = "CASH" in metode or "TUNAI" in metode
+            metode_clean = "CASH" if is_cash else "TRANSFER"
+            tgl_fmt = d.strftime("%d/%m/%Y")
+
+            if d < start_date:
+                # Potong saldo awal bulan berikutnya
+                if is_cash:
+                    saldo_awal_cash -= nom
+                elif cb != "PURWOKERTO":
+                    saldo_awal_bank -= nom
+            elif d.month == bulan and d.year == tahun:
                 if cb in pemilik_per_cab:
                     if is_cash:
                         pemilik_per_cab[cb]["cash"] += nom
@@ -537,8 +548,32 @@ async def get_dashboard(bulan: int, tahun: int):
                         pemilik_per_cab[cb]["transfer"] += nom
                     pemilik_per_cab[cb]["total"] += nom
 
+                # Potong Kas Penampung bulan berjalan
+                if is_cash:
+                    cash_masuk -= nom
+                    total_setoran_cabang -= nom
+                    riwayat_setoran.insert(0, {
+                        "tanggal": tgl_fmt,
+                        "cabang": cb,
+                        "nominal": -nom,
+                        "jenis": "CASH",
+                        "keterangan": f"Diambil Pemilik ({ket})",
+                        "is_manual": False
+                    })
+                elif cb != "PURWOKERTO":
+                    tf_masuk -= nom
+                    total_setoran_cabang -= nom
+                    riwayat_setoran.insert(0, {
+                        "tanggal": tgl_fmt,
+                        "cabang": cb,
+                        "nominal": -nom,
+                        "jenis": "TRANSFER",
+                        "keterangan": f"Diambil Pemilik ({ket})",
+                        "is_manual": False
+                    })
+
                 riwayat_pemilik.insert(0, {
-                    "tanggal": d.strftime("%d/%m/%Y"),
+                    "tanggal": tgl_fmt,
                     "cabang": cb,
                     "metode": metode_clean,
                     "nominal": nom,
