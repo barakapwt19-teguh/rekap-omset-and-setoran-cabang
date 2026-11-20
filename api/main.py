@@ -832,7 +832,8 @@ async def get_dashboard(bulan: int, tahun: int):
                                     })
 
                                 # Hanya tampilkan rincian per tanggal jika estimasi > 0 dan setor pusat masih kosong
-                                if v_est > 0 and v_pusat == 0:
+                                if v_est != 0 and v_pusat == 0:
+                                    estimasi_kewajiban[cab] += v_est
                                     rincian_estimasi_tanggal.append({
                                         "tanggal": tgl_fmt,
                                         "cabang": cab,
@@ -857,9 +858,10 @@ async def get_dashboard(bulan: int, tahun: int):
             f_rec = rekap_fee_cab[cab]
             target_setor = f_rec["estimasi"]
             f_rec["selisih_setor_pusat"] = f_rec["setor_pusat"] - target_setor
-            estimasi_kewajiban[cab] = max(0.0, target_setor - f_rec["setor_pusat"])
 
-        if riwayat_fee_harian:
+        if rincian_estimasi_tanggal:
+            tgl_estimasi_terakhir = sorted([x["tanggal"] for x in rincian_estimasi_tanggal])[-1]
+        elif riwayat_fee_harian:
             tgl_estimasi_terakhir = sorted([x["tanggal"] for x in riwayat_fee_harian])[-1]
 
         saldo_cash_akhir = saldo_awal_cash + cash_masuk - setor_bank - keluar_cash

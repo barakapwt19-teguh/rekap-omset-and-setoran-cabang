@@ -1051,11 +1051,16 @@
       document.getElementById('titleEstimasi').innerText = `Estimasi Kewajiban Setoran Pusat${subTitleEst}`;
 
       document.getElementById('tblEstimasiBody').innerHTML = listCabKas.map(cab => {
-        const nom = kas.estimasiKewajiban[cab] || 0;
-        const status = nom > 0
-          ? '<span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1 rounded-3">Belum Realisasi</span>'
-          : '<span class="badge-soft-sky">Lunas / Nihil</span>';
-        return `<tr><td>${getBranchBadgeHtml(cab)}</td><td class="text-end fw-bold text-primary">${formatRupiah(nom)}</td><td class="text-center">${status}</td></tr>`;
+        const nom = Number(kas.estimasiKewajiban[cab]) || 0;
+        let status = '<span class="badge-soft-sky">Lunas / Nihil</span>';
+        let textClass = 'text-primary';
+        if (nom > 0) {
+          status = '<span class="badge bg-warning-subtle text-warning-emphasis px-2 py-1 rounded-3">Belum Realisasi</span>';
+        } else if (nom < 0) {
+          status = '<span class="badge bg-success-subtle text-success px-2 py-1 rounded-3">Kelebihan Fee (-)</span>';
+          textClass = 'text-success';
+        }
+        return `<tr><td>${getBranchBadgeHtml(cab)}</td><td class="text-end fw-bold ${textClass}">${formatRupiah(nom)}</td><td class="text-center">${status}</td></tr>`;
       }).join('');
 
       const listRincianTgl = Array.isArray(kas.rincianEstimasiTanggal) ? kas.rincianEstimasiTanggal : [];
