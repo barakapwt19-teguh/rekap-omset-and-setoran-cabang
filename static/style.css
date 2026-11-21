@@ -25,6 +25,10 @@
   box-sizing: border-box;
 }
 
+html, body {
+  overflow-anchor: none;
+}
+
 body {
   font-family: 'Plus Jakarta Sans', -apple-system, BlinkMacSystemFont, sans-serif;
   background: linear-gradient(180deg, var(--bg-page-top) 0%, var(--bg-page-bottom) 100%);
@@ -32,6 +36,12 @@ body {
   color: var(--text-dark);
   padding-bottom: 4.5rem;
   -webkit-font-smoothing: antialiased;
+}
+
+/* Mode Pemilik (Read-Only) */
+body.role-pemilik [data-bs-toggle="modal"],
+body.role-pemilik .modal {
+  display: none !important;
 }
 
 .tabular-nums {
@@ -291,72 +301,135 @@ body {
   box-shadow: 0 4px 12px rgba(37, 99, 235, 0.32);
 }
 
-/* --- MODERN DATA TABLE & STICKY HEADER --- */
+/* =========================================================
+   MODERN DATA TABLE: STICKY HEADER 2 BARIS, RAPAT & FULL-WIDTH
+   ========================================================= */
 .table-modern-wrapper {
-  border-radius: 16px;
-  overflow: auto;
+  width: 100%;
+  border-radius: 14px;
+  overflow-x: auto;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
   border: 1px solid var(--border-subtle);
   background: #ffffff;
   position: relative;
 }
 
 .table-modern {
-  margin-bottom: 0;
-  font-size: 0.83rem;
+  width: 100%;
+  margin-bottom: 0 !important;
+  font-size: 0.78rem;
+  line-height: 1.25;
   white-space: nowrap;
   border-collapse: separate;
   border-spacing: 0;
 }
 
+.table-modern th,
+.table-modern td {
+  padding: 0.36rem 0.5rem !important;
+  border-bottom: 1px solid #eef2f6;
+  border-right: 1px solid #f1f5f9;
+  vertical-align: middle;
+}
+
+/* Header Tabel Umum (1 Baris) Sticky */
 .table-modern thead th {
   background-color: #eff6ff;
   color: #1e3a8a;
   font-weight: 700;
   text-transform: uppercase;
   font-size: 0.71rem;
-  letter-spacing: 0.04em;
-  padding: 0.75rem 0.9rem;
+  letter-spacing: 0.03em;
+  padding: 0.45rem 0.55rem !important;
   border-bottom: 2px solid var(--border-subtle);
-  position: sticky;
-  top: 0;
-  z-index: 4;
-}
-
-.table-matrix-sticky thead tr.branch-header th {
   position: sticky;
   top: 0;
   z-index: 6;
-  height: 36px;
-  border-bottom: 1px solid #cbd5e1;
-  text-align: center;
-  font-size: 0.76rem;
 }
 
-.table-matrix-sticky thead tr.sub-header th {
+/* Header Matriks Omset 2 Baris: Nama Cabang (Baris 1) & Tunai/Tujuan/VA/Total (Baris 2) */
+.table-modern thead tr.branch-header th {
   position: sticky;
-  top: 36px;
-  z-index: 5;
+  top: 0;
+  z-index: 9;
+  height: 29px;
+  padding: 0.32rem 0.5rem !important;
+  border-bottom: 1px solid #cbd5e1;
+  text-align: center;
+  font-size: 0.74rem;
+}
+
+.table-modern thead tr.sub-header th {
+  position: sticky;
+  top: 29px;
+  z-index: 8;
+  height: 26px;
+  padding: 0.28rem 0.45rem !important;
   background-color: #eff6ff;
+  color: #1e3a8a;
+  font-size: 0.68rem;
   border-bottom: 2px solid var(--border-subtle);
 }
 
-.table-matrix-sticky thead th.sticky-col {
-  left: 0;
-  z-index: 8 !important;
-  background-color: #dbeafe !important;
-  box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.12);
-}
-
-.sticky-col {
+/* Kolom Tanggal / Kiri Sticky Horizontal */
+.table-modern .sticky-col {
   position: sticky;
   left: 0;
-  z-index: 3;
+  z-index: 5;
   background-color: #ffffff;
+  border-right: 2px solid #cbd5e1 !important;
   box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.08);
 }
 
-tfoot .sticky-col {
-  z-index: 4;
+/* Sudut Kiri Atas (TANGGAL) harus di atas header maupun kolom sticky */
+.table-modern thead tr.branch-header th.sticky-col,
+.table-modern thead th.sticky-col {
+  left: 0;
+  z-index: 12 !important;
+  background-color: #0a192f !important;
+  color: #ffffff !important;
+  box-shadow: 4px 0 10px -4px rgba(15, 23, 42, 0.14);
+}
+
+/* Footer TOTAL Sticky di Bawah */
+.table-modern tfoot tr td,
+.table-modern tfoot tr th {
+  position: sticky;
+  bottom: 0;
+  z-index: 7;
+  padding: 0.42rem 0.5rem !important;
+  font-weight: 700;
+  border-top: 2px solid #94a3b8;
+  background-color: #f8fafc;
+}
+
+.table-modern tfoot td.sticky-col {
+  z-index: 10 !important;
+  background-color: #0d6efd !important;
+  color: #ffffff !important;
+}
+
+.table-modern tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.table-modern tbody tr:hover td {
+  background-color: #eff6ff;
+}
+
+.table-modern tbody tr:hover td.sticky-col {
+  background-color: #e6f0ff;
+}
+
+/* Kolom Keterangan Riwayat Membungkus Rapi agar tidak melar di HP */
+#tblRiwayatPengeluaranBody td:last-child,
+#tblRiwayatSetorBankBody td:last-child,
+#tblSetorPemilikBody td:last-child,
+#tblGudangPengeluaranBody td:last-child {
+  white-space: normal;
+  min-width: 140px;
+  max-width: 260px;
 }
 
 /* --- WARNA HEADER MATRIKS PER CABANG --- */
@@ -370,9 +443,9 @@ tfoot .sticky-col {
 /* --- WARNA BADGE PER CABANG --- */
 .badge-cabang {
   font-weight: 700;
-  padding: 0.36em 0.78em;
-  border-radius: 8px;
-  font-size: 0.73rem;
+  padding: 0.28em 0.65em;
+  border-radius: 7px;
+  font-size: 0.7rem;
   display: inline-block;
   letter-spacing: 0.02em;
 }
@@ -383,20 +456,6 @@ tfoot .sticky-col {
 .badge-banjarnegara { background-color: #f3e8ff; color: #6b21a8; border: 1px solid #e9d5ff; }
 .badge-banyumas-selatan { background-color: #ffe4e6; color: #9f1239; border: 1px solid #fecdd3; }
 .badge-default { background-color: #f1f5f9; color: #334155; border: 1px solid #cbd5e1; }
-
-.table-modern tbody td {
-  padding: 0.75rem 0.85rem;
-  border-bottom: 1px solid #eff6ff;
-  vertical-align: middle;
-}
-
-.table-modern tbody tr:last-child td {
-  border-bottom: none;
-}
-
-.table-modern tbody tr:hover td {
-  background-color: #eff6ff;
-}
 
 .col-total-cabang {
   background-color: rgba(219, 234, 254, 0.55);
@@ -450,9 +509,9 @@ tfoot .sticky-col {
   color: #1e3a8a;
   border: 1px solid var(--border-subtle);
   font-weight: 700;
-  padding: 0.42em 0.85em;
-  border-radius: 10px;
-  font-size: 0.78rem;
+  padding: 0.35em 0.72em;
+  border-radius: 8px;
+  font-size: 0.74rem;
   box-shadow: 0 2px 6px rgba(37, 99, 235, 0.08);
 }
 
@@ -460,61 +519,22 @@ tfoot .sticky-col {
   background: #e0f2fe;
   color: #0369a1;
   font-weight: 600;
-  padding: 0.35em 0.75em;
-  border-radius: 8px;
-  font-size: 0.75rem;
+  padding: 0.3em 0.65em;
+  border-radius: 7px;
+  font-size: 0.72rem;
 }
 
 .badge-total-tabel {
   font-weight: 800;
-  padding: 0.38em 0.8em;
-  border-radius: 9px;
-  font-size: 0.8rem;
+  padding: 0.35em 0.75em;
+  border-radius: 8px;
+  font-size: 0.76rem;
   font-variant-numeric: tabular-nums;
 }
 
-/* --- RESPONSIVE HP --- */
-@media (max-width: 767.98px) {
-  .hero-header {
-    padding: 1.25rem 0 4.2rem 0;
-    border-bottom-left-radius: 22px;
-    border-bottom-right-radius: 22px;
-  }
-  .filter-glass {
-    width: 100%;
-    display: grid !important;
-    grid-template-columns: 1fr 1fr;
-    gap: 0.45rem !important;
-  }
-  .filter-glass #selectCabang {
-    grid-column: span 2;
-    width: 100% !important;
-  }
-  .filter-glass #selectBulan,
-  .filter-glass #selectTahun {
-    width: 100% !important;
-  }
-  .filter-glass .btn-refresh-modern {
-    grid-column: span 2;
-    width: 100%;
-    padding: 0.5rem;
-  }
-  .nav-pills-modern {
-    width: 100%;
-    display: grid;
-    grid-template-columns: 1fr 1fr;
-  }
-  .nav-pills-modern .nav-link {
-    text-align: center;
-    padding: 0.55rem 0.5rem;
-    font-size: 0.8rem;
-  }
-  .metric-value {
-    font-size: 1.32rem;
-  }
-}
-
-/* STICKY COMPACT TOPBAR */
+/* =========================================================
+   STICKY COMPACT TOPBAR
+   ========================================================= */
 .sticky-topbar {
   position: sticky;
   top: 0;
@@ -603,4 +623,86 @@ tfoot .sticky-col {
 .btn-refresh-sm:hover {
   background: #3b82f6;
   border-color: #3b82f6;
+}
+
+/* =========================================================
+   RESPONSIF MAKSIMAL HP & PC
+   ========================================================= */
+@media (max-width: 767.98px) {
+  .sticky-topbar .container-fluid {
+    padding-left: 0.75rem !important;
+    padding-right: 0.75rem !important;
+  }
+
+  .nav-pills-topbar {
+    width: 100%;
+    display: flex;
+    flex-wrap: nowrap;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    gap: 0.25rem;
+  }
+  .nav-pills-topbar::-webkit-scrollbar {
+    display: none;
+  }
+  .nav-pills-topbar .nav-item {
+    flex: 1 0 auto;
+  }
+  .nav-pills-topbar .nav-link {
+    width: 100%;
+    text-align: center;
+    font-size: 0.75rem;
+    padding: 0.36rem 0.55rem;
+  }
+
+  .filter-glass-sm .form-select-sm {
+    font-size: 0.74rem;
+    padding-left: 0.45rem;
+    padding-right: 1.4rem;
+  }
+
+  main.container-fluid {
+    padding-left: 0.5rem !important;
+    padding-right: 0.5rem !important;
+  }
+
+  .modern-card {
+    padding: 0.75rem !important;
+    border-radius: 1rem !important;
+  }
+
+  .metric-value {
+    font-size: 1.28rem;
+  }
+
+  .table-modern {
+    font-size: 0.71rem;
+  }
+
+  .table-modern th,
+  .table-modern td {
+    padding: 0.28rem 0.38rem !important;
+  }
+
+  .table-modern thead tr.branch-header th {
+    height: 25px;
+    font-size: 0.68rem;
+  }
+
+  .table-modern thead tr.sub-header th {
+    top: 25px;
+    height: 23px;
+    font-size: 0.64rem;
+  }
+
+  .table-modern-wrapper {
+    max-height: 62vh !important;
+  }
+}
+
+@media (min-width: 768px) {
+  .table-modern-wrapper {
+    max-height: 68vh !important;
+  }
 }
