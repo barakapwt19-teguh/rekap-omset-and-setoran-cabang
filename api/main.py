@@ -10,6 +10,7 @@ from pydantic import BaseModel
 from pathlib import Path
 from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from fastapi.staticfiles import StaticFiles
+from fastapi import FastAPI, Request, Header, HTTPException
 
 BASE_DIR = Path(__file__).resolve().parent.parent
 app = FastAPI(title="Baraka Express Executive Controller")
@@ -255,6 +256,25 @@ class PengeluaranInput(BaseModel):
     nominal: float
     kategori: str
     keterangan: str
+
+PIN_PENAMPUNG = os.environ.get("PIN_PENAMPUNG", "32123")
+PIN_PEMILIK = os.environ.get("PIN_PEMILIK", "112345")
+
+class LoginInput(BaseModel):
+    passcode: str
+
+def verify_penampung_access(x_passcode: Optional[str] = Header(None)):
+    if not x_passcode or x_passcode != PIN_PENAMPUNG:
+        raise HTTPException(status_code=403, detail="Akses ditolak: Mode Pemilik hanya dapat melihat data (Read-Only).")
+
+@app.post("/api/login")
+async def login_passcode(data: LoginInput):
+    code = data.passcode.strip()
+    if code == PIN_PENAMPUNG:
+        return {"success": True, "role": "PENAMPUNG", "token": code, "message": "Login berhasil sebagai Penampung (Akses Penuh)"}
+    elif code == PIN_PEMILIK:
+        return {"success": True, "role": "PEMILIK", "token": code, "message": "Login berhasil sebagai Pemilik (Mode Pantau)"}
+    return JSONResponse({"success": False, "message": "Passcode salah! Silakan coba lagi."}, status_code=401)
 
 # --- ROUTES ---
 @app.get("/", response_class=HTMLResponse)
@@ -919,7 +939,8 @@ async def get_dashboard(bulan: int, tahun: int):
         return JSONResponse({"error": str(e)}, status_code=500)
 
 @app.post("/api/setor-bank")
-async def post_setor_bank(data: SetorBankInput):
+async def post_setor_bank(data: SetorBankInput, x_passcode: Optional[str] = Header(None)):
+    verify_penampung_access(x_passcode)
     try:
         ss = get_spreadsheet()
         ws = ss.worksheet("SETOR_TUNAI_BANK")
@@ -931,7 +952,8 @@ async def post_setor_bank(data: SetorBankInput):
         return {"success": False, "message": str(e)}
 
 @app.post("/api/setor-pusat")
-async def post_setor_pusat(data: SetorPusatInput):
+async def post_setor_pusat(data: SetorPusatInput, x_passcode: Optional[str] = Header(None)):
+    verify_penampung_access(x_passcode)
     try:
         ss = get_spreadsheet()
         ws = ss.worksheet("FEE_OMSET")
@@ -965,7 +987,8 @@ async def post_setor_pusat(data: SetorPusatInput):
         return {"success": False, "message": str(e)}
 
 @app.post("/api/pengeluaran")
-async def post_pengeluaran(data: PengeluaranInput):
+async def post_pengeluaran(data: PengeluaranInput, x_passcode: Optional[str] = Header(None)):
+    verify_penampung_access(x_passcode)
     try:
         ss = get_spreadsheet()
         ws = ss.worksheet("PENGELUARAN")
@@ -977,7 +1000,8 @@ async def post_pengeluaran(data: PengeluaranInput):
         return {"success": False, "message": str(e)}
 
 @app.post("/api/pengeluaran-gudang")
-async def tambah_pengeluaran_gudang(request: Request):
+async def tambah_pengeluaran_gudang(request: Request, x_passcode: Optional[str] = Header(None)):
+    verify_penampung_access(x_passcode)
     try:
         body = await request.json()
         ss = get_spreadsheet()
@@ -1011,7 +1035,8 @@ class SetorPemilikInput(BaseModel):
     keterangan: Optional[str] = ""
 
 @app.post("/api/setor-pemilik")
-async def post_setor_pemilik(data: SetorPemilikInput):
+async def post_setor_pemilik(data: SetorPemilikInput, x_passcode: Optional[str] = Header(None)):
+    verify_penampung_access(x_passcode)
     try:
         ss = get_spreadsheet()
         try:
