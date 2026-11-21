@@ -213,16 +213,31 @@
               <div class="row g-3">
                 <div class="col-12 col-lg-6">
                   <div class="small fw-bold text-primary mb-2"><i class="bi bi-building me-1"></i>Rekap Per Cabang</div>
-                  <div class="table-modern-wrapper">
+                  <div class="table-modern-wrapper mb-3">
                     <table class="table table-modern align-middle">
                       <thead><tr><th>Nama Cabang</th><th class="text-end">Estimasi Kewajiban</th><th class="text-center">Status</th></tr></thead>
                       <tbody id="tblEstimasiBody" class="tabular-nums"></tbody>
                     </table>
                   </div>
+
+                  <div class="small fw-bold text-primary mb-2"><i class="bi bi-calendar-check me-1"></i>Total Estimasi Per Tanggal</div>
+                  <div class="table-modern-wrapper" style="max-height: 220px;">
+                    <table class="table table-modern align-middle">
+                      <thead>
+                        <tr>
+                          <th>Tanggal</th>
+                          <th class="text-center">Cabang</th>
+                          <th class="text-end">Total Estimasi</th>
+                        </tr>
+                      </thead>
+                      <tbody id="tblEstimasiTotalTanggalBody" class="tabular-nums"></tbody>
+                    </table>
+                  </div>
                 </div>
+
                 <div class="col-12 col-lg-6">
                   <div class="small fw-bold text-primary mb-2"><i class="bi bi-calendar-event me-1"></i>Rincian Nominal Per Tanggal</div>
-                  <div class="table-modern-wrapper" style="max-height: 320px;">
+                  <div class="table-modern-wrapper" style="max-height: 440px;">
                     <table class="table table-modern align-middle">
                       <thead><tr><th>Tanggal</th><th>Cabang</th><th class="text-end">Nominal Kewajiban</th></tr></thead>
                       <tbody id="tblEstimasiTanggalBody" class="tabular-nums"></tbody>
@@ -1176,12 +1191,38 @@
           <tr>
             <td class="small fw-semibold text-dark">${r.tanggal}</td>
             <td>${getBranchBadgeHtml(r.cabang)}</td>
-            <td class="text-end fw-bold text-primary">${formatRupiah(r.nominal)}</td>
+            <td class="text-end fw-bold ${Number(r.nominal) < 0 ? 'text-success' : 'text-primary'}">${formatRupiah(r.nominal)}</td>
+          </tr>
+        `).join('');
+
+        // Rekap Total Estimasi Per Tanggal
+        const rekapPerTgl = {};
+        filteredRincianTgl.forEach(r => {
+          if (!rekapPerTgl[r.tanggal]) {
+            rekapPerTgl[r.tanggal] = { tanggal: r.tanggal, total: 0, jmlCabang: 0 };
+          }
+          rekapPerTgl[r.tanggal].total += Number(r.nominal) || 0;
+          rekapPerTgl[r.tanggal].jmlCabang += 1;
+        });
+
+        const listTotalPerTgl = Object.values(rekapPerTgl).sort((a, b) => {
+          const [d1, m1, y1] = a.tanggal.split('/');
+          const [d2, m2, y2] = b.tanggal.split('/');
+          return `${y1}-${m1}-${d1}`.localeCompare(`${y2}-${m2}-${d2}`);
+        });
+
+        document.getElementById('tblEstimasiTotalTanggalBody').innerHTML = listTotalPerTgl.map(t => `
+          <tr>
+            <td class="small fw-bold text-dark">${t.tanggal}</td>
+            <td class="text-center"><span class="badge-soft-sky">${t.jmlCabang} Cabang</span></td>
+            <td class="text-end fw-extrabold ${t.total < 0 ? 'text-success' : 'text-primary'}">${formatRupiah(t.total)}</td>
           </tr>
         `).join('');
       } else {
         document.getElementById('tblEstimasiTanggalBody').innerHTML =
           '<tr><td colspan="3" class="text-center py-4 text-muted">Tidak ada rincian harian belum tersetor</td></tr>';
+        document.getElementById('tblEstimasiTotalTanggalBody').innerHTML =
+          '<tr><td colspan="3" class="text-center py-3 text-muted">Nihil</td></tr>';
       }
 
       document.getElementById('titleRekapSetoran').innerHTML = `<i class="bi bi-arrow-down-left-circle-fill text-success me-2"></i>Rekap Setoran Cabang (${labelFilter})`;
