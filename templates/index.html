@@ -15,6 +15,44 @@
     body.role-pemilik .modal {
       display: none !important;
     }
+
+    html, body {
+      overflow-anchor: none;
+    }
+
+    @media (max-width: 767.98px) {
+      .sticky-topbar .container-fluid {
+        padding-left: 0.75rem !important;
+        padding-right: 0.75rem !important;
+      }
+      .nav-pills-topbar {
+        width: 100%;
+        display: flex;
+        flex-wrap: nowrap;
+        overflow-x: auto;
+        -webkit-overflow-scrolling: touch;
+        scrollbar-width: none;
+        gap: 0.25rem;
+      }
+      .nav-pills-topbar::-webkit-scrollbar {
+        display: none;
+      }
+      .nav-pills-topbar .nav-item {
+        flex: 1 0 auto;
+      }
+      .nav-pills-topbar .nav-link {
+        width: 100%;
+        text-align: center;
+        font-size: 0.76rem;
+        padding: 0.38rem 0.6rem;
+        white-space: nowrap;
+      }
+      .filter-glass-sm .form-select-sm {
+        font-size: 0.75rem;
+        padding-left: 0.45rem;
+        padding-right: 1.4rem;
+      }
+    }
   </style>
 </head>
 <body>
@@ -45,20 +83,28 @@
     <div class="container-fluid px-3 px-md-4">
       <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 py-2">
         
-        <!-- Kiri: Brand Ringkas -->
-        <div class="d-flex align-items-center gap-2">
-          <div class="brand-badge-sm">
-            <i class="bi bi-truck"></i>
-          </div>
-          <div class="lh-1">
-            <div class="d-flex align-items-center gap-2">
-              <span class="fw-extrabold text-white" style="font-size: 1rem; letter-spacing: -0.01em;">Baraka Express</span>
-              <span class="badge fw-bold px-2 py-0" style="background-color: #fde047; color: #0a192f; font-size: 0.62rem; line-height: 1.5;">
-                6 CABANG
-              </span>
+        <!-- Kiri: Brand Ringkas + Status Role & Logout -->
+        <div class="d-flex align-items-center justify-content-between flex-grow-1 flex-xl-grow-0 gap-2">
+          <div class="d-flex align-items-center gap-2">
+            <div class="brand-badge-sm">
+              <i class="bi bi-truck"></i>
             </div>
-            <small class="text-white-50" id="badgePeriodeAktif" style="font-size: 0.72rem;">-</small>
+            <div class="lh-1">
+              <div class="d-flex align-items-center flex-wrap gap-1">
+                <span class="fw-extrabold text-white" style="font-size: 0.96rem; letter-spacing: -0.01em;">Baraka Express</span>
+                <span class="badge fw-bold px-2 py-0" style="background-color: #fde047; color: #0a192f; font-size: 0.6rem; line-height: 1.5;">
+                  6 CABANG
+                </span>
+                <span id="badgeUserRole" class="badge fw-bold px-2 py-0 d-none" style="font-size: 0.6rem; line-height: 1.5;"></span>
+              </div>
+              <small class="text-white-50" id="badgePeriodeAktif" style="font-size: 0.7rem;">-</small>
+            </div>
           </div>
+
+          <!-- Tombol Kunci / Ganti Passcode (Compact di Kanan Baris 1 saat Mobile) -->
+          <button id="btnLogout" type="button" onclick="logoutPasscode()" class="btn-refresh-sm text-warning d-xl-none" title="Kunci / Ganti Passcode">
+            <i class="bi bi-box-arrow-right"></i>
+          </button>
         </div>
 
         <!-- Tengah: Navigasi 3 Modul Terintegrasi di Header -->
@@ -81,8 +127,8 @@
         </ul>
 
         <!-- Kanan: Filter Cabang, Bulan, Tahun & Refresh -->
-        <div class="filter-glass-sm d-flex align-items-center gap-1 gap-sm-2 order-2 order-xl-3">
-          <select id="selectCabang" class="form-select form-select-sm" style="width: 155px;" onchange="onCabangChange(this.value)">
+        <div class="filter-glass-sm d-flex align-items-center gap-1 gap-sm-2 order-2 order-xl-3 w-100 w-xl-auto">
+          <select id="selectCabang" class="form-select form-select-sm flex-fill" style="min-width: 115px; max-width: 165px;" onchange="onCabangChange(this.value)">
             <option value="ALL">Semua Cabang (6)</option>
             <option value="PURWOKERTO">Purwokerto</option>
             <option value="KEBUMEN">Kebumen</option>
@@ -92,23 +138,22 @@
             <option value="BANYUMAS SELATAN">Banyumas Selatan</option>
           </select>
 
-          <select id="selectBulan" class="form-select form-select-sm" style="width: 108px;" onchange="loadAllData()">
+          <select id="selectBulan" class="form-select form-select-sm" style="width: 96px;" onchange="loadAllData()">
             <option value="1">Januari</option><option value="2">Februari</option><option value="3">Maret</option>
             <option value="4">April</option><option value="5">Mei</option><option value="6">Juni</option>
             <option value="7">Juli</option><option value="8">Agustus</option><option value="9">September</option>
             <option value="10">Oktober</option><option value="11">November</option><option value="12">Desember</option>
           </select>
 
-          <select id="selectTahun" class="form-select form-select-sm" style="width: 78px;" onchange="loadAllData()">
+          <select id="selectTahun" class="form-select form-select-sm" style="width: 72px;" onchange="loadAllData()">
             <option value="2025">2025</option><option value="2026">2026</option><option value="2027">2027</option>
           </select>
 
-          <button id="btnRefresh" onclick="triggerRefresh()" class="btn-refresh-sm" title="Refresh Data">
+          <button id="btnRefresh" type="button" onclick="triggerRefresh()" class="btn-refresh-sm flex-shrink-0" title="Refresh Data">
             <i class="bi bi-arrow-clockwise" id="iconRefresh"></i>
           </button>
 
-          <span id="badgeUserRole" class="badge fw-bold px-2 py-1 d-none" style="font-size: 0.68rem;"></span>
-          <button id="btnLogout" onclick="logoutPasscode()" class="btn-refresh-sm text-warning" title="Kunci / Ganti Passcode">
+          <button id="btnLogoutDesktop" type="button" onclick="logoutPasscode()" class="btn-refresh-sm text-warning d-none d-xl-inline-flex flex-shrink-0" title="Kunci / Ganti Passcode">
             <i class="bi bi-box-arrow-right"></i>
           </button>
         </div>
@@ -1016,9 +1061,6 @@
         bsCollapse.show();
         const activeBox = document.getElementById('box-' + drawerId);
         if (activeBox) activeBox.classList.add('active-drawer');
-        setTimeout(() => {
-          targetEl.scrollIntoView({ behavior: 'smooth', block: 'nearest' });
-        }, 180);
       }
     }
 
@@ -1057,6 +1099,8 @@
       const tahun = document.getElementById('selectTahun').value;
       const iconRefresh = document.getElementById('iconRefresh');
       const alertBox = document.getElementById('statusAlert');
+      const currentScrollY = window.scrollY;
+
       if (iconRefresh) iconRefresh.classList.add('spin');
       if (alertBox) alertBox.classList.add('d-none');
 
@@ -1070,6 +1114,7 @@
 
         cachedDashboardData = data;
         renderDashboardView(data);
+        requestAnimationFrame(() => window.scrollTo(0, currentScrollY));
 
       } catch (err) {
         console.error("Gagal memuat data:", err);
