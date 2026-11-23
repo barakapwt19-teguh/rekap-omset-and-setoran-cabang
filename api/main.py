@@ -512,6 +512,7 @@ async def get_dashboard(bulan: int, tahun: int):
                 "saldo_awal": 0.0, "aktual_cash": 0.0,
                 "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0,
                 "tf_cust_cabang": 0.0, "setor_pemilik": 0.0, "tagihan_dist_retur": 0.0
+                "penyesuaian_pusat": 0.0
             }
             for cab in DAFTAR_CABANG
         }
@@ -531,6 +532,7 @@ async def get_dashboard(bulan: int, tahun: int):
                     ctrl_gudang[cb]["tf_cust_cabang"] = parse_num(r[7]) if len(r) > 7 else 0.0
                     ctrl_gudang[cb]["setor_pemilik"] = parse_num(r[8]) if len(r) > 8 else 0.0
                     ctrl_gudang[cb]["tagihan_dist_retur"] = parse_num(r[9]) if len(r) > 9 else 0.0
+                    ctrl_gudang[cb]["penyesuaian_pusat"] = parse_num(r[10]) if len(r) > 10 else 0.0
 
                     # Gunakan nilai Tagihan Dist+Retur dari CONTROL_GUDANG untuk kartu ringkasan
                     rekap_gudang_cab[cb]["tag_dist"] = ctrl_gudang[cb]["tagihan_dist_retur"]
@@ -774,7 +776,9 @@ async def get_dashboard(bulan: int, tahun: int):
                 "total_fee": 0.0,
                 "kewajiban": 0.0,
                 "estimasi": 0.0,
+                "penyesuaian": 0.0,
                 "setor_pusat": 0.0,
+                "kekurangan_setor": 0.0,
                 "selisih_setor_pusat": 0.0
             } for cab in DAFTAR_CABANG
         }
@@ -880,7 +884,10 @@ async def get_dashboard(bulan: int, tahun: int):
         tgl_estimasi_terakhir = ""
         for cab in DAFTAR_CABANG:
             f_rec = rekap_fee_cab[cab]
-            target_setor = f_rec["estimasi"]
+            penyesuaian_cab = ctrl_gudang[cab]["penyesuaian_pusat"]
+            f_rec["penyesuaian"] = penyesuaian_cab
+            target_setor = f_rec["estimasi"] + penyesuaian_cab
+            f_rec["kekurangan_setor"] = target_setor - f_rec["setor_pusat"]
             f_rec["selisih_setor_pusat"] = f_rec["setor_pusat"] - target_setor
 
         if rincian_estimasi_tanggal:

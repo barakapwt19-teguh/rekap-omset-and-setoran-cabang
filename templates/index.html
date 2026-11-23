@@ -751,9 +751,10 @@
                   <th class="text-end text-success">Fee Terima</th>
                   <th class="text-end text-primary">Fee Kirim</th>
                   <th class="text-end col-total-cabang">Total Fee</th>
-                  <th class="text-end" style="background-color: #eff6ff; color: #1d4ed8;">Kewajiban (Bln Ini)</th>
-                  <th class="text-end" style="background-color: #fffbeb; color: #92400e;">Tagihan Tempo (H+4)</th>
+                  <th class="text-end" style="background-color: #fffbeb; color: #92400e;">Total Kewajiban Setor (H+4)</th>
+                  <th class="text-end text-secondary">Penyesuaian</th>
                   <th class="text-end text-info">Realisasi Setor</th>
+                  <th class="text-end text-danger">Kekurangan Setor</th>
                 </tr>
               </thead>
               <tbody id="tblRekapOmsetFeeCabangBody" class="tabular-nums"></tbody>
@@ -1443,8 +1444,7 @@
       let totTerimaTerkirim = 0;
       let totKirimView = 0, kirimTunai = 0, kirimTujuan = 0, kirimVa = 0;
       let sumFeeTerima = 0, sumFeeKirim = 0, sumTotalFee = 0;
-      let sumKewajibanBulanIni = 0, sumTagihanTempoH4 = 0, sumRealisasiSetor = 0;
-
+      
       activeCabMatrix.forEach(cab => {
         const t = omset.terimaPerCabang[cab] || {};
         totTerimaView += Number(t.total) || 0;
@@ -1500,7 +1500,9 @@
       document.getElementById('fTotalKirim').innerText = formatRupiah(sumFeeKirim);
       document.getElementById('fTotalGabungan').innerText = formatRupiah(sumTotalFee);
 
-      // Tabel Rekapitulasi Global Omzet & Fee Per Cabang (11 Kolom)
+      let sumKewajibanH4 = 0, sumPenyesuaianPusat = 0, sumRealisasiSetor = 0, sumKekuranganSetor = 0;
+
+      // Tabel Rekapitulasi Global Omzet & Fee Per Cabang (12 Kolom)
       document.getElementById('titleRekapOmsetFeeCabang').innerHTML = `<i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee (${labelFilter})`;
       document.getElementById('tblRekapOmsetFeeCabangBody').innerHTML = activeCabMatrix.map(cab => {
         const t = omset.terimaPerCabang[cab] || {};
@@ -1510,13 +1512,18 @@
         const omsetTerkirim = Number(f.omset_terkirim) || 0;
         const omsetPending = Math.max(0, omsetTotTerima - omsetTerkirim);
 
-        const kewajibanBlnIni = Number(f.kewajiban) || 0;
-        const tagihanTempoH4 = Number(f.estimasi) || 0;
+        const totalKewajibanH4 = Number(f.estimasi) || 0;
+        const penyesuaian = Number(f.penyesuaian) || 0;
         const realisasiSetor = Number(f.setor_pusat) || 0;
+        const kekuranganSetor = (totalKewajibanH4 + penyesuaian) - realisasiSetor;
 
-        sumKewajibanBulanIni += kewajibanBlnIni;
-        sumTagihanTempoH4 += tagihanTempoH4;
+        sumKewajibanH4 += totalKewajibanH4;
+        sumPenyesuaianPusat += penyesuaian;
         sumRealisasiSetor += realisasiSetor;
+        sumKekuranganSetor += kekuranganSetor;
+
+        const clsPeny = penyesuaian > 0 ? 'text-warning-emphasis' : (penyesuaian < 0 ? 'text-success' : 'text-muted');
+        const clsKurang = kekuranganSetor > 0 ? 'text-danger' : (kekuranganSetor < 0 ? 'text-success' : 'text-muted');
 
         return `
           <tr>
@@ -1528,12 +1535,16 @@
             <td class="text-end text-success fw-bold">${formatRupiah(f.fee_terima)}</td>
             <td class="text-end text-primary fw-bold">${formatRupiah(f.fee_kirim)}</td>
             <td class="text-end col-total-cabang">${formatRupiah(f.total_fee)}</td>
-            <td class="text-end fw-bold" style="background-color: #f8fbff; color: #1d4ed8;">${formatRupiah(kewajibanBlnIni)}</td>
-            <td class="text-end fw-semibold" style="background-color: #fffdf5; color: #92400e;">${formatRupiah(tagihanTempoH4)}</td>
+            <td class="text-end fw-bold" style="background-color: #fffdf5; color: #92400e;">${formatRupiah(totalKewajibanH4)}</td>
+            <td class="text-end fw-semibold ${clsPeny}">${formatRupiah(penyesuaian)}</td>
             <td class="text-end text-info fw-bold">${formatRupiah(realisasiSetor)}</td>
+            <td class="text-end fw-extrabold ${clsKurang}">${formatRupiah(kekuranganSetor)}</td>
           </tr>
         `;
       }).join('');
+
+      const clsTotalPeny = sumPenyesuaianPusat > 0 ? 'text-warning-emphasis' : (sumPenyesuaianPusat < 0 ? 'text-success' : 'text-muted');
+      const clsTotalKurang = sumKekuranganSetor > 0 ? 'text-danger' : (sumKekuranganSetor < 0 ? 'text-success' : 'text-muted');
 
       document.getElementById('tblRekapOmsetFeeCabangFoot').innerHTML = `
         <tr>
@@ -1545,9 +1556,10 @@
           <td class="text-end bg-light text-success">${formatRupiah(sumFeeTerima)}</td>
           <td class="text-end bg-light text-primary">${formatRupiah(sumFeeKirim)}</td>
           <td class="text-end col-total-cabang">${formatRupiah(sumTotalFee)}</td>
-          <td class="text-end fw-bold" style="background-color: #eff6ff; color: #1d4ed8;">${formatRupiah(sumKewajibanBulanIni)}</td>
-          <td class="text-end fw-bold" style="background-color: #fffbeb; color: #92400e;">${formatRupiah(sumTagihanTempoH4)}</td>
+          <td class="text-end fw-bold" style="background-color: #fffbeb; color: #92400e;">${formatRupiah(sumKewajibanH4)}</td>
+          <td class="text-end bg-light fw-semibold ${clsTotalPeny}">${formatRupiah(sumPenyesuaianPusat)}</td>
           <td class="text-end bg-light text-info fw-bold">${formatRupiah(sumRealisasiSetor)}</td>
+          <td class="text-end bg-light fw-extrabold ${clsTotalKurang}">${formatRupiah(sumKekuranganSetor)}</td>
         </tr>
       `;
 
