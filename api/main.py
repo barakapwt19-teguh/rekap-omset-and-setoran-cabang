@@ -511,7 +511,7 @@ async def get_dashboard(bulan: int, tahun: int):
             cab: {
                 "saldo_awal": 0.0, "aktual_cash": 0.0,
                 "kasbon_lama": 0.0, "kasbon_baru": 0.0, "cicilan_masuk": 0.0,
-                "tf_cust_cabang": 0.0, "setor_pemilik": 0.0, "tagihan_dist_retur": 0.0
+                "tf_cust_cabang": 0.0, "setor_pemilik": 0.0, "tagihan_dist_retur": 0.0,
                 "penyesuaian_pusat": 0.0
             }
             for cab in DAFTAR_CABANG
