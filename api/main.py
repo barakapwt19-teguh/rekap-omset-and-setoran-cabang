@@ -631,7 +631,7 @@ async def get_dashboard(bulan: int, tahun: int):
 
             rec["total_pengeluaran"] = tot_pengeluaran
             rec["sisa_kas"] = rec["saldo_awal"] + tot_pemasukan - tot_pengeluaran
-            rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] if rec["aktual_cash"] > 0 else 0.0
+            rec["selisih_aktual"] = rec["aktual_cash"] - rec["sisa_kas"] 
 
         # --- 2. SETOR_TUNAI_BANK & PENGELUARAN KAS PENAMPUNG ---
         rows_bank = sheets_data.get("SETOR_TUNAI_BANK", [])[1:]
