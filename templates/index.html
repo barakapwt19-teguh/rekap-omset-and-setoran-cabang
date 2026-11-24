@@ -210,7 +210,7 @@
                 <strong class="text-dark" id="estInfoAktualCash">Rp 0</strong>
               </div>
               <div class="d-flex justify-content-between align-items-center text-muted mt-1">
-                <span>Transfer Masuk (Kecuali Purwokerto):</span>
+                <span>TF Customer di Cabang (Non-PWT):</span>
                 <strong class="text-primary" id="estInfoTfMasuk">Rp 0</strong>
               </div>
               <div class="d-flex justify-content-between align-items-center text-muted mt-1">
@@ -1234,7 +1234,7 @@
         const gRec = gdgRekapEst[cab] || {};
         sumEstAktualCash += Number(gRec.aktual_cash) || 0;
         if (cab !== 'PURWOKERTO') {
-          sumEstTfMasukNonPwt += Number(gRec.s_tf) || 0;
+          sumEstTfMasukNonPwt += Number(gRec.tf_cust_cabang) || 0;
         }
         sumEstTagihanDist += Number(gRec.tag_dist) || 0;
       });
