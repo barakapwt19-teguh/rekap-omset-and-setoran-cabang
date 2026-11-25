@@ -217,6 +217,10 @@
                 <span>Total Tagihan Dist+Retur:</span>
                 <strong class="text-danger" id="estInfoTagihanDist">Rp 0</strong>
               </div>
+              <div class="d-flex justify-content-between align-items-center text-dark mt-1 pt-1 border-top border-secondary-subtle">
+                <span class="fw-bold">Total Cashflow Gudang:</span>
+                <strong class="fw-extrabold text-success" id="estInfoTotalCashflow">Rp 0</strong>
+              </div>
             </div>
           </div>
 
@@ -1239,9 +1243,12 @@
         sumEstTagihanDist += Number(gRec.tag_dist) || 0;
       });
 
+      const sumEstTotalCashflow = sumEstAktualCash + sumEstTfMasukNonPwt + sumEstTagihanDist;
+
       document.getElementById('estInfoAktualCash').innerText = formatRupiah(sumEstAktualCash);
       document.getElementById('estInfoTfMasuk').innerText = formatRupiah(sumEstTfMasukNonPwt);
       document.getElementById('estInfoTagihanDist').innerText = formatRupiah(sumEstTagihanDist);
+      document.getElementById('estInfoTotalCashflow').innerText = formatRupiah(sumEstTotalCashflow);
 
       const listRincianTgl = Array.isArray(kas.rincianEstimasiTanggal) ? kas.rincianEstimasiTanggal : [];
       const filteredRincianTgl = (selectedCabang === 'ALL'
