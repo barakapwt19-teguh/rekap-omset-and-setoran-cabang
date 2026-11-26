@@ -474,6 +474,86 @@
           </div>
         </div>
 
+        <!-- DRAWER 1 GUDANG: PERBANDINGAN 6 CABANG (MUNCUL TEPAT DI BAWAH KARTU UTAMA) -->
+        <div class="collapse mb-3" id="drawerGudangRekapCabang">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <h6 class="fw-bold text-dark mb-0"><i class="bi bi-building-check text-primary me-2"></i>Rekapitulasi Kas Gudang Per Cabang</h6>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper">
+              <table class="table table-modern align-middle">
+                <thead>
+                  <tr>
+                    <th>Cabang</th>
+                    <th class="text-end">Saldo Awal</th>
+                    <th class="text-end">Pemasukan</th>
+                    <th class="text-end">BBM</th>
+                    <th class="text-end">Lain-Lain</th>
+                    <th class="text-end">Setor Cash</th>
+                    <th class="text-end">Setor TF</th>
+                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
+                    <th class="text-end col-total-cabang">Saldo Kas Akhir</th>
+                  </tr>
+                </thead>
+                <tbody id="tblGudangRekapCabangBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWER 2 GUDANG: TABEL HARIAN KAS GUDANG (MUNCUL TEPAT DI BAWAH KARTU UTAMA) -->
+        <div class="collapse mb-3" id="drawerGudangHarian">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <h6 class="fw-bold text-dark mb-0" id="titleGudangHarian"><i class="bi bi-calendar3 text-primary me-2"></i>Rincian Harian Kas Gudang</h6>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 450px;">
+              <table class="table table-modern align-middle">
+                <thead>
+                  <tr>
+                    <th class="sticky-col">Tanggal</th>
+                    <th>Cabang</th>
+                    <th class="text-end">Setoran Msk</th>
+                    <th class="text-end">BBM</th>
+                    <th class="text-end">LB (+)</th>
+                    <th class="text-end">Total Setoran</th>
+                    <th class="text-end">Lokalan Tunai</th>
+                    <th class="text-end">Tagihan Masuk</th>
+                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
+                    <th class="text-end">Setor Cash</th>
+                    <th class="text-end">Setor Transfer</th>
+                  </tr>
+                </thead>
+                <tbody id="tblGudangHarianBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWER 3 GUDANG: PENGELUARAN LAIN-LAIN GUDANG (MUNCUL TEPAT DI BAWAH KARTU UTAMA) -->
+        <div class="collapse mb-3" id="drawerGudangPengeluaran">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-receipt text-danger me-2"></i>Rincian Pengeluaran Lain-Lain Gudang (Non-BBM)</h6>
+                <span class="badge-total-tabel bg-danger-subtle text-danger" id="rTotalKeluarGudangBadge">Total: Rp 0</span>
+              </div>
+              <div class="d-flex align-items-center gap-2">
+                <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalPengeluaranGudang">+ Pengeluaran Gudang</button>
+                <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangPengeluaran')"><i class="bi bi-x-lg"></i></button>
+              </div>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 380px;">
+              <table class="table table-modern align-middle">
+                <thead><tr><th>Tanggal</th><th>Cabang</th><th>Rincian</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
+                <tbody id="tblGudangPengeluaranBody" class="tabular-nums"></tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+
         <!-- LEMBAR REKAP KAS GUDANG (FORMAT PEMBUKUAN CABANG) -->
         <div class="modern-card p-3 p-md-4 mb-3">
           <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -540,65 +620,7 @@
           </div>
         </div>
 
-        <!-- DRAWER 1 GUDANG: PERBANDINGAN 6 CABANG -->
-        <div class="collapse mb-3" id="drawerGudangRekapCabang">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <h6 class="fw-bold text-dark mb-0"><i class="bi bi-building-check text-primary me-2"></i>Rekapitulasi Kas Gudang Per Cabang</h6>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangRekapCabang')"><i class="bi bi-x-lg"></i> Tutup</button>
-            </div>
-            <div class="table-modern-wrapper">
-              <table class="table table-modern align-middle">
-                <thead>
-                  <tr>
-                    <th>Cabang</th>
-                    <th class="text-end">Saldo Awal</th>
-                    <th class="text-end">Pemasukan</th>
-                    <th class="text-end">BBM</th>
-                    <th class="text-end">Lain-Lain</th>
-                    <th class="text-end">Setor Cash</th>
-                    <th class="text-end">Setor TF</th>
-                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
-                    <th class="text-end col-total-cabang">Saldo Kas Akhir</th>
-                  </tr>
-                </thead>
-                <tbody id="tblGudangRekapCabangBody" class="tabular-nums"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 2 GUDANG: TABEL HARIAN KAS GUDANG -->
-        <div class="collapse mb-3" id="drawerGudangHarian">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <h6 class="fw-bold text-dark mb-0" id="titleGudangHarian"><i class="bi bi-calendar3 text-primary me-2"></i>Rincian Harian Kas Gudang</h6>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangHarian')"><i class="bi bi-x-lg"></i> Tutup</button>
-            </div>
-            <div class="table-modern-wrapper" style="max-height: 450px;">
-              <table class="table table-modern align-middle">
-                <thead>
-                  <tr>
-                    <th class="sticky-col">Tanggal</th>
-                    <th>Cabang</th>
-                    <th class="text-end">Setoran Msk</th>
-                    <th class="text-end">BBM</th>
-                    <th class="text-end">LB (+)</th>
-                    <th class="text-end">Total Setoran</th>
-                    <th class="text-end">Lokalan Tunai</th>
-                    <th class="text-end">Tagihan Masuk</th>
-                    <th class="text-end text-danger">Tagihan Dist+Retur</th>
-                    <th class="text-end">Setor Cash</th>
-                    <th class="text-end">Setor Transfer</th>
-                  </tr>
-                </thead>
-                <tbody id="tblGudangHarianBody" class="tabular-nums"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 4 GUDANG: RIWAYAT SETORAN LANGSUNG KE PEMILIK -->
+        <!-- DRAWER 4 GUDANG: RIWAYAT SETORAN LANGSUNG KE PEMILIK (MUNCUL TEPAT DI BAWAH LEMBAR REKAP) -->
         <div class="collapse mb-4" id="drawerSetorPemilik">
           <div class="modern-card p-3 p-md-4 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
@@ -624,28 +646,6 @@
                   </tr>
                 </thead>
                 <tbody id="tblSetorPemilikBody" class="tabular-nums"></tbody>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 3 GUDANG: PENGELUARAN LAIN-LAIN GUDANG (NON-BBM) -->
-        <div class="collapse mb-4" id="drawerGudangPengeluaran">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <div class="d-flex align-items-center flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0"><i class="bi bi-receipt text-danger me-2"></i>Rincian Pengeluaran Lain-Lain Gudang (Non-BBM)</h6>
-                <span class="badge-total-tabel bg-danger-subtle text-danger" id="rTotalKeluarGudangBadge">Total: Rp 0</span>
-              </div>
-              <div class="d-flex align-items-center gap-2">
-                <button class="btn btn-sm btn-blue-modern" data-bs-toggle="modal" data-bs-target="#modalPengeluaranGudang">+ Pengeluaran Gudang</button>
-                <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-gudang', 'drawerGudangPengeluaran')"><i class="bi bi-x-lg"></i></button>
-              </div>
-            </div>
-            <div class="table-modern-wrapper" style="max-height: 380px;">
-              <table class="table table-modern align-middle">
-                <thead><tr><th>Tanggal</th><th>Cabang</th><th>Rincian</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
-                <tbody id="tblGudangPengeluaranBody" class="tabular-nums"></tbody>
               </table>
             </div>
           </div>
@@ -710,6 +710,47 @@
             </div>
           </div>
         </div>
+        <!-- AKHIR BARIS 1 -->
+
+        <!-- DRAWER 1: MATRIKS HARIAN OMSET BARANG TERIMA (DI LUAR .row) -->
+        <div class="collapse mb-3" id="drawerOmsetTerima">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0" id="titleMatriksTerima"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Terima</h6>
+                <span class="badge-total-tabel" id="rTotalOmsetTerimaBadge">Total: Rp 0</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 480px;">
+              <table class="table table-modern align-middle">
+                <thead id="tblMatriksTerimaHead"></thead>
+                <tbody id="tblMatriksTerimaBody" class="tabular-nums"></tbody>
+                <tfoot id="tblMatriksTerimaFoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
+
+        <!-- DRAWER 2: MATRIKS HARIAN OMSET BARANG KIRIM (DI LUAR .row) -->
+        <div class="collapse mb-3" id="drawerOmsetKirim">
+          <div class="modern-card p-3 p-md-4 border-primary-subtle">
+            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+              <div class="d-flex align-items-center flex-wrap gap-2">
+                <h6 class="fw-bold text-dark mb-0" id="titleMatriksKirim"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Kirim</h6>
+                <span class="badge-total-tabel" id="rTotalOmsetKirimBadge">Total: Rp 0</span>
+              </div>
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetKirim')"><i class="bi bi-x-lg"></i> Tutup</button>
+            </div>
+            <div class="table-modern-wrapper" style="max-height: 480px;">
+              <table class="table table-modern align-middle">
+                <thead id="tblMatriksKirimHead"></thead>
+                <tbody id="tblMatriksKirimBody" class="tabular-nums"></tbody>
+                <tfoot id="tblMatriksKirimFoot"></tfoot>
+              </table>
+            </div>
+          </div>
+        </div>
 
         <!-- BARIS 2: 3 KARTU PENDAPATAN FEE (TERIMA, KIRIM, TOTAL FEE) -->
         <div class="row g-3 mb-3">
@@ -753,83 +794,10 @@
             </div>
           </div>
         </div>
+        <!-- AKHIR BARIS 2 -->
 
-        <!-- TABEL REKAPITULASI GLOBAL OMZET & FEE PER CABANG -->
-        <div class="modern-card p-3 p-md-4 mb-3">
-          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-            <h6 class="fw-bold text-dark mb-0" id="titleRekapOmsetFeeCabang"><i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee Per Cabang</h6>
-            <div class="d-flex gap-2 flex-wrap">
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-table me-1"></i>Rekap Omset &amp; Fee Harian</button>
-            </div>
-          </div>
-          <div class="table-modern-wrapper">
-            <table class="table table-modern align-middle">
-              <thead>
-                <tr>
-                  <th class="sticky-col">Cabang</th>
-                  <th class="text-end">Omset Terima (Total)</th>
-                  <th class="text-end text-success">Terima Terkirim</th>
-                  <th class="text-end text-warning-emphasis">Belum Terkirim</th>
-                  <th class="text-end">Omset Kirim</th>
-                  <th class="text-end text-success">Fee Terima</th>
-                  <th class="text-end text-primary">Fee Kirim</th>
-                  <th class="text-end col-total-cabang">Total Fee</th>
-                  <th class="text-end" style="background-color: #fffbeb; color: #92400e; white-space: normal; line-height: 1.15; min-width: 115px;">
-                    KEWAJIBAN<br><span style="font-size: 0.62rem; font-weight: 600;">SETOR (H+4)</span>
-                  </th>
-                  <th class="text-end text-secondary">Penyesuaian</th>
-                  <th class="text-end text-info">Realisasi Setor</th>
-                  <th class="text-end text-danger">Kekurangan Setor</th>
-                </tr>
-              </thead>
-              <tbody id="tblRekapOmsetFeeCabangBody" class="tabular-nums"></tbody>
-              <tfoot class="fw-bold" id="tblRekapOmsetFeeCabangFoot"></tfoot>
-            </table>
-          </div>
-        </div>
-
-        <!-- DRAWER 1: MATRIKS HARIAN OMSET BARANG TERIMA -->
-        <div class="collapse mb-4" id="drawerOmsetTerima">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <div class="d-flex align-items-center flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0" id="titleMatriksTerima"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Terima</h6>
-                <span class="badge-total-tabel" id="rTotalOmsetTerimaBadge">Total: Rp 0</span>
-              </div>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetTerima')"><i class="bi bi-x-lg"></i> Tutup</button>
-            </div>
-            <div class="table-modern-wrapper" style="max-height: 480px;">
-              <table class="table table-modern align-middle">
-                <thead id="tblMatriksTerimaHead"></thead>
-                <tbody id="tblMatriksTerimaBody" class="tabular-nums"></tbody>
-                <tfoot id="tblMatriksTerimaFoot"></tfoot>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 2: MATRIKS HARIAN OMSET BARANG KIRIM -->
-        <div class="collapse mb-4" id="drawerOmsetKirim">
-          <div class="modern-card p-3 p-md-4 border-primary-subtle">
-            <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
-              <div class="d-flex align-items-center flex-wrap gap-2">
-                <h6 class="fw-bold text-dark mb-0" id="titleMatriksKirim"><i class="bi bi-table text-primary me-2"></i>Rekapitulasi Harian Barang Kirim</h6>
-                <span class="badge-total-tabel" id="rTotalOmsetKirimBadge">Total: Rp 0</span>
-              </div>
-              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerOmsetKirim')"><i class="bi bi-x-lg"></i> Tutup</button>
-            </div>
-            <div class="table-modern-wrapper" style="max-height: 480px;">
-              <table class="table table-modern align-middle">
-                <thead id="tblMatriksKirimHead"></thead>
-                <tbody id="tblMatriksKirimBody" class="tabular-nums"></tbody>
-                <tfoot id="tblMatriksKirimFoot"></tfoot>
-              </table>
-            </div>
-          </div>
-        </div>
-
-        <!-- DRAWER 3: REKAP OMSET & FEE HARIAN -->
-        <div class="collapse mb-4" id="drawerFeeHarian">
+        <!-- DRAWER 3: REKAP OMSET & FEE HARIAN (DI LUAR .row) -->
+        <div class="collapse mb-3" id="drawerFeeHarian">
           <div class="modern-card p-3 border-primary-subtle">
             <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-2">
               <div>
@@ -879,6 +847,40 @@
           </div>
         </div>
 
+        <!-- TABEL REKAPITULASI GLOBAL OMZET & FEE PER CABANG -->
+        <div class="modern-card p-3 p-md-4 mb-3">
+          <div class="d-flex justify-content-between align-items-center flex-wrap gap-2 mb-3">
+            <h6 class="fw-bold text-dark mb-0" id="titleRekapOmsetFeeCabang"><i class="bi bi-award-fill text-primary me-2"></i>Rekapitulasi Global Omzet &amp; Fee Per Cabang</h6>
+            <div class="d-flex gap-2 flex-wrap">
+              <button type="button" class="btn btn-sm btn-soft-blue" onclick="toggleTableDrawer('modul-omset', 'drawerFeeHarian')"><i class="bi bi-table me-1"></i>Rekap Omset &amp; Fee Harian</button>
+            </div>
+          </div>
+          <div class="table-modern-wrapper">
+            <table class="table table-modern align-middle">
+              <thead>
+                <tr>
+                  <th class="sticky-col">Cabang</th>
+                  <th class="text-end">Omset Terima (Total)</th>
+                  <th class="text-end text-success">Terima Terkirim</th>
+                  <th class="text-end text-warning-emphasis">Belum Terkirim</th>
+                  <th class="text-end">Omset Kirim</th>
+                  <th class="text-end text-success">Fee Terima</th>
+                  <th class="text-end text-primary">Fee Kirim</th>
+                  <th class="text-end col-total-cabang">Total Fee</th>
+                  <th class="text-end" style="background-color: #fffbeb; color: #92400e; white-space: normal; line-height: 1.15; min-width: 115px;">
+                    KEWAJIBAN<br><span style="font-size: 0.62rem; font-weight: 600;">SETOR (H+4)</span>
+                  </th>
+                  <th class="text-end text-secondary">Penyesuaian</th>
+                  <th class="text-end text-info">Realisasi Setor</th>
+                  <th class="text-end text-danger">Kekurangan Setor</th>
+                </tr>
+              </thead>
+              <tbody id="tblRekapOmsetFeeCabangBody" class="tabular-nums"></tbody>
+              <tfoot class="fw-bold" id="tblRekapOmsetFeeCabangFoot"></tfoot>
+            </table>
+          </div>
+        </div>       
+       
       </div>
 
     </div>
