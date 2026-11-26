@@ -546,8 +546,16 @@
               </div>
             </div>
             <div class="table-modern-wrapper" style="max-height: 380px;">
-              <table class="table table-modern align-middle">
-                <thead><tr><th>Tanggal</th><th>Cabang</th><th>Rincian</th><th class="text-end">Nominal</th><th>Keterangan</th></tr></thead>
+              <table class="table table-modern table-sm align-middle">
+                <thead>
+                  <tr>
+                    <th class="text-nowrap">Tanggal</th>
+                    <th>Cabang</th>
+                    <th style="max-width: 115px;">Rincian</th>
+                    <th class="text-end text-nowrap">Nominal</th>
+                    <th>Keterangan</th>
+                  </tr>
+                </thead>
                 <tbody id="tblGudangPengeluaranBody" class="tabular-nums"></tbody>
               </table>
             </div>
@@ -1465,10 +1473,12 @@
           ? '<tr><td colspan="5" class="text-center py-4 text-muted">Belum ada pengeluaran lain-lain gudang</td></tr>'
           : filteredGdgKeluar.map(i => `
             <tr>
-              <td class="small text-muted">${i.tanggal}</td>
-              <td>${getBranchBadgeHtml(i.cabang)}</td>
-              <td><span class="badge-soft-blue">${i.kategori}</span></td>
-              <td class="text-end fw-bold text-danger">${formatRupiah(i.nominal)}</td>
+              <td class="small text-muted text-nowrap">${i.tanggal}</td>
+              <td class="text-nowrap">${getBranchBadgeHtml(i.cabang)}</td>
+              <td style="max-width: 115px;">
+                <span class="badge-soft-blue d-inline-block text-start" style="white-space: normal; line-height: 1.25;">${i.kategori}</span>
+              </td>
+              <td class="text-end fw-bold text-danger text-nowrap">${formatRupiah(i.nominal)}</td>
               <td class="small text-muted">${i.keterangan}</td>
             </tr>
           `).join('');
